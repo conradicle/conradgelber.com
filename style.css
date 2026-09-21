@@ -41,6 +41,7 @@
   --rule:#C7CDD7;
   --accent:#14675E;
   --measure:63ch;
+  --h1-size:clamp(2.7rem,8.4vw,4.9rem);
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -67,7 +68,7 @@ header.mast{padding:clamp(4rem,11vw,7.5rem) 0 2rem}
 h1{
   font-family:Spectral,Georgia,serif;
   font-weight:600;
-  font-size:clamp(2.7rem,8.4vw,4.9rem);
+  font-size:var(--h1-size);
   line-height:1.02;
   letter-spacing:-0.022em;
   margin:0;
@@ -91,6 +92,22 @@ h1{
   color:var(--ink-soft);
 }
 .stamp a{border-bottom-color:var(--ink-soft)}
+
+/* Masthead grid: name and standfirst left, portrait right.
+   The portrait's top edge sits on the cap height of "Conrad": 0.148em of the
+   h1 size = (1.02 - (1.059 + 0.463)) / 2 + (1.059 - 0.660), from Spectral's metrics. */
+.mast-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  column-gap:clamp(1.5rem,4vw,3rem);
+  align-items:start;
+}
+.portrait{display:block;margin:calc(var(--h1-size) * .148) 0 0}
+.portrait img{display:block;width:200px;height:auto}
+
+/* Photo plate: full column width, no frame */
+.plate{display:block;margin:1.6rem 0 0}
+.plate img{display:block;width:100%;height:auto}
 
 /* Intro */
 .intro{padding:3.2rem 0 1rem;max-width:var(--measure)}
@@ -176,6 +193,9 @@ footer{
 
 @media (max-width:640px){
   body{font-size:16px}
+  .mast-grid{grid-template-columns:1fr;row-gap:1.5rem}
+  .portrait{order:-1;margin:0}
+  .portrait img{width:160px}
   .entry{grid-template-columns:1fr;gap:.2rem}
   .when{padding-top:0;margin-bottom:.35rem}
 }
