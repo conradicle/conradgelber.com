@@ -85,7 +85,7 @@ h1{
   display:flex;
   flex-wrap:wrap;
   gap:.4rem 1.6rem;
-  margin-top:2.4rem;
+  margin-top:0;
   padding-top:1rem;
   border-top:2px solid var(--ink);
   font-size:.9rem;
@@ -93,20 +93,27 @@ h1{
 }
 .stamp a{border-bottom-color:var(--ink-soft)}
 
-/* Masthead grid: name and standfirst left, portrait right.
-   The portrait's top edge sits on the cap height of "Conrad": 0.148em of the
-   h1 size = (1.02 - (1.059 + 0.463)) / 2 + (1.059 - 0.660), from Spectral's metrics. */
+/* Masthead grid: name and standfirst left, portrait right. The portrait is a
+   column bound by two edges: its top sits on the cap height of "Conrad"
+   (0.148em of the h1 size = (1.02 - (1.059 + 0.463)) / 2 + (1.059 - 0.660),
+   from Spectral's metrics) and its bottom lands on the 2px rule above the
+   stamp. The 2.4rem that used to be the stamp's margin-top is the text
+   column's padding-bottom, so the grid row ends exactly at the rule. The img is
+   absolutely positioned inside its column so the text sets the row height and
+   the photo follows it, never the other way round. */
 .mast-grid{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
   column-gap:clamp(1.5rem,4vw,3rem);
-  align-items:start;
+  align-items:stretch;
 }
-.portrait{display:block;margin:calc(var(--h1-size) * .148) 0 0}
-.portrait img{display:block;width:200px;height:auto}
+.mast-text{padding-bottom:2.4rem}
+.portrait{display:block;position:relative;width:220px;margin:calc(var(--h1-size) * .148) 0 0}
+.portrait img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0}
 
-/* Photo plate: full column width, no frame */
-.plate{display:block;margin:1.6rem 0 0}
+/* Photo band: sits under the section rule, on the column edges, 1.6rem clear
+   above (the h2's margin) and below */
+.plate{display:block;margin:0 0 1.6rem}
 .plate img{display:block;width:100%;height:auto}
 
 /* Intro */
@@ -194,8 +201,8 @@ footer{
 @media (max-width:640px){
   body{font-size:16px}
   .mast-grid{grid-template-columns:1fr;row-gap:1.5rem}
-  .portrait{order:-1;margin:0}
-  .portrait img{width:160px}
+  .portrait{order:-1;position:static;width:160px;margin:0}
+  .portrait img{position:static;height:auto}
   .entry{grid-template-columns:1fr;gap:.2rem}
   .when{padding-top:0;margin-bottom:.35rem}
 }
