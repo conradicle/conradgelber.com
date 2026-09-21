@@ -4,10 +4,12 @@ Static site, no build step. Cloudflare Pages serves the repo root as-is.
 
 ## 1. Push the repo
 
-Create an empty GitHub repo (e.g. `conradicle/conradgelber.com`) and push `main`:
+Create an empty public GitHub repo at <https://github.com/new> named
+`conradgelber.com` under `conradicle` (no README, no .gitignore, no licence:
+the repo already has its history). Then:
 
 ```bash
-git remote add origin git@github.com:conradicle/conradgelber.com.git
+git remote add origin https://github.com/conradicle/conradgelber.com.git
 git push -u origin main
 ```
 
@@ -21,7 +23,7 @@ Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** →
 | Production branch      | `main`                    |
 | Framework preset       | None                      |
 | Build command          | *(leave blank)*           |
-| Build output directory | `.`                       |
+| Build output directory | `/`                       |
 | Root directory         | *(leave blank)*           |
 
 **Save and Deploy.** The first build takes under a minute and lands on
@@ -37,13 +39,15 @@ Pages project → **Custom domains** → **Set up a custom domain**.
 2. Repeat for `www.conradgelber.com`.
 
 Both hostnames go active once the certificate issues, usually within a few
-minutes. `<link rel="canonical">` already points at the apex, so www serving
-the same content is fine for search. If you later want www to 301 to the
-apex, add a `_redirects` file with one line:
+minutes. www does not serve a duplicate: the `_redirects` file in the repo
+301s every `www.conradgelber.com` URL to the same path on the apex, and
+`<link rel="canonical">` points at the apex as well. Check it with:
 
+```bash
+curl -sI https://www.conradgelber.com/ | grep -i "^HTTP\|^location"
 ```
-https://www.conradgelber.com/* https://conradgelber.com/:splat 301
-```
+
+Expect `301` and `location: https://conradgelber.com/`.
 
 ## 4. Verify
 
@@ -64,9 +68,45 @@ four woff2 files, favicon). The console should be empty.
   browser never executes it and the CSP does not apply to it.
 - Every deploy is a plain git push. Preview deploys for branches are on by
   default and get their own `*.pages.dev` URL.
-- If you turn on **Cloudflare Web Analytics** later, do it from the dashboard
-  with the *automatic* option (Cloudflare injects the beacon at the edge for
-  proxied zones). That beacon is a script, so the CSP will need
-  `script-src https://static.cloudflareinsights.com` and
-  `connect-src https://cloudflareinsights.com` added at the same time or it
-  will be blocked silently.
+
+## After the first deploy
+
+### Run the live URL through LinkedIn's Post Inspector first
+
+Before adding the site as a Featured card on LinkedIn, open
+<https://www.linkedin.com/post-inspector/> and inspect
+`https://conradgelber.com/`. LinkedIn caches Open Graph data aggressively,
+and a bad first scrape (a 404, a half-deployed page, a missing `og.png`) is
+hard to clear afterwards. The inspector both shows you what LinkedIn sees and
+forces a fresh scrape. You want: title "Conrad Gelber", the description, and
+the 1200x630 `og.png` preview. Only then add the Featured card.
+
+### If you turn on Cloudflare Web Analytics
+
+Do it from the dashboard with the *automatic* option (Cloudflare injects the
+beacon at the edge for proxied zones). The beacon is a script, so the CSP in
+`_headers` will block it silently unless you add two directives at the same
+time:
+
+```
+script-src https://static.cloudflareinsights.com; connect-src https://cloudflareinsights.com
+```
+
+Append them to the `Content-Security-Policy` line, commit, push, then enable
+analytics. It is cookieless and needs no banner.
+
+### Updating alumniOf after graduation (2027)
+
+The JSON-LD Person block in `index.html` deliberately has no `alumniOf`
+while you are still enrolled. After graduating, add this property to the
+block (after `worksFor`, before `sameAs`):
+
+```json
+"alumniOf": {
+  "@type": "HighSchool",
+  "name": "Miami Beach Senior High School"
+},
+```
+
+Then paste the page URL into <https://validator.schema.org/> to confirm the
+block still parses, and update `<lastmod>` in `sitemap.xml`.
