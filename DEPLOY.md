@@ -72,6 +72,11 @@ four woff2 files, favicon). The console should be empty.
   `manifest-src` set to `'self'`. There is no `script-src`, so scripts are
   blocked entirely. The JSON-LD block is a data block, not a script; the
   browser never executes it and the CSP does not apply to it.
+- Caching (`_headers`): HTML is served with `max-age=0` by Pages; `style.css`
+  is `no-cache` (revalidated on every load, cheap via ETag); `/fonts/*` and
+  `/img/*` are cached for a year as immutable. So: never overwrite an image
+  or font in place. A new crop or a new face gets a new filename (the images
+  carry their dimensions in the name for this reason).
 - Every deploy is a plain git push to `main`; Cloudflare builds it within a
   minute or two. Preview deploys for other branches are on by default and
   get their own `*.pages.dev` URL.
