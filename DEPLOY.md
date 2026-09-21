@@ -39,9 +39,15 @@ Pages project → **Custom domains** → **Set up a custom domain**.
 2. Repeat for `www.conradgelber.com`.
 
 Both hostnames go active once the certificate issues, usually within a few
-minutes. www does not serve a duplicate: the `_redirects` file in the repo
-301s every `www.conradgelber.com` URL to the same path on the apex, and
-`<link rel="canonical">` points at the apex as well. Check it with:
+minutes. www does not serve a duplicate: a **zone-level Redirect Rule**
+(Cloudflare dashboard -> conradgelber.com -> Rules -> Redirect Rules) 301s
+every `www.conradgelber.com` request to the same path on the apex, and
+`<link rel="canonical">` points at the apex as well.
+
+This cannot be done with a Pages `_redirects` file: the source of a
+`_redirects` rule must be a relative path, so cross-hostname redirects are
+rejected at build time with "Only relative URLs are allowed". Check the
+rule with:
 
 ```bash
 curl -sI https://www.conradgelber.com/ | grep -i "^HTTP\|^location"
@@ -66,8 +72,9 @@ four woff2 files, favicon). The console should be empty.
   `manifest-src` set to `'self'`. There is no `script-src`, so scripts are
   blocked entirely. The JSON-LD block is a data block, not a script; the
   browser never executes it and the CSP does not apply to it.
-- Every deploy is a plain git push. Preview deploys for branches are on by
-  default and get their own `*.pages.dev` URL.
+- Every deploy is a plain git push to `main`; Cloudflare builds it within a
+  minute or two. Preview deploys for other branches are on by default and
+  get their own `*.pages.dev` URL.
 
 ## After the first deploy
 
