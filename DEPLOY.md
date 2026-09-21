@@ -73,10 +73,17 @@ four woff2 files, favicon). The console should be empty.
   blocked entirely. The JSON-LD block is a data block, not a script; the
   browser never executes it and the CSP does not apply to it.
 - Caching (`_headers`): HTML is served with `max-age=0` by Pages; `style.css`
-  is `no-cache` (revalidated on every load, cheap via ETag); `/fonts/*` and
-  `/img/*` are cached for a year as immutable. So: never overwrite an image
-  or font in place. A new crop or a new face gets a new filename (the images
-  carry their dimensions in the name for this reason).
+  is `no-cache`; `/fonts/*` and `/img/*` are cached for a year as immutable.
+  So: never overwrite an image or font in place. A new crop or a new face
+  gets a new filename (the images carry their dimensions in the name for
+  this reason).
+- **Browser Cache TTL.** The zone setting (Caching -> Configuration) overrides
+  any origin `Cache-Control` shorter than itself; the free-plan default is
+  4 hours, which turns `no-cache` into `max-age=14400` and left returning
+  visitors with new HTML and a stale stylesheet. Set it to **Respect Existing
+  Headers**. Until that is set, bump the query string on the stylesheet link
+  in `index.html` (`/style.css?v=2` -> `?v=3`) whenever `style.css` changes;
+  it is harmless to keep doing so afterwards.
 - Every deploy is a plain git push to `main`; Cloudflare builds it within a
   minute or two. Preview deploys for other branches are on by default and
   get their own `*.pages.dev` URL.
