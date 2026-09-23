@@ -1,6 +1,8 @@
 # Deploying conradgelber.com
 
-Static site, no build step. Cloudflare Pages serves the repo root as-is.
+Static site, no build step on deploy. Cloudflare Pages serves the repo root
+as-is. The one generated file, `play/play.js`, is built locally and committed;
+see [The /play/ game](#the-play-game) below.
 
 ## 1. Push the repo
 
@@ -63,20 +65,33 @@ curl -sI https://conradgelber.com/ | grep -i "content-security-policy\|x-content
 
 You should see the three headers from `_headers`. Then open the site with
 DevTools → Network: every request should be same-origin (HTML, `style.css`,
-four woff2 files, favicon). The console should be empty.
+four woff2 files, favicon). The console should be empty. On `/play/`, expect
+`play.css`, `play.js`, `land.json` and `places.json` as well, and the three
+difficulty buttons should become clickable once the map loads (if they stay
+disabled, the CSP is blocking the script).
 
 ## Notes
 
 - `_headers` applies to every path (`/*`). The CSP is
-  `default-src 'none'` with `style-src`, `font-src`, `img-src` and
-  `manifest-src` set to `'self'`. There is no `script-src`, so scripts are
-  blocked entirely. The JSON-LD block is a data block, not a script; the
-  browser never executes it and the CSP does not apply to it.
+  `default-src 'none'` with `script-src`, `connect-src`, `style-src`,
+  `font-src`, `img-src` and `manifest-src` set to `'self'`. Only
+  same-origin script files run; inline scripts, inline `style` attributes and
+  requests to any other host are blocked. The JSON-LD block is a data block,
+  not a script; the browser never executes it and the CSP does not apply to it.
+- Keep a single CSP rule. A second rule for a subpath (say `/play/*`) does not
+  override `/*`: Pages sends both, joined with a comma, and the browser
+  enforces each policy separately, so anything either one blocks stays blocked.
 - Caching (`_headers`): HTML is served with `max-age=0` by Pages; `style.css`
-  is `no-cache`; `/fonts/*` and `/img/*` are cached for a year as immutable.
-  So: never overwrite an image or font in place. A new crop or a new face
+  is `no-cache`; `/fonts/*`, `/img/*` and `/play/land.json` are cached for a
+  year as immutable. So: never overwrite an image, font or `land.json` in
+  place. A new crop or a new face
   gets a new filename (the images carry their dimensions in the name for
   this reason).
+- `fonts/spectral-latin-ext-600.woff2` is declared only in `play/play.css`,
+  with the latin-ext `unicode-range`, so the front page never loads it and
+  `/play/` fetches it only when a name like Chișinău is on screen. It is the
+  same Spectral build as the latin files (byte-identical to
+  `@fontsource/spectral` 5.3.0).
 - **Browser Cache TTL.** The zone setting (Caching -> Configuration) overrides
   any origin `Cache-Control` shorter than itself; the free-plan default is
   4 hours, which turns `no-cache` into `max-age=14400` and left returning
@@ -87,6 +102,43 @@ four woff2 files, favicon). The console should be empty.
 - Every deploy is a plain git push to `main`; Cloudflare builds it within a
   minute or two. Preview deploys for other branches are on by default and
   get their own `*.pages.dev` URL.
+
+## The /play/ game
+
+`play/` is what Pages serves: `index.html`, `play.css`, the bundled
+`play.js`, `land.json` and `places.json`. The source lives in `play-src/`
+(d3-geo, d3-selection, d3-zoom and topojson-client, bundled by esbuild).
+After editing `play-src/src/main.js`, rebuild from the repo root and commit
+the new `play/play.js`:
+
+```bash
+npm --prefix play-src ci && npm --prefix play-src run build
+```
+
+(In Windows PowerShell 5.1, use `npm.cmd` and run the two commands
+separately.) Bump `?v=` on the `play.js` or `play.css` link in
+`play/index.html` whenever either changes, for the same Browser Cache TTL
+reason as the stylesheet.
+
+Data:
+
+- `play/land.json` is `land-50m.json` from the `world-atlas` package
+  (Natural Earth, public domain). `npm --prefix play-src run land` copies it.
+- `play/places.json` is generated. `play-src/scripts/place-list.mjs` holds
+  the curated names per tier; `build-places.mjs` looks each one up in
+  Natural Earth's `ne_10m_populated_places_simple.geojson` (download it from
+  the natural-earth-vector repo; it is not committed) and fails on any name
+  that is missing or ambiguous. Coordinates are never typed by hand.
+
+  ```bash
+  node play-src/scripts/build-places.mjs path/to/ne_10m_populated_places_simple.geojson
+  ```
+
+- `npm --prefix play-src run check-places` confirms every place is on land,
+  or within 50 km of it, in `land.json`, and lists any that are not.
+
+Pages also serves `play-src/` itself (its source and package files, not
+`node_modules`). That is harmless; the same files are public on GitHub.
 
 ## After the first deploy
 
@@ -104,14 +156,15 @@ the 1200x630 `og.png` preview. Only then add the Featured card.
 
 Do it from the dashboard with the *automatic* option (Cloudflare injects the
 beacon at the edge for proxied zones). The beacon is a script, so the CSP in
-`_headers` will block it silently unless you add two directives at the same
-time:
+`_headers` will block it silently unless you add its hosts to the two
+directives that already exist, so they read:
 
 ```
-script-src https://static.cloudflareinsights.com; connect-src https://cloudflareinsights.com
+script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com
 ```
 
-Append them to the `Content-Security-Policy` line, commit, push, then enable
+Edit the existing directives in place; do not append a second `script-src`,
+since browsers ignore a repeated directive. Commit, push, then enable
 analytics. It is cookieless and needs no banner.
 
 ### Updating alumniOf after graduation (2027)

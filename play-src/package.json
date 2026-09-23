@@ -1,0 +1,20 @@
+{
+  "name": "conradgelber-play",
+  "private": true,
+  "description": "Source for /play/, the globe pin drop game. Builds to ../play/play.js.",
+  "scripts": {
+    "build": "esbuild src/main.js --bundle --minify --format=iife --target=es2019 --outfile=../play/play.js",
+    "land": "node scripts/copy-land.mjs",
+    "check-places": "node scripts/check-places.mjs"
+  },
+  "dependencies": {
+    "d3-geo": "3.1.1",
+    "d3-selection": "3.0.0",
+    "d3-zoom": "3.0.0",
+    "topojson-client": "3.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "world-atlas": "2.0.2"
+  }
+}
