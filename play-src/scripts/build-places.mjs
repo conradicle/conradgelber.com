@@ -30,7 +30,9 @@ const problems = [];
 for (const [tier, entries] of Object.entries(TIERS)) {
   for (const entry of entries) {
     const [label, country, adm1] = entry.split('|');
-    const [display, neNameRaw] = label.split('=');
+    const [displayRaw, neNameRaw] = label.split('=');
+    const exact = displayRaw.endsWith('!');
+    const display = exact ? displayRaw.slice(0, -1) : displayRaw;
     const neName = neNameRaw || display;
     const hits = features.filter(({ properties: p }) =>
       (fold(p.name) === fold(neName) || fold(p.nameascii || '') === fold(neName)) &&
@@ -46,7 +48,7 @@ for (const [tier, entries] of Object.entries(TIERS)) {
     // deliberately renames the place (Astana, Gothenburg, Bangalore...).
     const neDisplay = hits[0].properties.name;
     out.push({
-      name: fold(neDisplay) === fold(display) ? neDisplay : display,
+      name: !exact && fold(neDisplay) === fold(display) ? neDisplay : display,
       country: COUNTRY_LABELS[country] || country,
       lat: +lat.toFixed(4),
       lon: +lon.toFixed(4),
