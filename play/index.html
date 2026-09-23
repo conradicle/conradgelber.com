@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pin drop &middot; Conrad Gelber</title>
+<meta name="description" content="A globe with no labels and ten places to find. Drop a pin, lock in your guess, and see how far off you were.">
+<link rel="canonical" href="https://conradgelber.com/play/">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=3">
+<link rel="stylesheet" href="/play/play.css?v=2">
+<script src="/play/play.js?v=1" defer></script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="playhead">
+    <a href="/">Conrad Gelber</a>
+  </header>
+
+  <main class="game">
+
+    <section class="screen" id="screen-start">
+      <h1 class="game-title">Pin drop</h1>
+      <p class="game-intro">Ten places and a globe with no labels. Drag to
+        turn it, scroll or pinch to zoom, and tap where you think each
+        place is. The closer the pin, the more points you get, up to
+        1,000 a round.</p>
+      <div class="tiers" id="tiers">
+        <button type="button" class="tier" data-tier="capitals">
+          <span class="tier-name">Capitals</span>
+          <span class="tier-desc">National capitals, including the ones
+            nobody can place.</span>
+          <span class="tier-best" data-best="capitals"></span>
+        </button>
+        <button type="button" class="tier" data-tier="second">
+          <span class="tier-name">Second cities</span>
+          <span class="tier-desc">Big cities other than the capital.</span>
+          <span class="tier-best" data-best="second"></span>
+        </button>
+        <button type="button" class="tier" data-tier="edge">
+          <span class="tier-name">Edge of the map</span>
+          <span class="tier-desc">Remote towns and outposts, from the
+            Arctic to Tierra del Fuego.</span>
+          <span class="tier-best" data-best="edge"></span>
+        </button>
+      </div>
+      <p class="game-status" id="load-status" role="status"></p>
+    </section>
+
+    <section class="screen" id="screen-round" hidden>
+      <div class="round-meta">
+        <span id="round-count"></span>
+        <span id="round-total"></span>
+      </div>
+      <h1 class="place" id="place-name"></h1>
+      <p class="place-country" id="place-country"></p>
+
+      <div class="globe-frame">
+        <svg class="globe" id="globe" viewBox="0 0 600 600" tabindex="0"
+          role="application"
+          aria-label="Globe. Drag or use the arrow keys to turn it, scroll, pinch, or press plus and minus to zoom. Click or tap to drop a pin, or press Enter to drop one at the center.">
+          <circle class="sea" cx="300" cy="300" r="290"></circle>
+          <path class="graticule"></path>
+          <path class="land"></path>
+          <path class="arc"></path>
+          <g class="crosshair">
+            <line x1="288" y1="300" x2="312" y2="300"></line>
+            <line x1="300" y1="288" x2="300" y2="312"></line>
+          </g>
+          <g class="pin pin-guess off"><circle r="7"></circle></g>
+          <g class="pin pin-answer off"><circle r="7"></circle></g>
+        </svg>
+      </div>
+
+      <div class="controls">
+        <p class="result" id="result" aria-live="polite"></p>
+        <button type="button" class="btn" id="lock" disabled>Lock in guess</button>
+        <button type="button" class="btn" id="next" hidden>Next place</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-end" hidden>
+      <h1 class="game-title" id="end-total"></h1>
+      <p class="game-intro" id="end-best"></p>
+      <table class="rounds">
+        <thead>
+          <tr><th scope="col">Place</th><th scope="col" class="num">Distance</th><th scope="col" class="num">Score</th></tr>
+        </thead>
+        <tbody id="end-rows"></tbody>
+      </table>
+      <div class="end-actions">
+        <button type="button" class="btn" id="again">Play again</button>
+        <button type="button" class="btn btn-quiet" id="change">Change difficulty</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p class="colophon">Map data from Natural Earth, which is in the
+      public domain.</p>
+  </footer>
+
+</div>
+</body>
+</html>
