@@ -6,10 +6,11 @@ desktop.ini
 .vscode/
 .idea/
 
-# Local tooling (never shipped; the site has no build step)
+# Local tooling at the root (never shipped; the site has no build step).
+# play-src/ keeps its package.json and lockfile under version control.
 node_modules/
-package.json
-package-lock.json
+/package.json
+/package-lock.json
 .claude/
 
 # Wrangler / Cloudflare local state
