@@ -18,7 +18,11 @@ if (!src) {
 }
 
 const features = JSON.parse(readFileSync(src, 'utf8')).features;
-const fold = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+// Letters like ø and ł have no combining-mark decomposition, so map them
+// by hand before stripping marks.
+const BASE = { ø: 'o', Ø: 'O', æ: 'ae', Æ: 'AE', ł: 'l', Ł: 'L', đ: 'd', Đ: 'D', ı: 'i', ß: 'ss' };
+const fold = (s) => s.replace(/[øØæÆłŁđĐıß]/g, (c) => BASE[c])
+  .normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 const out = [];
 const problems = [];
@@ -38,8 +42,11 @@ for (const [tier, entries] of Object.entries(TIERS)) {
       continue;
     }
     const [lon, lat] = hits[0].geometry.coordinates;
+    // Show Natural Earth's own NAME (with its diacritics) unless the list
+    // deliberately renames the place (Astana, Gothenburg, Bangalore...).
+    const neDisplay = hits[0].properties.name;
     out.push({
-      name: display,
+      name: fold(neDisplay) === fold(display) ? neDisplay : display,
       country: COUNTRY_LABELS[country] || country,
       lat: +lat.toFixed(4),
       lon: +lon.toFixed(4),
