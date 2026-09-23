@@ -1,0 +1,170 @@
+/* /play/: the globe pin drop game. Loads after /style.css and uses its
+   tokens, fonts, .wrap, footer and .colophon. */
+
+:root{
+  --sea:var(--ink);
+  --land:#C7CDD7;
+  --pin-answer:#3FB8A8;
+}
+
+/* Header: the name, sized down, on the same 2px rule as the masthead stamp */
+.playhead{
+  padding:clamp(1.6rem,5vw,2.6rem) 0 .7rem;
+  border-bottom:2px solid var(--ink);
+}
+.playhead a{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:1.25rem;
+  letter-spacing:-0.01em;
+  border-bottom:none;
+}
+
+.game{padding:2rem 0 0}
+.screen[hidden]{display:none}
+
+.game-title{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:clamp(2.2rem,6vw,3.2rem);
+  line-height:1.05;
+  letter-spacing:-0.02em;
+  margin:0 0 .8rem;
+}
+.game-intro{max-width:var(--measure);margin:0 0 1.8rem;color:var(--ink-soft)}
+.game-status{min-height:1.6em;margin:1rem 0 0;font-size:.93rem;color:var(--ink-soft)}
+
+/* Difficulty picker: three docket rows */
+.tiers{border-top:1px solid var(--rule)}
+.tier{
+  display:grid;
+  grid-template-columns:minmax(0,11rem) 1fr auto;
+  gap:.2rem 1.5rem;
+  align-items:baseline;
+  width:100%;
+  min-height:44px;
+  padding:1.1rem 0;
+  border:0;
+  border-bottom:1px solid var(--rule);
+  background:none;
+  color:var(--ink);
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.tier:hover .tier-name{color:var(--accent)}
+.tier-name{font-family:Spectral,Georgia,serif;font-weight:600;font-size:1.17rem}
+.tier-desc{color:var(--ink-soft);font-size:.96rem}
+.tier-best{font-size:.88rem;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tier:disabled{cursor:progress}
+
+/* Round */
+.round-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  font-size:.88rem;
+  color:var(--ink-soft);
+  font-variant-numeric:tabular-nums;
+}
+.place{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:clamp(2rem,7vw,3.4rem);
+  line-height:1.08;
+  letter-spacing:-0.02em;
+  margin:.4rem 0 0;
+  overflow-wrap:anywhere;
+}
+.place-country{min-height:1.62em;margin:.2rem 0 1rem;color:var(--accent);font-size:.98rem}
+
+.globe-frame{max-width:600px;margin:0 auto}
+.globe{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:1;
+  touch-action:none;
+  cursor:grab;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.globe:active{cursor:grabbing}
+.sea{fill:var(--sea)}
+.graticule{fill:none;stroke:var(--paper);stroke-opacity:.09;stroke-width:.6}
+.land{fill:var(--land);stroke:none}
+.arc{fill:none;stroke:var(--paper);stroke-width:2;stroke-dasharray:5 5;stroke-linecap:round}
+.pin circle{stroke-width:2.5}
+.pin-guess circle{fill:var(--paper);stroke:var(--accent)}
+.pin-answer circle{fill:var(--pin-answer);stroke:var(--paper)}
+.off{display:none}
+.crosshair{stroke:var(--paper);stroke-width:1.5;opacity:0;pointer-events:none}
+.globe:focus-visible .crosshair{opacity:.8}
+
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem 1.5rem;
+  max-width:600px;
+  margin:1rem auto 0;
+}
+.result{margin:0;min-height:1.62em;font-variant-numeric:tabular-nums}
+.result strong{font-weight:500}
+
+/* Buttons */
+.btn{
+  min-height:44px;
+  min-width:44px;
+  padding:.6rem 1.3rem;
+  border:1px solid var(--ink);
+  border-radius:2px;
+  background:var(--ink);
+  color:var(--paper);
+  font:inherit;
+  font-weight:500;
+  font-size:.96rem;
+  cursor:pointer;
+}
+.btn:hover{background:var(--accent);border-color:var(--accent)}
+.btn:disabled{background:none;color:var(--ink-soft);border-color:var(--rule);cursor:not-allowed}
+.btn[hidden]{display:none}
+.btn-quiet{background:none;color:var(--ink)}
+.btn-quiet:hover{background:none;color:var(--accent);border-color:var(--accent)}
+
+/* Same focus ring as links on the front page */
+.btn:focus-visible,
+.tier:focus-visible,
+.globe:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+.globe:focus:not(:focus-visible){outline:none}
+
+/* End screen */
+.rounds{
+  width:100%;
+  max-width:var(--measure);
+  border-collapse:collapse;
+  font-variant-numeric:tabular-nums;
+  margin:0 0 1.8rem;
+}
+.rounds th{
+  text-align:left;
+  font-weight:500;
+  font-size:.88rem;
+  color:var(--ink-soft);
+  padding:0 .5rem .5rem 0;
+  border-bottom:1px solid var(--rule);
+}
+.rounds td{padding:.7rem .5rem .7rem 0;border-bottom:1px solid var(--rule);vertical-align:baseline}
+.rounds tr:last-child td{border-bottom:none}
+.rounds .num{text-align:right;white-space:nowrap}
+.rounds .where{display:block;font-size:.88rem;color:var(--ink-soft)}
+.rounds .name{font-family:Spectral,Georgia,serif;font-weight:600}
+.end-actions{display:flex;flex-wrap:wrap;gap:.8rem}
+
+@media (max-width:640px){
+  .tier{grid-template-columns:1fr;gap:.15rem}
+  .game{padding-top:1.4rem}
+  .controls .btn{flex:1 1 100%}
+}
