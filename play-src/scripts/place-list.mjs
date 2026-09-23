@@ -3,7 +3,10 @@
 // (public domain), and build-places.mjs looks the point up.
 //
 // Entry format: "Display name=NE name|NE adm0name|NE adm1name"
-//   - "=NE name" only when the label we show differs from Natural Earth's.
+//   - "=NE name" when the entry's name is not how Natural Earth spells it.
+//     The page shows Natural Earth's NAME field, diacritics included, unless
+//     the display name is a real rename (Astana for Nur-Sultan); an entry
+//     like "Lome=Lomé" displays as Lomé.
 //   - "|NE adm1name" only when name + country is ambiguous.
 
 export const COUNTRY_LABELS = {
