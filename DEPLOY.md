@@ -87,6 +87,11 @@ disabled, the CSP is blocking the script).
   place. A new crop or a new face
   gets a new filename (the images carry their dimensions in the name for
   this reason).
+- `fonts/spectral-latin-ext-600.woff2` is declared only in `play/play.css`,
+  with the latin-ext `unicode-range`, so the front page never loads it and
+  `/play/` fetches it only when a name like Chișinău is on screen. It is the
+  same Spectral build as the latin files (byte-identical to
+  `@fontsource/spectral` 5.3.0).
 - **Browser Cache TTL.** The zone setting (Caching -> Configuration) overrides
   any origin `Cache-Control` shorter than itself; the free-plan default is
   4 hours, which turns `no-cache` into `max-age=14400` and left returning
