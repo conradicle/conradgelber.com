@@ -7,6 +7,8 @@
 //     The page shows Natural Earth's NAME field, diacritics included, unless
 //     the display name is a real rename (Astana for Nur-Sultan); an entry
 //     like "Lome=Lomé" displays as Lomé.
+//   - A trailing "!" on the display name shows it exactly as written, even
+//     when it only differs from Natural Earth by accents ("Osaka!" over Ōsaka).
 //   - "|NE adm1name" only when name + country is ambiguous.
 
 export const COUNTRY_LABELS = {
@@ -62,13 +64,13 @@ export const TIERS = {
     'Johannesburg|South Africa', 'Durban|South Africa', 'Bulawayo|Zimbabwe',
     'Casablanca|Morocco', 'Alexandria|Egypt', 'Oran|Algeria', 'Benghazi=Banghazi|Libya',
     'Port Sudan|Sudan', 'Dire Dawa|Ethiopia', 'Beira|Mozambique',
-    'Istanbul|Turkey', 'Izmir|Turkey', 'Tabriz|Iran', 'Mashhad|Iran',
+    'Istanbul|Turkey', 'Izmir!|Turkey', 'Tabriz|Iran', 'Mashhad|Iran',
     'Isfahan|Iran', 'Jeddah|Saudi Arabia', 'Dubai|United Arab Emirates',
     'Basra|Iraq', 'Aleppo|Syria', 'Lahore|Pakistan', 'Peshawar|Pakistan',
     'Mumbai|India', 'Kolkata|India', 'Chennai|India', 'Bangalore=Bengaluru|India',
     'Ahmedabad|India', 'Ho Chi Minh City|Vietnam', 'Mandalay|Myanmar',
     'Chiang Mai|Thailand', 'Cebu|Philippines', 'Davao|Philippines',
-    'Medan|Indonesia', 'Makassar|Indonesia', 'Osaka|Japan', 'Sapporo|Japan',
+    'Medan|Indonesia', 'Makassar|Indonesia', 'Osaka!|Japan', 'Sapporo|Japan',
     'Busan|South Korea', 'Shanghai|China', 'Guangzhou|China', 'Chengdu|China',
     'Harbin|China', 'Urumqi=Ürümqi|China', 'Samarkand|Uzbekistan',
     'Saint Petersburg=St. Petersburg|Russia', 'Novosibirsk|Russia',
