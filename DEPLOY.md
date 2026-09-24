@@ -97,11 +97,50 @@ disabled, the CSP is blocking the script).
   4 hours, which turns `no-cache` into `max-age=14400` and left returning
   visitors with new HTML and a stale stylesheet. Set it to **Respect Existing
   Headers**. Until that is set, bump the query string on the stylesheet link
-  in `index.html` (`/style.css?v=2` -> `?v=3`) whenever `style.css` changes;
+  (`/style.css?v=4` -> `?v=5`) whenever `style.css` changes, in every page
+  that links it (see the list under [Pages and the tab bar](#pages-and-the-tab-bar));
   it is harmless to keep doing so afterwards.
 - Every deploy is a plain git push to `main`; Cloudflare builds it within a
   minute or two. Preview deploys for other branches are on by default and
   get their own `*.pages.dev` URL.
+
+## Pages and the tab bar
+
+Each section has its own page, a plain `index.html` in its own folder:
+
+| Page | File |
+| --- | --- |
+| `/` | `index.html` |
+| `/work/` | `work/index.html` |
+| `/built/` | `built/index.html` |
+| `/writing/` | `writing/index.html` |
+| `/next/` | `next/index.html` |
+| `/off-the-clock/` | `off-the-clock/index.html` |
+| `/games/` | `games/index.html` |
+
+All seven carry the same `<nav class="tabs" aria-label="Site">` block under
+the masthead. There is no build step and no include, so **a change to the tab
+bar (a label, a new tab, a reordering) has to be made by hand in all seven
+files**, identically. The one difference between copies is
+`aria-current="page"`, which sits on the current page's tab (the front page
+has none). After editing, check that the copies still match:
+
+```bash
+grep -h --no-group-separator -A7 '<nav class="tabs"' index.html */index.html | sed 's/ aria-current="page"//' | sort | uniq -c
+```
+
+Every line should show a count of 7. The same goes for the head (font
+preloads, favicon, `style.css?v=`) and the footer, which are also copied.
+
+`/play/` and `/cambio/` do not get the tab bar. `/play/` has a single
+"← Games" link in its header instead.
+
+`/cambio/` is not part of this repo: it is a separate Worker (`cambio`,
+source in `conradicle/cambio-game`) routed at `conradgelber.com/cambio` and
+`conradgelber.com/cambio/*`, with its own security headers. Worker routes
+exist only on the custom domain, so `/cambio/` 404s on `*.pages.dev` preview
+deploys; test that link on the live site. The game loads `/fonts/*.woff2` and
+`/favicon.svg` from this site, so do not rename those.
 
 ## The /play/ game
 
