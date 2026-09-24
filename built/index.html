@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Things I've built &middot; Conrad Gelber</title>
+<meta name="description" content="Sites and tools Conrad Gelber has built, including miamidadecommissionwatch.com, its district lookup, flcountycommissionwatch.com, and this site.">
+<link rel="canonical" href="https://conradgelber.com/built/">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=4">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast-sub">
+    <p class="site-name"><a href="/">Conrad Gelber</a></p>
+  </header>
+
+  <nav class="tabs" aria-label="Site">
+    <a href="/work/">Work</a>
+    <a href="/built/" aria-current="page">Built</a>
+    <a href="/writing/">Writing</a>
+    <a href="/next/">Next</a>
+    <a href="/off-the-clock/">Off the clock</a>
+    <a href="/games/">Games</a>
+  </nav>
+
+  <main>
+  <section>
+    <h1 class="page-title">Things I've built</h1>
+
+    <div class="entry">
+      <div class="when">2026</div>
+      <div class="what">
+        <h3><a href="https://miamidadecommissionwatch.com">miamidadecommissionwatch.com</a></h3>
+        <!-- TODO: the brief said Next.js, but the repo is static HTML and JavaScript with a Node prerender step on Vercel. Confirm which to say. -->
+        <p class="role">HTML and JavaScript, Vercel, Supabase, Cloudflare</p>
+        <p class="note">The public site for Miami-Dade Commission Watch.
+          It carries plain-language summaries of every county
+          commission meeting in English, Spanish, and Haitian Creole,
+          and a directory of all 13 commissioners by district. I also
+          set up all of the project's email infrastructure. Residents
+          use it to follow what the Board of County Commissioners
+          decided without reading the agenda themselves.</p>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="when">2026</div>
+      <div class="what">
+        <h3><a href="https://www.miamidadecommissionwatch.com/get-involved.html#find-district">MDCW district lookup</a></h3>
+        <p class="role">JavaScript, Census Bureau geocoder, Vercel function</p>
+        <p class="note">Residents enter an address and get back their
+          county commission district and commissioner. The address
+          goes through a small serverless proxy to the Census Bureau
+          geocoder, and the browser matches the point against the
+          county's district boundaries. It answers the first question
+          most people have before public comment: who represents
+          me?</p>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="when">2026</div>
+      <div class="what">
+        <h3><a href="https://flcountycommissionwatch.com">flcountycommissionwatch.com</a></h3>
+        <p class="role">Next.js, Vercel, Supabase, Cloudflare</p>
+        <p class="note">The statewide version of the Miami-Dade model.
+          Each Florida county will get its own subdomain and participant
+          guide, and a student lead will claim the county and run its
+          site with a local team.</p>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="when">2026</div>
+      <div class="what">
+        <h3><a href="https://evergladesnavigator.com">Everglades Navigator</a></h3>
+        <p class="role">Next.js, Vercel</p>
+        <p class="note">A site I build and maintain for my dad's guided
+          fishing charters and ecotours in the Everglades. The business
+          has not opened yet, so a coming-soon page sits in front of
+          the tours, the gallery, and the trip request forms until it
+          does.</p>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="when">2026</div>
+      <div class="what">
+        <h3><a href="https://github.com/conradicle/conradgelber.com">This site and the globe game</a></h3>
+        <p class="role">HTML, CSS, and JavaScript on Cloudflare Pages</p>
+        <p class="note">No framework and no build step on deploy. The
+          fonts, images, and map data are all served from this
+          domain, and the pages make no requests anywhere else. The
+          globe game at <a href="/play/">/play/</a> asks you to drop a
+          pin on capitals, second cities, and remote towns.</p>
+      </div>
+    </div>
+  </section>
+  </main>
+
+  <footer>
+    <div class="contact">
+      <span><a href="mailto:conrad@conradgelber.com">conrad@conradgelber.com</a></span>
+      <span><a href="https://www.linkedin.com/in/conradgelber">LinkedIn</a></span>
+      <span><a href="https://github.com/conradicle">GitHub</a></span>
+    </div>
+    <p class="colophon">Miami Beach, Florida. Views here are my own
+      and not those of any organization named on this page.</p>
+  </footer>
+
+</div>
+</body>
+</html>
