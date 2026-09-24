@@ -2,10 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://conradgelber.com/</loc>
-    <lastmod>2026-09-23</lastmod>
+    <lastmod>2026-09-24</lastmod>
+  </url>
+  <url>
+    <loc>https://conradgelber.com/work/</loc>
+    <lastmod>2026-09-24</lastmod>
+  </url>
+  <url>
+    <loc>https://conradgelber.com/built/</loc>
+    <lastmod>2026-09-24</lastmod>
+  </url>
+  <url>
+    <loc>https://conradgelber.com/writing/</loc>
+    <lastmod>2026-09-24</lastmod>
+  </url>
+  <url>
+    <loc>https://conradgelber.com/next/</loc>
+    <lastmod>2026-09-24</lastmod>
+  </url>
+  <url>
+    <loc>https://conradgelber.com/off-the-clock/</loc>
+    <lastmod>2026-09-24</lastmod>
+  </url>
+  <url>
+    <loc>https://conradgelber.com/games/</loc>
+    <lastmod>2026-09-24</lastmod>
   </url>
   <url>
     <loc>https://conradgelber.com/play/</loc>
-    <lastmod>2026-09-23</lastmod>
+    <lastmod>2026-09-24</lastmod>
   </url>
 </urlset>
