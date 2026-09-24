@@ -22,16 +22,33 @@
 
 /* Header: the name, sized down, on the same 2px rule as the masthead stamp */
 .playhead{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:1rem;
   padding:clamp(1.6rem,5vw,2.6rem) 0 .7rem;
   border-bottom:2px solid var(--ink);
 }
-.playhead a{
+.playhead a:first-child{
   font-family:Spectral,Georgia,serif;
   font-weight:600;
   font-size:1.25rem;
   letter-spacing:-0.01em;
   border-bottom:none;
 }
+/* Back to /games/. The vertical padding makes a 44px tap target and the
+   negative margin keeps it from making the header any taller. */
+.playhead .back{
+  padding:.65rem 0;
+  margin:-.65rem 0;
+  font-size:.93rem;
+  color:var(--ink-soft);
+  border-bottom:none;
+  text-decoration:underline;
+  text-decoration-color:var(--accent);
+  text-underline-offset:4px;
+}
+.playhead .back:hover{color:var(--accent)}
 
 .game{padding:2rem 0 0}
 .screen[hidden]{display:none}
