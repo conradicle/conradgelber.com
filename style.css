@@ -186,12 +186,16 @@ h2{
   font-variant-numeric:tabular-nums;
   padding-top:.28rem;
 }
-.what h3{
+/* Entry headings are h2s on the section pages; undo the section h2's rule */
+.what h2{
   font-family:Spectral,Georgia,serif;
   font-weight:600;
   font-size:1.17rem;
   line-height:1.35;
+  letter-spacing:normal;
   margin:0 0 .12rem;
+  padding-bottom:0;
+  border-bottom:none;
 }
 .role{font-size:.93rem;color:var(--accent);margin:0 0 .5rem}
 .what p.note{margin:0;max-width:58ch;color:var(--ink-soft)}
@@ -219,12 +223,17 @@ h2{
   max-width:var(--measure);
 }
 .paper:last-child{border-bottom:none}
+/* h2 on /writing/, h3 in the front page list under its own h2 */
+.paper h2,
 .paper h3{
   font-family:Spectral,Georgia,serif;
   font-weight:600;
   font-size:1.1rem;
   line-height:1.4;
+  letter-spacing:normal;
   margin:0 0 .3rem;
+  padding-bottom:0;
+  border-bottom:none;
 }
 .paper p{margin:0;color:var(--ink-soft);font-size:.96rem}
 .paper p.role{color:var(--accent);font-size:.93rem;margin:0 0 .35rem}
