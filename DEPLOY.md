@@ -97,7 +97,7 @@ disabled, the CSP is blocking the script).
   4 hours, which turns `no-cache` into `max-age=14400` and left returning
   visitors with new HTML and a stale stylesheet. Set it to **Respect Existing
   Headers**. Until that is set, bump the query string on the stylesheet link
-  (`/style.css?v=4` -> `?v=5`) whenever `style.css` changes, in every page
+  (`/style.css?v=5` -> `?v=6`) whenever `style.css` changes, in every page
   that links it (see the list under [Pages and the tab bar](#pages-and-the-tab-bar));
   it is harmless to keep doing so afterwards.
 - Every deploy is a plain git push to `main`; Cloudflare builds it within a
