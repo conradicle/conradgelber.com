@@ -117,19 +117,20 @@ Each section has its own page, a plain `index.html` in its own folder:
 | `/next/` | `next/index.html` |
 | `/off-the-clock/` | `off-the-clock/index.html` |
 | `/games/` | `games/index.html` |
+| any missing path | `404.html` |
 
-All seven carry the same `<nav class="tabs" aria-label="Site">` block under
+All eight carry the same `<nav class="tabs" aria-label="Site">` block under
 the masthead. There is no build step and no include, so **a change to the tab
-bar (a label, a new tab, a reordering) has to be made by hand in all seven
+bar (a label, a new tab, a reordering) has to be made by hand in all eight
 files**, identically. The one difference between copies is
 `aria-current="page"`, which sits on the current page's tab (the front page
-has none). After editing, check that the copies still match:
+and the 404 page have none). After editing, check that the copies still match:
 
 ```bash
-grep -h --no-group-separator -A7 '<nav class="tabs"' index.html */index.html | sed 's/ aria-current="page"//' | sort | uniq -c
+grep -h --no-group-separator -A7 '<nav class="tabs"' index.html 404.html */index.html | sed 's/ aria-current="page"//' | sort | uniq -c
 ```
 
-Every line should show a count of 7. The same goes for the head (font
+Every line should show a count of 8. The same goes for the head (font
 preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
 `/play/` and `/cambio/` do not get the tab bar. `/play/` has a single
