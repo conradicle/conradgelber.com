@@ -92,6 +92,44 @@ h1{
   color:var(--ink-soft);
 }
 .stamp a{border-bottom-color:var(--ink-soft)}
+h1 a{border-bottom:none;padding-bottom:0}
+
+/* Section pages: the name, sized down, on the same 2px rule as the stamp */
+.mast-sub{
+  padding:clamp(1.6rem,5vw,2.6rem) 0 .7rem;
+  border-bottom:2px solid var(--ink);
+}
+.site-name{
+  margin:0;
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:1.25rem;
+  line-height:1.3;
+  letter-spacing:-0.01em;
+}
+.site-name a{border-bottom:none;padding-bottom:0}
+
+/* Site tabs. The markup is copied into every page but /play/; see DEPLOY.md.
+   The current tab's 3px underline sits over the bar's 1px rule. */
+.tabs{
+  display:flex;
+  flex-wrap:wrap;
+  column-gap:1.75rem;
+  border-bottom:1px solid var(--rule);
+  font-size:.95rem;
+  line-height:1.3;
+}
+.tabs a{
+  display:flex;
+  align-items:center;
+  min-height:44px;
+  margin-bottom:-1px;
+  padding:3px 0 0;
+  border-bottom:3px solid transparent;
+  color:var(--ink-soft);
+}
+.tabs a:hover{color:var(--accent)}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
 
 /* Masthead grid: name and standfirst left, portrait right. The portrait is a
    column bound by two edges: its top sits on the cap height of "Conrad"
@@ -159,6 +197,21 @@ h2{
 .what p.note{margin:0;max-width:58ch;color:var(--ink-soft)}
 .what p.note strong{color:var(--ink);font-weight:500}
 
+/* Section page title: an h1 that reads like the old section h2 */
+.page-title{
+  font-family:Spectral,Georgia,serif;
+  font-weight:500;
+  font-size:clamp(1.75rem,4.4vw,2.1rem);
+  line-height:1.2;
+  letter-spacing:-0.012em;
+  margin:0 0 1.6rem;
+  padding-bottom:.55rem;
+  border-bottom:1px solid var(--rule);
+}
+
+/* Front page list of the section pages, one .paper row each */
+.pages{list-style:none;margin:0;padding:0}
+
 /* Research list */
 .paper{
   padding:1.25rem 0;
@@ -206,4 +259,11 @@ footer{
   .portrait img{position:static;height:auto}
   .entry{grid-template-columns:1fr;gap:.2rem}
   .when{padding-top:0;margin-bottom:.35rem}
+}
+
+/* Phones: the six tabs as two rows of three, each cell on its own rule */
+@media (max-width:560px){
+  .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:0}
+  .tabs a{margin-bottom:0;border-bottom:1px solid var(--rule)}
+  .tabs a[aria-current="page"]{border-bottom:3px solid var(--accent)}
 }
