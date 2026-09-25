@@ -190,10 +190,16 @@ Pages also serves `play-src/` itself (its source and package files, not
 Before adding the site as a Featured card on LinkedIn, open
 <https://www.linkedin.com/post-inspector/> and inspect
 `https://conradgelber.com/`. LinkedIn caches Open Graph data aggressively,
-and a bad first scrape (a 404, a half-deployed page, a missing `og.png`) is
-hard to clear afterwards. The inspector both shows you what LinkedIn sees and
-forces a fresh scrape. You want: title "Conrad Gelber", the description, and
-the 1200x630 `og.png` preview. Only then add the Featured card.
+and a bad first scrape (a 404, a half-deployed page, a missing preview image)
+is hard to clear afterwards. The inspector both shows you what LinkedIn sees
+and forces a fresh scrape. You want: title "Conrad Gelber", the description,
+and the 1200x630 preview image. Only then add the Featured card.
+
+The preview image is `img/og-suit-1200x630.jpg`, named in the `og:image` tag
+in `index.html`. Like every file in `img/`, it is cached for a year, and
+LinkedIn and other sites cache previews by URL, so a new preview image always
+gets a new filename (and the `og:image` and `og:image:alt` tags change with
+it). Run the inspector again afterwards.
 
 ### If you turn on Cloudflare Web Analytics
 
