@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibility &middot; Conrad Gelber</title>
+<meta name="description" content="The accessibility standard conradgelber.com aims for, its known limitations, and how to report a problem.">
+<link rel="canonical" href="https://conradgelber.com/accessibility/">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=6">
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="wrap">
+
+  <header class="mast-sub">
+    <p class="site-name"><a href="/">Conrad Gelber</a></p>
+  </header>
+
+  <nav class="tabs" aria-label="Site">
+    <a href="/work/">Work</a>
+    <a href="/built/">Built</a>
+    <a href="/writing/">Writing</a>
+    <a href="/next/">Next</a>
+    <a href="/off-the-clock/">Off the clock</a>
+    <a href="/games/">Games</a>
+  </nav>
+
+  <main id="main">
+  <section>
+    <h1 class="page-title">Accessibility</h1>
+    <div class="prose">
+      <h2>The standard</h2>
+      <p>This site aims to meet the Web Content Accessibility
+        Guidelines (WCAG) 2.2 at level AA. It was last reviewed in
+        September 2026, with automated checks (axe and pa11y) at phone
+        and desktop widths and by hand with a keyboard alone.</p>
+      <p>Every page can be used with a keyboard, shows where the
+        focus is, and starts with a link that skips to the main
+        content. Text meets a contrast ratio of at least 4.5:1, and
+        pages reflow to a single column when zoomed to 400% with no
+        sideways scrolling. The two games respect the reduced motion
+        setting on your device.</p>
+
+      <h2>Known limitations</h2>
+      <p><a href="/play/">Pin drop</a> is a visual game. You can play
+        it with a keyboard (the arrow keys turn the globe, plus and
+        minus zoom, and Enter drops a pin at the center), and each
+        result is read out to screen readers. The globe has no labels
+        on purpose, though, so the game cannot be played without
+        sight.</p>
+      <p><a href="/cambio/">Cambio</a> is a fast card game with time
+        limits that are part of the game: 45 seconds for each turn,
+        10 seconds to pass a card, and slapping is a race between
+        players. These limits cannot be extended. You can play it
+        with a keyboard: Tab to a card and press Enter to slap it,
+        which counts exactly like a tap. Each card is labelled with
+        whose it is and which slot it is in, and moves and turns are
+        announced to screen readers as they happen.</p>
+
+      <h2>Reporting a problem</h2>
+      <p>If something on this site is hard or impossible to use,
+        email <a href="mailto:conrad@conradgelber.com">conrad@conradgelber.com</a>
+        with the address of the page and what happened. I aim to
+        reply within a week.</p>
+    </div>
+  </section>
+  </main>
+
+  <footer>
+    <div class="contact">
+      <span><a href="mailto:conrad@conradgelber.com">conrad@conradgelber.com</a></span>
+      <span><a href="https://www.linkedin.com/in/conradgelber">LinkedIn</a></span>
+      <span><a href="https://github.com/conradicle">GitHub</a></span>
+      <span><a href="/accessibility/">Accessibility</a></span>
+    </div>
+    <p class="colophon">Miami Beach, Florida. Views here are my own
+      and not those of any organization named on this page.</p>
+  </footer>
+
+</div>
+</body>
+</html>

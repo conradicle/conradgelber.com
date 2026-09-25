@@ -52,6 +52,8 @@
 
 .game{padding:2rem 0 0}
 .screen[hidden]{display:none}
+/* Read by screen readers, never shown */
+.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 .game-title{
   font-family:Spectral,Georgia,serif;

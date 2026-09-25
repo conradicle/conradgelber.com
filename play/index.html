@@ -15,11 +15,12 @@
 <link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/style.css?v=5">
-<link rel="stylesheet" href="/play/play.css?v=3">
-<script src="/play/play.js?v=1" defer></script>
+<link rel="stylesheet" href="/style.css?v=6">
+<link rel="stylesheet" href="/play/play.css?v=4">
+<script src="/play/play.js?v=2" defer></script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to main content</a>
 <div class="wrap">
 
   <header class="playhead">
@@ -27,7 +28,7 @@
     <a class="back" href="/games/">&larr; Games</a>
   </header>
 
-  <main class="game">
+  <main id="main" class="game">
 
     <section class="screen" id="screen-start">
       <h1 class="game-title">Pin drop</h1>
@@ -104,11 +105,13 @@
       </div>
     </section>
 
+    <p class="visually-hidden" id="announce" aria-live="polite"></p>
+
   </main>
 
   <footer>
     <p class="colophon">Map data from Natural Earth, which is in the
-      public domain.</p>
+      public domain. <a href="/accessibility/">Accessibility</a></p>
   </footer>
 
 </div>

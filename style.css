@@ -63,6 +63,10 @@ a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--accent);pa
 a:hover{color:var(--accent)}
 a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
 
+/* Skip link: the first stop for a keyboard, off screen until focused */
+.skip{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+.skip:focus{position:fixed;left:1rem;top:1rem;width:auto;height:auto;z-index:10;padding:.6rem 1rem;background:var(--paper);border:2px solid var(--ink);color:var(--ink)}
+
 /* Masthead */
 header.mast{padding:clamp(4rem,11vw,7.5rem) 0 2rem}
 h1{

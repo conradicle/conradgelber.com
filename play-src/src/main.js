@@ -22,6 +22,14 @@ const EARTH_KM = 6371;
 const DEG = 180 / Math.PI;
 
 const $ = (id) => document.getElementById(id);
+
+// Screen reader announcements (a polite live region outside the screens, so
+// it is in the page before anything is said into it).
+function announce(text) {
+  const el = $('announce');
+  el.textContent = '';
+  setTimeout(() => { el.textContent = text; }, 50);
+}
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // ---------- scoring ----------
@@ -260,6 +268,7 @@ function dropPin([x, y]) {
   if (!lonlat || !Number.isFinite(lonlat[0]) || !Number.isFinite(lonlat[1])) return;
   guess = lonlat;
   lockBtn.disabled = false;
+  announce('Pin dropped. Lock in your guess, or drop the pin again.');
   schedule();
 }
 
@@ -351,6 +360,7 @@ function startRound() {
   nextBtn.hidden = true;
   if (k !== 1) flyTo(center(), 1);
   schedule();
+  announce(`Round ${round + 1} of ${ROUNDS}. Find ${place.name}.`);
   svgEl.focus({ preventScroll: true });
 }
 
