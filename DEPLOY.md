@@ -72,6 +72,8 @@ disabled, the CSP is blocking the script).
 
 ## Notes
 
+- **HSTS.** `_headers` sends `Strict-Transport-Security: max-age=63072000; includeSubDomains` (two years, no preload). Browsers that have seen it will only use HTTPS for conradgelber.com **and every subdomain** for two years, so any new subdomain must serve HTTPS from day one. Proxied records get Cloudflare's wildcard certificate automatically; a DNS-only record pointing elsewhere needs its own certificate. Checked 2026-09-24: only the apex and www resolve, and both serve valid HTTPS. The `cambio` Worker sends the same header.
+- `_headers` also sends `Permissions-Policy` (every browser feature the site does not use is turned off) and `Cross-Origin-Opener-Policy: same-origin` on every path, and serves `/.well-known/security.txt` as plain text. Update its `Expires` line before 2027-09-24. Every page starts with a "Skip to main content" link to `<main id="main">`, and every footer links `/accessibility/`; keep both when adding a page.
 - `_headers` applies to every path (`/*`). The CSP is
   `default-src 'none'` with `script-src`, `connect-src`, `style-src`,
   `font-src`, `img-src` and `manifest-src` set to `'self'`. Only
@@ -117,9 +119,10 @@ Each section has its own page, a plain `index.html` in its own folder:
 | `/next/` | `next/index.html` |
 | `/off-the-clock/` | `off-the-clock/index.html` |
 | `/games/` | `games/index.html` |
+| `/accessibility/` | `accessibility/index.html` |
 | any missing path | `404.html` |
 
-All eight carry the same `<nav class="tabs" aria-label="Site">` block under
+All nine carry the same `<nav class="tabs" aria-label="Site">` block under
 the masthead. There is no build step and no include, so **a change to the tab
 bar (a label, a new tab, a reordering) has to be made by hand in all eight
 files**, identically. The one difference between copies is
@@ -130,7 +133,7 @@ and the 404 page have none). After editing, check that the copies still match:
 grep -h --no-group-separator -A7 '<nav class="tabs"' index.html 404.html */index.html | sed 's/ aria-current="page"//' | sort | uniq -c
 ```
 
-Every line should show a count of 8. The same goes for the head (font
+Every line should show a count of 9. The same goes for the head (font
 preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
 `/play/` and `/cambio/` do not get the tab bar. `/play/` has a single
