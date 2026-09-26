@@ -457,7 +457,8 @@ function startThinking() {
   const started = performance.now();
   const pause = reducedMotion.matches ? 600 : 1000 + (ui.level === 'hard' ? 300 : 0);
   ui.thinking = { th, started, pause, input: null, stage: 'think' };
-  banner(`${ui.names[1]} is thinking.`, false);
+  // Shown in the players bar, so the result of the last shot stays on screen.
+  $('group-1').textContent = 'thinking';
   updateControls();
   schedule();
 }
@@ -468,6 +469,7 @@ function thinkFrame(now) {
     if (!t.input) t.input = t.th.think(2500);
     if (t.input && now - t.started >= t.pause) {
       t.stage = 'show';
+      updatePlayers();
       t.showAt = now;
       const cur = cuePos() ?? suggestedSpot(ui.state);
       t.fromCue = cur;
