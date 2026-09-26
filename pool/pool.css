@@ -230,3 +230,64 @@
 @media (max-width:640px){
   .shot-row .btn{padding:.6rem .8rem}
 }
+
+/* Compact play screen for phones in portrait: the site header gives way to a
+   small back button, the table goes nearly edge to edge with thin rails, the
+   result line floats over the table for a few seconds, and every control
+   sits in one row under the table. */
+:root{--chrome-compact:98px}
+.corner-back,.row-nudge{display:none}
+body.compact .playhead{display:none}
+body.compact .wrap{padding:0 4px}
+body.compact .game{padding-top:0}
+body.compact #screen-play{position:relative;padding-top:2px}
+body.compact .players{grid-template-columns:40px 1fr auto 1fr;gap:.4rem;min-height:40px}
+body.compact .corner-back{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:40px;
+  height:40px;
+  padding:0 0 3px;
+  border:1px solid var(--rule);
+  border-radius:50%;
+  color:var(--ink);
+  font-size:1.6rem;
+  line-height:1;
+}
+body.compact .corner-back:hover{color:var(--accent);border-color:var(--accent)}
+body.compact .banner{
+  position:absolute;
+  top:50px;
+  left:14px;
+  right:14px;
+  z-index:2;
+  min-height:0;
+  margin:0;
+  padding:.45rem .7rem;
+  border-radius:4px;
+  background:rgba(19,35,60,.9);
+  color:var(--paper);
+  pointer-events:none;
+  transition:opacity .35s;
+}
+body.compact .banner.foul{color:#FFD9CF}
+body.compact .banner.gone,
+body.compact .banner:empty{opacity:0}
+body.compact .table.portrait{
+  aspect-ratio:1.0406/2.0312;
+  width:min(100%, calc((100vh - var(--chrome-compact)) * .51231));
+  width:min(100%, calc((100svh - var(--chrome-compact)) * .51231));
+}
+body.compact #fine{display:none}
+body.compact .shot-row{grid-template-columns:44px 36px 36px 1fr auto;gap:6px;margin-top:4px}
+body.compact .spin-btn{width:44px;height:44px}
+body.compact .spin-mini{width:42px;height:42px}
+body.compact .row-nudge{display:flex;align-items:center;justify-content:center;min-width:36px;width:36px;padding:0;font-size:1.3rem;line-height:1}
+body.compact .power-label{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+body.compact #skip{grid-column:2 / 6}
+body.compact .shot-row .btn:not(.row-nudge){padding:.6rem .75rem}
+body.compact .spin-panel{position:fixed;left:8px;right:8px;bottom:60px;z-index:3;margin:0;box-shadow:0 6px 24px rgba(19,35,60,.25)}
+@media (prefers-reduced-motion:reduce){
+  body.compact .banner{transition:none}
+}

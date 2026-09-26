@@ -6,7 +6,7 @@ import {
 import { aimGuide } from './engine/guide.js';
 import { createThinker } from './engine/ai.js';
 import { seededRng } from './engine/rng.js';
-import { Renderer, pocketName, OUTER_L, OUTER_W } from './render.js';
+import { Renderer, pocketName, outer, RAIL, RAIL_COMPACT } from './render.js';
 import { describe, summary } from './words.js';
 import { drawSpinBall, spinFromPoint, spinWords, drawWheel } from './widgets.js';
 import { Online, rejoinable, rejoin } from './online.js';
@@ -83,6 +83,7 @@ const online = new Online({
 function show(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
   document.body.classList.toggle('playing', id === 'screen-play');
+  if (id !== 'screen-play') document.body.classList.remove('compact');
   // Size the table now, while the screen is known to be showing.
   if (id === 'screen-play') layout();
 }
@@ -536,9 +537,18 @@ function clockFrame(now) {
 
 // ─── Words ────────────────────────────────────────────────────────────────
 
+let bannerTimer = null;
 function banner(text, bad) {
-  $('banner').textContent = text;
-  $('banner').classList.toggle('foul', !!bad);
+  const el = $('banner');
+  el.textContent = text;
+  el.classList.toggle('foul', !!bad);
+  el.classList.remove('gone');
+  // On a phone the line floats over the table, so it steps aside after a few
+  // seconds (it was announced, and the players bar keeps the essentials).
+  clearTimeout(bannerTimer);
+  if (document.body.classList.contains('compact') && !ui.waiting) {
+    bannerTimer = setTimeout(() => el.classList.add('gone'), bad ? 6000 : 4000);
+  }
 }
 function announce(text) {
   // Clear first so a repeated sentence is read again.
@@ -558,8 +568,7 @@ function updateControls() {
   $('skip').hidden = !shooting;
   $('shoot').disabled = !mine;
   $('power').disabled = !mine;
-  $('fine-left').disabled = !mine;
-  $('fine-right').disabled = !mine;
+  for (const id of ['fine-left', 'fine-right', 'row-left', 'row-right']) $(id).disabled = !mine;
   $('spin-btn').disabled = !mine;
   const eight = mine && onTheEight(ui.state, ui.me);
   $('shoot').textContent = eight && ui.called == null ? 'Call a pocket' : 'Shoot';
@@ -610,8 +619,50 @@ function setPower(v) {
 }
 
 // Fine aim.
-$('fine-left').addEventListener('click', () => rotateAim(0.1 * DEG));
-$('fine-right').addEventListener('click', () => rotateAim(-0.1 * DEG));
+/**
+ * A nudge button: one tenth of a degree per press, and held down it keeps
+ * turning (the first repeat after a pause, so a tap never double-counts).
+ */
+function nudge(id, rad) {
+  const btn = $(id);
+  let delay = null;
+  let every = null;
+  let repeated = false;
+  const stop = () => {
+    clearTimeout(delay);
+    clearInterval(every);
+    delay = every = null;
+  };
+  btn.addEventListener('pointerdown', () => {
+    if (!myTurn()) return;
+    repeated = false;
+    stop();
+    delay = setTimeout(() => {
+      every = setInterval(() => {
+        repeated = true;
+        if (myTurn()) rotateAim(rad);
+      }, 50);
+    }, 350);
+  });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) btn.addEventListener(ev, stop);
+  btn.addEventListener('click', () => {
+    if (!repeated) rotateAim(rad);
+    repeated = false;
+  });
+}
+nudge('fine-left', 0.1 * DEG);
+nudge('fine-right', -0.1 * DEG);
+nudge('row-left', 0.1 * DEG);
+nudge('row-right', -0.1 * DEG);
+
+$('corner-back').addEventListener('click', (e) => {
+  const live = ui.state && ui.state.phase !== 'over' && ui.mode;
+  if (live && !window.confirm('Leave this game?')) {
+    e.preventDefault();
+    return;
+  }
+  if (ui.mode === 'online') online.leave();
+});
 const wheel = $('wheel');
 let wheelDrag = null;
 wheel.addEventListener('pointerdown', (e) => {
@@ -714,7 +765,7 @@ function tablePoint(e) {
   return renderer.toTable(e.clientX - rect.left, e.clientY - rect.top);
 }
 function nearestHole(x, y) {
-  const holes = Renderer.holes();
+  const holes = renderer.holes();
   let best = -1;
   let bd = 0.1;
   holes.forEach((h, i) => {
@@ -1067,17 +1118,27 @@ function draw(now) {
 
 // ─── Layout ───────────────────────────────────────────────────────────────
 
+/** Narrow screens get the compact play screen: no site header, thin rails, one control row. */
+const COMPACT_BELOW = 600;
+
 function layout() {
+  const compact = window.innerWidth < COMPACT_BELOW;
+  document.body.classList.toggle('compact', compact);
   const box = $('table-box');
   const w = box.clientWidth;
-  const chrome = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chrome')) || 272;
+  const css = getComputedStyle(document.documentElement);
+  const chrome = parseFloat(css.getPropertyValue(compact ? '--chrome-compact' : '--chrome')) || 272;
   const h = Math.max(200, window.innerHeight - chrome);
-  const sLand = Math.min(w / OUTER_L, h / OUTER_W);
-  const sPort = Math.min(w / OUTER_W, h / OUTER_L);
-  const portrait = sPort > sLand * 1.05;
+  let portrait = true;
+  if (!compact) {
+    const o = outer(RAIL);
+    const sLand = Math.min(w / o.l, h / o.w);
+    const sPort = Math.min(w / o.w, h / o.l);
+    portrait = sPort > sLand * 1.05;
+  }
   canvas.classList.toggle('portrait', portrait);
   canvas.classList.toggle('landscape', !portrait);
-  renderer.resize(portrait);
+  renderer.resize(portrait, compact ? RAIL_COMPACT : RAIL);
   drawWheel($('wheel'), Math.atan2(ui.aim.y, ui.aim.x), myTurn());
   drawSpinBall($('spin-mini'), ui.side, ui.top, false);
   if (!$('spin-panel').hidden) drawSpinBall($('spin-ball'), ui.side, ui.top, true);
