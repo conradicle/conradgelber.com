@@ -1,6 +1,6 @@
 import { Sim, AIM_MAX } from '../../play-src/src/pool/engine/physics.js';
 import { newGame, checkInput, applyResult, tableForShot, timeout, forfeit } from '../../play-src/src/pool/engine/rules.js';
-import { SHOT_CLOCK_MS, RECONNECT_MS, PLAYBACK, cleanName, ENGINE_VERSION } from '../../play-src/src/pool/engine/protocol.js';
+import { SHOT_CLOCK_MS, RECONNECT_MS, PLAYBACK, cleanName, ENGINE_VERSION, tableHash } from '../../play-src/src/pool/engine/protocol.js';
 
 /**
  * One pool room, independent of the runtime. The Durable Object owns the
@@ -23,6 +23,10 @@ const CLAIM_MS = 60_000;
 export const ROOM_IDLE_MS = 2 * 60 * 60 * 1000;
 /** A little over the animation, so the clock starts once both screens are still. */
 const SETTLE_MS = 600;
+/** Results kept for checking browsers' hashes against, and checks held for a shot still running. */
+const KEEP_RESULTS = 8;
+const KEEP_CHECKS = 4;
+const HASH = /^[0-9a-f]{16}$/;
 
 export function emptyRoom(code) {
   return { v: 1, code, seats: [], settings: null, game: null, claimedUntil: null, lastActiveAt: null };
@@ -33,7 +37,7 @@ const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 export class RoomCore {
   /**
    * deps: now(), rng() (uint32), send(seatId, type, payload), isConnected(seatId),
-   * sessionEnded(seatId, reason).
+   * sessionEnded(seatId, reason), log(line).
    */
   constructor(snapshot, deps) {
     this.s = snapshot;
@@ -175,6 +179,8 @@ export class RoomCore {
       pending: null,
       waiting: null,
       rematch: [false, false],
+      results: [],
+      checks: [],
     };
     this.broadcastRoom();
     this.broadcastGame();
@@ -213,6 +219,12 @@ export class RoomCore {
     g.state = applyResult(g.state, p.input, sim);
     g.seq++;
     g.pending = null;
+    // Keep this result's fingerprint, and settle any browser checks that came in first.
+    const hash = tableHash(g.state.table);
+    g.results = [...(g.results ?? []), { seq: p.seq, hash }].slice(-KEEP_RESULTS);
+    const early = (g.checks ?? []).filter((c) => c.seq === p.seq);
+    g.checks = (g.checks ?? []).filter((c) => c.seq !== p.seq);
+    for (const c of early) this.compare(p.seq, hash, c.hash, c.ua);
     if (g.state.phase === 'over') g.clock = { endsAt: null, left: null };
     else {
       // The next shot's clock starts once the animation has played out on both screens.
@@ -221,6 +233,26 @@ export class RoomCore {
       if (g.waiting) g.clock = { endsAt: null, left: SHOT_CLOCK_MS };
     }
     this.sendResultToAll();
+  }
+
+  /**
+   * A browser's fingerprint of the table it ended a shot with: { seq, hash }.
+   * Any difference from the server's own result is logged with the room code,
+   * the shot, both hashes and the browser's user agent, and nothing else.
+   */
+  check(id, payload, ua) {
+    const g = this.s.game;
+    if (this.seatOf(id) < 0 || !g || !payload || !Number.isInteger(payload.seq) || typeof payload.hash !== 'string' || !HASH.test(payload.hash)) return;
+    const done = (g.results ?? []).find((r) => r.seq === payload.seq);
+    if (done) this.compare(payload.seq, done.hash, payload.hash, ua);
+    else if (g.pending && g.pending.seq === payload.seq) {
+      g.checks = [...(g.checks ?? []), { seq: payload.seq, hash: payload.hash, ua }].slice(-KEEP_CHECKS);
+    }
+  }
+
+  compare(seq, server, client, ua) {
+    if (server === client) return;
+    this.d.log(`pool mismatch room=${this.s.code} shot=${seq} server=${server} client=${client} ua=${JSON.stringify(String(ua ?? '').slice(0, 200))}`);
   }
 
   /** Live aim for the watcher: relayed as is, after a shape check. */

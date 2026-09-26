@@ -103,6 +103,11 @@ export class Online {
     this.emit('game:aim', a);
   }
 
+  /** This browser's fingerprint of the table after shot `seq`, for the server to compare. */
+  check(seq, hash) {
+    this.emit('game:check', { seq, hash });
+  }
+
   async rematch() {
     try {
       await this.request('game:rematch', {});

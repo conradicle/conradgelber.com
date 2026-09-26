@@ -62,3 +62,27 @@ export const SHOT_CLOCK_MS = 60_000;
 export const RECONNECT_MS = 5 * 60_000;
 /** Shots play back at this speed, so the server can tell when the animation ends. */
 export const PLAYBACK = 1.2;
+
+/**
+ * A short fingerprint of a table: two 32-bit FNV-1a-style hashes over every
+ * ball's on-table flag and the exact little-endian bytes of its x and
+ * y. After an online shot each browser sends the hash of the table it ended
+ * with, and the Worker logs any that differ from its own.
+ */
+export function tableHash(table) {
+  const view = new DataView(new ArrayBuffer(8));
+  let h1 = 0x811c9dc5;
+  let h2 = 0x01000193;
+  const eat = (byte) => {
+    h1 = Math.imul(h1 ^ byte, 0x01000193) >>> 0;
+    h2 = Math.imul(h2 ^ byte, 0x5bd1e995) >>> 0;
+  };
+  for (let i = 0; i < table.on.length; i++) {
+    eat(table.on[i] ? 1 : 0);
+    for (const v of [table.x[i], table.y[i]]) {
+      view.setFloat64(0, v, true);
+      for (let k = 0; k < 8; k++) eat(view.getUint8(k));
+    }
+  }
+  return h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0');
+}

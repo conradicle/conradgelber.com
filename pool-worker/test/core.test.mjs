@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { RoomCore, emptyRoom, FIRST_SLICE, SLICE } from '../src/core.js';
-import { cleanCode, isAllowedRoomCode, cleanName, ROOM_CODE_ALPHABET, ENGINE_VERSION, SHOT_CLOCK_MS, RECONNECT_MS } from '../../play-src/src/pool/engine/protocol.js';
+import { cleanCode, isAllowedRoomCode, cleanName, ROOM_CODE_ALPHABET, ENGINE_VERSION, SHOT_CLOCK_MS, RECONNECT_MS, tableHash } from '../../play-src/src/pool/engine/protocol.js';
 import { playShot } from '../../play-src/src/pool/engine/rules.js';
 import { AIM_MAX } from '../../play-src/src/pool/engine/physics.js';
 import { seededRng } from '../../play-src/src/pool/engine/rng.js';
@@ -10,13 +10,14 @@ const v = ENGINE_VERSION;
 
 /** A room with a fake clock and fake sockets. */
 function harness() {
-  const h = { t: 1_000_000, sent: [], ended: [], online: new Set() };
+  const h = { t: 1_000_000, sent: [], ended: [], online: new Set(), logged: [] };
   const rng = seededRng(42);
   h.core = new RoomCore(emptyRoom('KSJGZZ'), {
     now: () => h.t,
     rng,
     send: (id, type, d) => h.sent.push({ id, type, d: JSON.parse(JSON.stringify(d)) }),
     isConnected: (id) => h.online.has(id),
+    log: (line) => h.logged.push(line),
     sessionEnded: (id, reason) => {
       h.online.delete(id);
       h.ended.push({ id, reason });
@@ -277,4 +278,58 @@ test('aim is relayed from the shooter only, and only in shape', () => {
   assert.deepEqual(h.last(b.id, 'game:aim'), { ax: 5, ay: 7, power: 50, place: { x: 100, y: 200 }, call: null });
   h.core.aim(a.id, { ax: 5.5, ay: 7, power: 50 });
   assert.equal(h.of(b.id, 'game:aim').length, 1);
+});
+
+// ─── Mismatch reports ─────────────────────────────────────────────────────
+
+const UA = 'Mozilla/5.0 (Test) "quoted"';
+
+test('a browser whose table matches the server logs nothing', () => {
+  const { h, a, b, g } = twoPlayers();
+  h.core.shot(a.id, { seq: 0, input: breakShot });
+  h.alarms();
+  const hash = tableHash(g().state.table);
+  h.core.check(a.id, { seq: 0, hash }, UA);
+  h.core.check(b.id, { seq: 0, hash }, UA);
+  assert.deepEqual(h.logged, []);
+});
+
+test('a browser whose table differs is logged: room, shot, both hashes, user agent', () => {
+  const { h, a, g } = twoPlayers();
+  h.core.shot(a.id, { seq: 0, input: breakShot });
+  h.alarms();
+  const server = tableHash(g().state.table);
+  h.core.check(a.id, { seq: 0, hash: '0123456789abcdef' }, UA);
+  assert.equal(h.logged.length, 1);
+  assert.equal(h.logged[0], `pool mismatch room=KSJGZZ shot=0 server=${server} client=0123456789abcdef ua=${JSON.stringify(UA)}`);
+});
+
+test('a check that arrives while the shot is still running is compared when it finishes', () => {
+  const { h, a, g } = twoPlayers();
+  h.core.shot(a.id, { seq: 0, input: breakShot });
+  assert.ok(g().pending, 'the break runs past its first slice');
+  h.core.check(a.id, { seq: 0, hash: 'ffffffffffffffff' }, UA);
+  assert.deepEqual(h.logged, []);
+  h.alarms();
+  assert.equal(h.logged.length, 1);
+  assert.match(h.logged[0], /^pool mismatch room=KSJGZZ shot=0 server=[0-9a-f]{16} client=ffffffffffffffff ua=/);
+});
+
+test('malformed checks, and checks from outside the room, are ignored', () => {
+  const { h, a, g } = twoPlayers();
+  h.core.shot(a.id, { seq: 0, input: breakShot });
+  h.alarms();
+  for (const bad of [null, { seq: 0 }, { seq: 0, hash: 'xyz' }, { seq: '0', hash: '0123456789abcdef' }, { seq: 0, hash: '0123456789ABCDEF' }]) h.core.check(a.id, bad, UA);
+  h.core.check('someone-else', { seq: 0, hash: '0123456789abcdef' }, UA);
+  h.core.check(a.id, { seq: 5, hash: '0123456789abcdef' }, UA);
+  assert.deepEqual(h.logged, []);
+  assert.equal(g().seq, 1);
+});
+
+test('a very long user agent is cut to 200 characters', () => {
+  const { h, a } = twoPlayers();
+  h.core.shot(a.id, { seq: 0, input: breakShot });
+  h.alarms();
+  h.core.check(a.id, { seq: 0, hash: '0000000000000000' }, 'x'.repeat(500));
+  assert.ok(h.logged[0].endsWith(`ua="${'x'.repeat(200)}"`));
 });

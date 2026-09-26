@@ -70,6 +70,8 @@ export class PoolRoom extends DurableObject {
         }
       },
       isConnected: (seatId) => this.socketsOf(seatId).length > 0,
+      // Only mismatch reports (see RoomCore.check); watch them with wrangler tail.
+      log: (line) => console.log(line),
       sessionEnded: (seatId, reason) => {
         for (const ws of this.socketsOf(seatId)) {
           const a = ws.deserializeAttachment();
@@ -138,7 +140,9 @@ export class PoolRoom extends DurableObject {
     if (this.ctx.getWebSockets().length >= MAX_SOCKETS) return refuse('This room has too many connections. Try again in a moment.', (p) => this.ctx.waitUntil(p));
     const { 0: client, 1: server } = new WebSocketPair();
     this.ctx.acceptWebSocket(server);
-    server.serializeAttachment({ code, seatId: null, openedAt: Date.now() });
+    // The user agent is kept only to go with a mismatch report.
+    const ua = (request.headers.get('User-Agent') ?? '').slice(0, 200);
+    server.serializeAttachment({ code, seatId: null, openedAt: Date.now(), ua });
     await this.save();
     return new Response(null, { status: 101, webSocket: client });
   }
@@ -193,6 +197,9 @@ export class PoolRoom extends DurableObject {
       case 'game:aim':
         if (me) core.aim(me, d);
         return; // nothing to save
+      case 'game:check':
+        if (me) core.check(me, d, att.ua);
+        break;
       case 'game:rematch': {
         const err = me ? core.rematch(me) : 'Not in a room.';
         reply(err ? { ok: false, error: err } : { ok: true });
