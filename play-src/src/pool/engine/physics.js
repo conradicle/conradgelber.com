@@ -57,8 +57,30 @@ const SPIN_K = 5 / (2 * R);
 const SLIP_EPS = 1e-6;
 /** Most collisions resolved inside one step before the rest of it is skipped. */
 const MAX_EVENTS = 64;
-/** Balls this close to the cushion line are checked against the cushions. */
-const RAIL_ZONE = 2 * R;
+/**
+ * Broad phase. A ball's total kinetic energy, moving plus spinning, never
+ * rises under cloth friction (each step is proved to lose energy in the
+ * comments on friction()), so the fastest it can ever travel before its next
+ * contact is sqrt(v^2 + (2/5) R^2 w^2), with w its full spin. Spin can turn
+ * into speed (a follow shot's cue ball stops dead at contact, then speeds up
+ * again), which is why the bound uses energy and never the current speed.
+ * A pair of balls whose gap is wider than both bounds can close in the time
+ * left cannot touch, so it is skipped until then; the same goes for a ball
+ * and the cushions. Contacts are the only thing that can raise a ball's
+ * energy, so every contact clears the cached times for the balls in it.
+ * Skipping only pairs that cannot collide leaves every result bit for bit
+ * the same.
+ */
+const I_RATIO = (2 / 5) * R * R;
+/** Gap shaved off (metres) and speed padding, so rounding never makes a skip unsafe. */
+const SAFE_GAP = 1e-9;
+const SAFE_PAD = 1 + 1e-9;
+/**
+ * Pairs that could come due within this long are kept on a short list that
+ * every step walks; the rest are not looked at again until the earliest of
+ * their safe times, or until a contact.
+ */
+const HORIZON = 32 * DT;
 
 export const BALLS = 16;
 
@@ -108,6 +130,72 @@ export class Sim {
     this.wz[0] = k * side;
     this.moving[0] = v > 0 ? 1 : 0;
     if (!this.moving[0]) this.done = true;
+
+    /** Simulated seconds since the strike. */
+    this.t = 0;
+    /** Per ball: the most speed its energy allows. */
+    this.bound = new Float64Array(BALLS);
+    /** Per pair (i * BALLS + j, i < j): no contact possible before this time. */
+    this.pairSafe = new Float64Array(BALLS * BALLS).fill(-Infinity);
+    /** Per ball: no cushion contact possible before this time. */
+    this.railSafe = new Float64Array(BALLS).fill(-Infinity);
+    /** Pairs to check every step, in (i, j) order, and when the list must be rebuilt. */
+    this.active = new Uint8Array(BALLS * BALLS);
+    this.activeN = 0;
+    this.rescanAt = -Infinity;
+    this.rebound(0);
+  }
+
+  /** Pair safe time from the current gap and both balls' bounds. */
+  pairTime(i, j, now) {
+    const px = this.x[j] - this.x[i];
+    const py = this.y[j] - this.y[i];
+    const reach = (this.bound[i] + this.bound[j]) * SAFE_PAD;
+    return reach > 0 ? now + (Math.sqrt(px * px + py * py) - 2 * R - SAFE_GAP) / reach : Infinity;
+  }
+
+  /**
+   * Rebuild the list of pairs to check: every pair that could touch before
+   * now + HORIZON, kept in (i, j) order so ties resolve as a full scan would.
+   * The rest are safe until at least the earliest of their times, so the list
+   * holds until then.
+   */
+  rescan(now) {
+    const { on, moving, pairSafe, active } = this;
+    const horizon = now + HORIZON;
+    // Energy only fell since each bound was taken, so a fresh one is tighter and still safe.
+    for (let i = 0; i < BALLS; i++) if (on[i] && moving[i]) this.rebound(i);
+    let n = 0;
+    let next = Infinity;
+    for (let i = 0; i < BALLS; i++) {
+      if (!on[i]) continue;
+      for (let j = i + 1; j < BALLS; j++) {
+        if (!on[j] || (!moving[i] && !moving[j])) continue;
+        const k = i * BALLS + j;
+        if (pairSafe[k] < horizon) pairSafe[k] = this.pairTime(i, j, now);
+        if (pairSafe[k] < horizon) active[n++] = k;
+        else if (pairSafe[k] < next) next = pairSafe[k];
+      }
+    }
+    this.activeN = n;
+    this.rescanAt = next;
+  }
+
+  /** Recompute a ball's speed bound from its energy now. */
+  rebound(i) {
+    const { vx, vy, wx, wy, wz } = this;
+    this.bound[i] = Math.sqrt(vx[i] * vx[i] + vy[i] * vy[i] + I_RATIO * (wx[i] * wx[i] + wy[i] * wy[i] + wz[i] * wz[i]));
+  }
+
+  /** A contact changed ball i: its bound is new and every cached time involving it is void. */
+  touched(i) {
+    this.rebound(i);
+    this.railSafe[i] = -Infinity;
+    for (let j = 0; j < BALLS; j++) {
+      if (j < i) this.pairSafe[j * BALLS + i] = -Infinity;
+      else if (j > i) this.pairSafe[i * BALLS + j] = -Infinity;
+    }
+    this.rescanAt = -Infinity;
   }
 
   /** Run to the end. Returns this. */
@@ -141,6 +229,15 @@ export class Sim {
     return { on: Array.from(this.on, (b) => b === 1), x: Array.from(this.x), y: Array.from(this.y) };
   }
 
+  /**
+   * One step of cloth friction. Per unit mass, with I = (2/5) R^2 and a the
+   * speed change this step, a sliding step changes the energy by
+   * -a s + (7/4) a^2, where s is the slip speed (the spin terms fold into s
+   * because I * 5/(2R) = R). A full step has s > 3.5 a, so the change is
+   * below -(7/4) a^2; a partial step has a = s / 3.5, a change of -s^2 / 7.
+   * A rolling step only shrinks v and the matching spin, and side spin only
+   * decays. So no step adds energy, which the broad phase relies on.
+   */
   friction() {
     const { vx, vy, wx, wy, wz, moving, on } = this;
     for (let i = 0; i < BALLS; i++) {
@@ -190,15 +287,18 @@ export class Sim {
   /** Move every ball through `dt`, stopping at each collision on the way. */
   advance(dt) {
     let left = dt;
+    let now = this.t;
     for (let n = 0; n < MAX_EVENTS; n++) {
-      const hit = this.nextEvent(left);
+      const hit = this.nextEvent(left, now);
       if (hit === null) break;
       this.move(this.evT);
       left -= this.evT;
+      now += this.evT;
       if (hit === 0) this.collideBalls(this.evA, this.evB);
       else this.collideCushion(this.evA, this.evNx, this.evNy);
     }
     this.move(left);
+    this.t += dt;
   }
 
   move(t) {
@@ -215,45 +315,61 @@ export class Sim {
    * 1 for a ball and a cushion, null for none; details go in this.ev*.
    * Ties go to the first found, which the fixed loop order makes the same everywhere.
    */
-  nextEvent(limit) {
-    const { x, y, vx, vy, on, moving } = this;
+  nextEvent(limit, now) {
+    const { x, y, vx, vy, on, moving, bound, pairSafe, railSafe } = this;
     let best = limit;
     let kind = null;
-    for (let i = 0; i < BALLS; i++) {
-      if (!on[i]) continue;
-      for (let j = i + 1; j < BALLS; j++) {
-        if (!on[j] || (!moving[i] && !moving[j])) continue;
-        const px = x[j] - x[i];
-        const py = y[j] - y[i];
-        const qx = vx[j] - vx[i];
-        const qy = vy[j] - vy[i];
-        const b = px * qx + py * qy;
-        if (b >= 0) continue; // not closing
-        const c = px * px + py * py - D2;
-        let t;
-        if (c <= 0) t = 0;
-        else {
-          const a = qx * qx + qy * qy;
-          // Gap squared minus 4R^2 is f(t) = a t^2 + 2 b t + c. If f still falls at
-          // `best` and is still positive there, there is no contact before it.
-          if (-b >= a * best && a * best * best + 2 * b * best + c > 0) continue;
-          const disc = b * b - a * c;
-          if (disc < 0) continue;
-          t = (-b - Math.sqrt(disc)) / a;
-        }
-        if (t < best) {
-          best = t;
-          kind = 0;
-          this.evA = i;
-          this.evB = j;
-        }
+    // Every pair left off the list is safe past now + limit, so it cannot be the next event.
+    if (now + limit > this.rescanAt) this.rescan(now);
+    const { active, activeN } = this;
+    for (let n = 0; n < activeN; n++) {
+      // Pair index is i * BALLS + j with BALLS = 16.
+      const k = active[n];
+      const i = k >> 4;
+      const j = k & 15;
+      if (!on[i] || !on[j] || (!moving[i] && !moving[j])) continue;
+      if (pairSafe[k] >= now + best) continue;
+      pairSafe[k] = this.pairTime(i, j, now);
+      if (pairSafe[k] >= now + best) continue;
+      const px = x[j] - x[i];
+      const py = y[j] - y[i];
+      const qx = vx[j] - vx[i];
+      const qy = vy[j] - vy[i];
+      const b = px * qx + py * qy;
+      if (b >= 0) continue; // not closing
+      const c = px * px + py * py - D2;
+      let t;
+      if (c <= 0) t = 0;
+      else {
+        const a = qx * qx + qy * qy;
+        // Gap squared minus 4R^2 is f(t) = a t^2 + 2 b t + c. If f still falls at
+        // `best` and is still positive there, there is no contact before it.
+        if (-b >= a * best && a * best * best + 2 * b * best + c > 0) continue;
+        const disc = b * b - a * c;
+        if (disc < 0) continue;
+        t = (-b - Math.sqrt(disc)) / a;
+      }
+      if (t < best) {
+        best = t;
+        kind = 0;
+        this.evA = i;
+        this.evB = j;
       }
     }
     for (let i = 0; i < BALLS; i++) {
       if (!on[i] || !moving[i]) continue;
       const bx = x[i];
       const by = y[i];
-      if (bx > RAIL_ZONE + R && bx < L - RAIL_ZONE - R && by > RAIL_ZONE + R && by < W - RAIL_ZONE - R) continue;
+      if (railSafe[i] >= now + best) continue;
+      // Every cushion face and jaw lies on or outside the rectangle of the
+      // cushion lines, so the distance to that rectangle is a safe gap.
+      let edge = bx;
+      if (L - bx < edge) edge = L - bx;
+      if (by < edge) edge = by;
+      if (W - by < edge) edge = W - by;
+      const reach = bound[i] * SAFE_PAD;
+      railSafe[i] = reach > 0 ? now + (edge - R - SAFE_GAP) / reach : Infinity;
+      if (railSafe[i] >= now + best) continue;
       const ux = vx[i];
       const uy = vy[i];
       for (let s = 0; s < SEG_COUNT; s++) {
@@ -335,6 +451,8 @@ export class Sim {
     vy[j] += J * ny;
     this.moving[i] = 1;
     this.moving[j] = 1;
+    this.touched(i);
+    this.touched(j);
     if (this.firstHit < 0 && (i === 0 || j === 0)) this.firstHit = i === 0 ? j : i;
   }
 
@@ -355,14 +473,16 @@ export class Sim {
     vx[i] += jn * nx + jt * tx;
     vy[i] += jn * ny + jt * ty;
     wz[i] -= SPIN_K * jt;
+    this.touched(i);
     if (this.firstHit >= 0) this.railAfterHit = true;
     if (!this.railed.includes(i)) this.railed.push(i);
   }
 
   pockets() {
-    const { x, y, on } = this;
+    const { x, y, on, moving } = this;
     for (let i = 0; i < BALLS; i++) {
-      if (!on[i]) continue;
+      // A ball at rest was checked on the step it last moved.
+      if (!on[i] || !moving[i]) continue;
       const bx = x[i];
       const by = y[i];
       if (bx > R && bx < L - R && by > R && by < W - R) continue;
