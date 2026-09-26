@@ -16,6 +16,7 @@ import {
   parseData, BANDS, buildLookup, suggestionIndex, suggest, createRound, judge, isComplete, pickRoute,
 } from './logic.js';
 import { createCombobox } from './combobox.js';
+import { loadStats, saveStats, recordRound, routeWeight, weakSpots } from './weak-spots.js';
 
 const RECENT = 40;
 const ARC_POINTS = 256;
@@ -33,6 +34,11 @@ function announce(text) {
 }
 
 // ---------- state ----------
+
+// Even reading window.localStorage can throw when storage is blocked.
+let storage = null;
+try { storage = window.localStorage; } catch (e) { storage = null; }
+let stats = loadStats(storage);
 
 let data = null;          // parseData(routes.json)
 let lookup = null;        // normalized name -> [country]
@@ -203,7 +209,7 @@ function progressText() {
 }
 
 function startRound() {
-  const route = pickRoute(data.routes, band, { recent });
+  const route = pickRoute(data.routes, band, { recent, weight: (r) => routeWeight(r, stats) });
   recent = [route.id, ...recent].slice(0, RECENT);
   // Half the time, fly it the other way round.
   const flip = Math.random() < 0.5;
@@ -312,6 +318,9 @@ function reveal(complete) {
   ].filter((m) => m.lonlat);
   globe.frameBetween([route.from.lon, route.from.lat], [route.to.lon, route.to.lat], 0.75);
   drawArc(coords);
+  stats = recordRound(stats, round);
+  saveStats(storage, stats);
+  refreshStats();
   showResults(complete);
 }
 
@@ -397,6 +406,34 @@ function showResults(complete) {
   announce(`${title.textContent}. ${$('results-km').textContent}`);
 }
 
+// ---------- weak spots ----------
+
+function listNames(names) {
+  if (names.length <= 1) return names.join('');
+  return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+}
+
+function refreshStats() {
+  const weak = weakSpots(stats);
+  const text = $('weak-text');
+  if (!weak.length) {
+    text.textContent = 'Countries you miss come up more often in later routes, until you get each one three times in a row.';
+  } else {
+    const shown = weak.slice(0, 6);
+    const more = weak.length - shown.length;
+    text.textContent = `Coming up more often because you missed them: ${listNames(more ? [...shown, `${more} more`] : shown)}.`;
+  }
+  $('reset-stats').hidden = !weak.length && !Object.keys(stats).length;
+}
+
+$('reset-stats').addEventListener('click', () => {
+  stats = {};
+  saveStats(storage, stats);
+  refreshStats();
+  announce('Your stats are reset. Every route is equally likely again.');
+  $('weak-text').focus({ preventScroll: true });
+});
+
 // ---------- controls ----------
 
 $('guess-btn').addEventListener('click', () => { combo.submit(); input.focus(); });
@@ -422,6 +459,7 @@ function setLoading(on, message) {
 }
 
 setLoading(true, 'Loading the map');
+refreshStats();
 
 const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
 
