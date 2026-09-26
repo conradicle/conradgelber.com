@@ -30,7 +30,7 @@ export const DT = 1 / 1024;
 /** Longest a shot may run before everything is stopped where it is. */
 export const MAX_STEPS = 40 * 1024;
 /** Top cue ball speed at full power, m/s. */
-export const V_MAX = 10;
+export const V_MAX = 11.5;
 /** Largest tip offset, as a fraction of the ball radius. */
 export const MAX_TIP = 0.5;
 /** Integer ranges for shot inputs. */
@@ -40,11 +40,11 @@ export const AIM_MAX = 1 << 20;
 
 export const G = 9.81;
 export const MU_SLIDE = 0.2;
-export const MU_ROLL = 0.01;
+export const MU_ROLL = 0.024;
 /** Side spin lost per second, rad/s. */
 const Z_DECEL = 25;
 export const E_BALL = 0.95;
-const E_CUSHION = 0.85;
+const E_CUSHION = 0.8;
 const MU_CUSHION = 0.2;
 
 const D2 = 4 * R * R;
