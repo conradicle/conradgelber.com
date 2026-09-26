@@ -158,6 +158,56 @@ h1 a{border-bottom:none;padding-bottom:0}
 .plate{display:block;margin:0 0 1.6rem}
 .plate img{display:block;width:100%;height:auto}
 
+/* Photo carousel (/off-the-clock/). Every slide is the same 3:2 box so the
+   strip never changes height; each photo is cropped into it with
+   object-fit, and the crop-* classes aim the crop. Each slide is 85% of the
+   column so the next photo peeks in. Without JS it is still a swipeable,
+   scrollable strip; carousel.js unhides the buttons. */
+section.carousel{padding:0;margin:0 0 1.6rem}
+.carousel-track{
+  display:flex;
+  gap:.75rem;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+  scrollbar-color:var(--rule) transparent;
+  padding-bottom:.5rem;
+}
+.carousel-track:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media (prefers-reduced-motion:no-preference){
+  .carousel-track{scroll-behavior:smooth}
+}
+.slide{flex:0 0 85%;aspect-ratio:3/2;scroll-snap-align:start;background:var(--rule)}
+.slide picture{display:block;width:100%;height:100%}
+.slide img{display:block;width:100%;height:100%;object-fit:cover}
+.slide img.crop-snook{object-position:38% 50%}
+/* Portrait shot: keep the face and the building's pinnacles both in frame */
+.slide img.crop-palace{object-position:50% 17%}
+.carousel-controls:not([hidden]){
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  margin-top:.6rem;
+}
+.carousel-controls button{
+  min-height:44px;
+  min-width:44px;
+  padding:0 1rem;
+  font:inherit;
+  font-size:.95rem;
+  color:var(--ink);
+  background:transparent;
+  border:1px solid var(--ink);
+  border-radius:2px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.carousel-controls button:hover{color:var(--accent);border-color:var(--accent)}
+.carousel-controls button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.carousel-status{margin:0;white-space:nowrap;font-size:.9rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
 /* Intro */
 .intro{padding:3.2rem 0 1rem;max-width:var(--measure)}
 .intro p{margin:0 0 1.1rem}

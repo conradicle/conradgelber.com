@@ -15,7 +15,7 @@
 <link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/style.css?v=6">
+<link rel="stylesheet" href="/style.css?v=7">
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -37,13 +37,49 @@
   <main id="main">
   <section>
     <h1 class="page-title">Off the clock</h1>
-    <picture class="plate">
-      <source type="image/avif" srcset="/img/snook-810x324.avif 810w, /img/snook-1620x648.avif 1620w" sizes="(min-width: 920px) 808px, (min-width: 400px) 90vw, calc(100vw - 2.5rem)">
-      <source type="image/webp" srcset="/img/snook-810x324.webp 810w, /img/snook-1620x648.webp 1620w" sizes="(min-width: 920px) 808px, (min-width: 400px) 90vw, calc(100vw - 2.5rem)">
-      <img src="/img/snook-810x324.jpg" srcset="/img/snook-810x324.jpg 810w, /img/snook-1620x648.jpg 1620w" sizes="(min-width: 920px) 808px, (min-width: 400px) 90vw, calc(100vw - 2.5rem)"
-        width="810" height="324" loading="eager" decoding="async"
-        alt="Conrad in a cap and sunglasses holding a snook across his chest on the deck of a boat, with calm water and a mangrove shoreline behind him under a clear sky.">
-    </picture>
+    <!-- Photo carousel: a scroll-snap strip that swipes without JS; carousel.js
+         unhides the buttons and adds arrow keys. Crop positions live in
+         style.css, since the CSP blocks inline style attributes. -->
+    <section class="carousel" aria-roledescription="carousel" aria-label="Photos">
+      <div class="carousel-track" tabindex="0">
+        <div class="slide" role="group" aria-roledescription="slide" aria-label="1 of 4">
+          <picture>
+            <!-- The 5:2 snook shot is cropped to the 3:2 slide, so it renders about 1.67x the slide width -->
+            <source type="image/avif" srcset="/img/snook-810x324.avif 810w, /img/snook-1620x648.avif 1620w" sizes="(min-width: 920px) 1145px, (min-width: 400px) 128vw, calc(142vw - 3.5rem)">
+            <source type="image/webp" srcset="/img/snook-810x324.webp 810w, /img/snook-1620x648.webp 1620w" sizes="(min-width: 920px) 1145px, (min-width: 400px) 128vw, calc(142vw - 3.5rem)">
+            <img class="crop-snook" src="/img/snook-810x324.jpg" srcset="/img/snook-810x324.jpg 810w, /img/snook-1620x648.jpg 1620w" sizes="(min-width: 920px) 1145px, (min-width: 400px) 128vw, calc(142vw - 3.5rem)"
+              width="810" height="324" loading="eager" decoding="async"
+              alt="Conrad in a cap and sunglasses holding a snook across his chest on the deck of a boat, with calm water and a mangrove shoreline behind him under a clear sky.">
+          </picture>
+        </div>
+        <div class="slide" role="group" aria-roledescription="slide" aria-label="2 of 4">
+          <picture>
+            <source type="image/webp" srcset="/img/skiing-1200x900.webp">
+            <img src="/img/skiing-1200x900.jpg" width="1200" height="900" loading="lazy" decoding="async"
+              alt="Conrad skiing down a mountain slope">
+          </picture>
+        </div>
+        <div class="slide" role="group" aria-roledescription="slide" aria-label="3 of 4">
+          <picture>
+            <source type="image/webp" srcset="/img/buckingham-palace-900x1200.webp">
+            <img class="crop-palace" src="/img/buckingham-palace-900x1200.jpg" width="900" height="1200" loading="lazy" decoding="async"
+              alt="Conrad standing in front of Buckingham Palace in London">
+          </picture>
+        </div>
+        <div class="slide" role="group" aria-roledescription="slide" aria-label="4 of 4">
+          <picture>
+            <source type="image/webp" srcset="/img/dolomites-1200x800.webp">
+            <img src="/img/dolomites-1200x800.jpg" width="1200" height="800" loading="lazy" decoding="async"
+              alt="Conrad hiking a trail in the Dolomites, Italy">
+          </picture>
+        </div>
+      </div>
+      <div class="carousel-controls" hidden>
+        <button type="button" class="carousel-prev" aria-label="Previous photo">&larr; Prev</button>
+        <p class="carousel-status" aria-live="polite" aria-atomic="true">1 of 4</p>
+        <button type="button" class="carousel-next" aria-label="Next photo">Next &rarr;</button>
+      </div>
+    </section>
     <div class="prose">
       <p>I pitch for the varsity baseball team at Miami Beach Senior
         High. I shoot trap at Markham Park in Broward County, where
@@ -69,5 +105,6 @@
   </footer>
 
 </div>
+<script src="/off-the-clock/carousel.js?v=1" defer></script>
 </body>
 </html>
