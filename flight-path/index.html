@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flight Path &middot; Conrad Gelber</title>
+<meta name="description" content="Two cities and the shortest route between them. Name every country a plane flying the great circle passes over.">
+<link rel="canonical" href="https://conradgelber.com/flight-path/">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=7">
+<link rel="stylesheet" href="/play/play.css?v=4">
+<link rel="stylesheet" href="/flight-path/flight-path.css?v=1">
+<script src="/flight-path/flight-path.js?v=1" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="wrap">
+
+  <header class="playhead">
+    <a href="/">Conrad Gelber</a>
+    <a class="back" href="/games/">&larr; Games</a>
+  </header>
+
+  <main id="main" class="game">
+
+    <section class="screen" id="screen-start">
+      <h1 class="game-title">Flight Path</h1>
+      <p class="game-intro">Two cities and the shortest route between them:
+        the great circle a plane would fly. Name every country the plane
+        passes over on the way. The countries it takes off from and lands
+        in do not count.</p>
+      <div class="tiers" id="tiers">
+        <button type="button" class="tier" data-band="short">
+          <span class="tier-name">Short</span>
+          <span class="tier-desc">Under 3,000 km. Only a few countries, often small ones.</span>
+        </button>
+        <button type="button" class="tier" data-band="medium">
+          <span class="tier-name">Medium</span>
+          <span class="tier-desc">3,000 to 8,000 km, across a continent or two.</span>
+        </button>
+        <button type="button" class="tier" data-band="long">
+          <span class="tier-name">Long</span>
+          <span class="tier-desc">Over 8,000 km. Great circles bend further than you think.</span>
+        </button>
+      </div>
+      <p class="game-status" id="load-status" role="status"></p>
+    </section>
+
+    <section class="screen" id="screen-round" hidden>
+      <div class="round-meta">
+        <span id="band-label"></span>
+        <span id="progress"></span>
+      </div>
+      <h1 class="place" id="route-title"></h1>
+      <p class="place-country" id="route-countries"></p>
+
+      <div class="globe-frame">
+        <svg class="globe" id="globe" viewBox="0 0 600 600" tabindex="0"
+          role="application"
+          aria-label="Globe with the two cities marked. Drag or use the arrow keys to turn it, scroll, pinch, or press plus and minus to zoom. The results are also listed below the globe after you reveal the route.">
+          <defs>
+            <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+              <rect class="hatch-bg" width="6" height="6"></rect>
+              <line class="hatch-line" x1="0" y1="0" x2="0" y2="6"></line>
+            </pattern>
+            <pattern id="dots" patternUnits="userSpaceOnUse" width="6" height="6">
+              <rect class="dots-bg" width="6" height="6"></rect>
+              <circle class="dots-dot" cx="3" cy="3" r="1.3"></circle>
+            </pattern>
+          </defs>
+          <circle class="sea" cx="300" cy="300" r="290"></circle>
+          <path class="graticule"></path>
+          <path class="land"></path>
+          <g class="shapes"></g>
+          <path class="borders"></path>
+          <path class="arc-casing"></path>
+          <path class="arc route-arc"></path>
+          <g class="markers"></g>
+          <g class="pin pin-guess pin-from off"><circle r="7"></circle></g>
+          <g class="pin pin-answer pin-to off"><circle r="7"></circle></g>
+        </svg>
+      </div>
+
+      <div class="guess" id="guess-area">
+        <label class="guess-label" for="guess-input">Name a country on the route</label>
+        <div class="guess-row">
+          <div class="combo">
+            <input id="guess-input" type="text" role="combobox"
+              aria-autocomplete="list" aria-expanded="false" aria-controls="guess-list"
+              aria-describedby="guess-help" autocomplete="off" autocapitalize="words"
+              spellcheck="false">
+            <ul class="suggestions" id="guess-list" role="listbox" aria-label="Countries" hidden></ul>
+          </div>
+          <button type="button" class="btn" id="guess-btn">Guess</button>
+        </div>
+        <p class="hint" id="guess-help">Type a country and press Enter. The up and
+          down arrows move through the suggestions.</p>
+        <p class="feedback" id="feedback"></p>
+
+        <div class="tally">
+          <div>
+            <h2 class="tally-title">Found</h2>
+            <p class="tally-none" id="found-none">None yet.</p>
+            <ul class="chips" id="found-list"></ul>
+          </div>
+          <div id="wrong-block" hidden>
+            <h2 class="tally-title">Not on this route</h2>
+            <ul class="chips" id="wrong-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button type="button" class="btn btn-quiet" id="reveal">Reveal the route</button>
+      </div>
+
+      <section class="results" id="results" hidden aria-labelledby="results-title">
+        <h2 class="results-title" id="results-title" tabindex="-1"></h2>
+        <p class="results-km" id="results-km"></p>
+        <ul class="legend" aria-hidden="true">
+          <li class="found"><span class="mark"></span>Found</li>
+          <li class="missed"><span class="mark"></span>Missed</li>
+          <li class="wrong"><span class="mark"></span>Wrong guess</li>
+        </ul>
+        <h3 class="results-sub">On the route, in the order the plane reaches them</h3>
+        <ol class="result-list" id="results-list"></ol>
+        <div id="results-wrong-block" hidden>
+          <h3 class="results-sub">Your wrong guesses</h3>
+          <ul class="result-list" id="results-wrong"></ul>
+        </div>
+        <div class="results-notes" id="results-notes" hidden></div>
+        <div class="end-actions">
+          <button type="button" class="btn" id="next-route">Next route</button>
+          <button type="button" class="btn btn-quiet" id="change">Change difficulty</button>
+        </div>
+      </section>
+    </section>
+
+    <p class="visually-hidden" id="announce" aria-live="polite"></p>
+
+  </main>
+
+  <footer>
+    <p class="colophon">Map data from Natural Earth, which is in the
+      public domain. <a href="/accessibility/">Accessibility</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
