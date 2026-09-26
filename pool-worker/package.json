@@ -1,0 +1,16 @@
+{
+  "name": "conradgelber-pool-worker",
+  "private": true,
+  "type": "module",
+  "description": "The pool game's Worker: rooms, shot checks and the shared simulation, routed at conradgelber.com/pool/ws.",
+  "scripts": {
+    "dev": "node scripts/dev-assets.mjs && wrangler dev -c wrangler.dev.jsonc --port 8797",
+    "deploy": "wrangler deploy",
+    "test": "node --test \"test/*.test.mjs\"",
+    "ws-check": "node test/ws-check.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.137.0",
+    "ws": "8.21.3"
+  }
+}

@@ -1,0 +1,23 @@
+// Pool game server: one Durable Object per room. The page is the Pages site;
+// this Worker only answers the socket at conradgelber.com/pool/ws.
+// Free plan only: SQLite-backed Durable Objects, no paid features.
+// Pages serves this folder publicly, like the rest of the repo: never put a
+// secret, key or token in it. Use `wrangler secret put` if one is ever needed.
+{
+  "name": "pool",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "durable_objects": {
+    "bindings": [
+      { "name": "ROOMS", "class_name": "PoolRoom" },
+      // Per-IP counters in memory only (see src/limiter.js).
+      { "name": "LIMITER", "class_name": "Limiter" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PoolRoom", "Limiter"] }],
+  // Only reachable at conradgelber.com/pool/ws: no separate workers.dev address.
+  "workers_dev": false,
+  // No Workers Logs: nothing about players (names, room codes, IPs) is kept beyond Cloudflare defaults.
+  "observability": { "enabled": false },
+  "routes": [{ "pattern": "conradgelber.com/pool/ws", "zone_name": "conradgelber.com" }]
+}
