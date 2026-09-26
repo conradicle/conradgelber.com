@@ -6,7 +6,7 @@
   "scripts": {
     "build": "esbuild src/main.js --bundle --minify --format=iife --target=es2019 --outfile=../play/play.js",
     "build:flight": "esbuild src/flight-path/main.js --bundle --minify --format=iife --target=es2019 --outfile=../flight-path/flight-path.js",
-    "build:pool": "node scripts/pool-version.mjs && esbuild src/pool/main.js --bundle --minify --format=iife --target=es2019 --outfile=../pool/pool.js",
+    "build:pool": "node scripts/pool-version.mjs && esbuild src/pool/main.js --bundle --minify --format=iife --target=es2019 --define:POOL_DEV=false --outfile=../pool/pool.js",
     "land": "node scripts/copy-land.mjs",
     "check-places": "node scripts/check-places.mjs",
     "countries": "node scripts/copy-countries.mjs",
