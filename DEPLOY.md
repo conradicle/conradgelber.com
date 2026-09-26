@@ -332,6 +332,16 @@ node pool-worker/test/ws-check.mjs http://localhost:8797
 The last of its checks trips the per-IP limit on wrong room codes, so that
 address is turned away from joining rooms for a minute afterwards.
 
+After each online shot, every browser sends a hash of the table it ended
+with, and the Worker logs any that differ from its own result: one line
+starting `pool mismatch`, with the room code, the shot number, both hashes
+and the browser's user agent (nothing else about the player). Workers Logs
+are off, so nothing is stored; watch them live from `pool-worker/`:
+
+```bash
+npx wrangler tail pool --search "pool mismatch" --format pretty
+```
+
 Settings are kept per browser in `localStorage` under `pool-settings` (name,
 game, guide, level). An online seat's token is in `sessionStorage` (a refresh
 takes the seat back) and `localStorage` (`pool-session`, so a reopened tab
