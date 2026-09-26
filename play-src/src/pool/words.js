@@ -46,8 +46,8 @@ const WIN = {
   'wrong-pocket': () => 'The 8 went in the wrong pocket.',
   'scratch-on-eight': () => 'Scratch on the 8.',
   'foul-on-eight': () => 'The 8 went down on a foul.',
-  forfeit: () => 'The other player did not come back.',
-  left: () => 'The other player left.',
+  forfeit: () => 'The other player did not come back in time.',
+  left: () => 'The other player left the game.',
 };
 
 /** One or two sentences about the last shot or event. */
@@ -59,7 +59,8 @@ export function describe(state, names, me) {
     const mine = r.pocketed.filter((n) => !(r.win && n === (state.game === 9 ? 9 : 8)));
     if (r.fouls.length) {
       if (mine.length) parts.push(`${pocketed(names, me, r.shooter)} ${list(mine)}.`);
-      parts.push(`Foul: ${foulText(r)}.`);
+      // A loss on the 8 names its own foul.
+      if (!(r.win && ['scratch-on-eight', 'foul-on-eight'].includes(r.win.reason))) parts.push(`Foul: ${foulText(r)}.`);
     } else if (mine.length) {
       parts.push(`${pocketed(names, me, r.shooter)} ${list(mine)}.`);
     } else if (!r.win) parts.push(`${who(names, me, r.shooter)} missed.`);
