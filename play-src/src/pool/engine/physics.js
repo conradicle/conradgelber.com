@@ -38,12 +38,12 @@ export const POWER_MAX = 1000;
 export const SPIN_MAX = 1000;
 export const AIM_MAX = 1 << 20;
 
-const G = 9.81;
-const MU_SLIDE = 0.2;
-const MU_ROLL = 0.01;
+export const G = 9.81;
+export const MU_SLIDE = 0.2;
+export const MU_ROLL = 0.01;
 /** Side spin lost per second, rad/s. */
 const Z_DECEL = 25;
-const E_BALL = 0.95;
+export const E_BALL = 0.95;
 const E_CUSHION = 0.85;
 const MU_CUSHION = 0.2;
 
