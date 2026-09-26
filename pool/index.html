@@ -122,6 +122,7 @@
     <section class="screen" id="screen-play" hidden aria-labelledby="play-title">
       <h1 class="visually-hidden" id="play-title">Pool</h1>
       <div class="players">
+        <a class="corner-back" id="corner-back" href="/games/" aria-label="Back to Games">&lsaquo;</a>
         <div class="player" id="player-0">
           <span class="player-name" id="name-0"></span>
           <span class="player-group" id="group-0"></span>
@@ -156,6 +157,8 @@
           <canvas class="spin-mini" id="spin-mini" aria-hidden="true"></canvas>
           <span class="visually-hidden" id="spin-btn-text">Spin: none</span>
         </button>
+        <button type="button" class="btn btn-quiet row-nudge" id="row-left" aria-label="Aim a little anticlockwise">&lsaquo;</button>
+        <button type="button" class="btn btn-quiet row-nudge" id="row-right" aria-label="Aim a little clockwise">&rsaquo;</button>
         <label class="power">
           <span class="power-label">Power <span id="power-value">50%</span></span>
           <input type="range" id="power" min="1" max="100" value="50" aria-describedby="power-help">

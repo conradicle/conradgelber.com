@@ -8,10 +8,14 @@ import { BALLS } from './engine/physics.js';
  * so the player breaks upward, as in GamePigeon.
  */
 
-/** Rail width as drawn, in metres. */
+/**
+ * Rail width as drawn, in metres. Phones in portrait get thin rails so the
+ * cloth, and the balls on it, can be as large as the screen allows.
+ */
 export const RAIL = 0.055;
-export const OUTER_L = L + 2 * RAIL;
-export const OUTER_W = W + 2 * RAIL;
+export const RAIL_COMPACT = 0.025;
+/** The whole table as drawn, rails included, for a given rail width. */
+export const outer = (rail) => ({ l: L + 2 * rail, w: W + 2 * rail });
 
 const COLORS = {
   1: '#F2C21B', 2: '#1D4FC4', 3: '#D5281B', 4: '#5B2A8C', 5: '#EE7420', 6: '#157A3B', 7: '#7A1F1F', 8: '#141414',
@@ -35,11 +39,14 @@ export class Renderer {
     this.s = 1;
     this.dpr = 1;
     this.reducedMotion = false;
+    this.rail = RAIL;
   }
 
   /** Size the backing store to the canvas's CSS box. */
-  resize(portrait) {
+  resize(portrait, rail = RAIL) {
     this.portrait = portrait;
+    this.rail = rail;
+    const { l: OUTER_L, w: OUTER_W } = outer(rail);
     const rect = this.canvas.getBoundingClientRect();
     this.dpr = Math.min(3, window.devicePixelRatio || 1);
     this.canvas.width = Math.max(1, Math.round(rect.width * this.dpr));
@@ -51,14 +58,16 @@ export class Renderer {
 
   /** Table metres to CSS pixels. */
   toScreen(x, y) {
-    if (this.portrait) return [(W - y + RAIL) * this.s, (L - x + RAIL) * this.s];
-    return [(x + RAIL) * this.s, (W - y + RAIL) * this.s];
+    const r = this.rail;
+    if (this.portrait) return [(W - y + r) * this.s, (L - x + r) * this.s];
+    return [(x + r) * this.s, (W - y + r) * this.s];
   }
 
   /** CSS pixels to table metres. */
   toTable(px, py) {
-    if (this.portrait) return [L + RAIL - py / this.s, W + RAIL - px / this.s];
-    return [px / this.s - RAIL, W + RAIL - py / this.s];
+    const r = this.rail;
+    if (this.portrait) return [L + r - py / this.s, W + r - px / this.s];
+    return [px / this.s - r, W + r - py / this.s];
   }
 
   /** A direction in table space to screen space (unit vectors stay unit). */
@@ -67,11 +76,14 @@ export class Renderer {
   }
 
   /** Where each pocket is drawn: the hole centre and radius, in table metres. */
-  static holes() {
+  holes() {
+    // Thin rails leave less room behind the mouth, so the holes sit further in.
+    const thin = this.rail < 0.04;
     return POCKETS.map((p, i) => {
       const corner = i !== 1 && i !== 4;
-      const back = corner ? 0.028 : 0.036;
-      return { x: p.mx + p.ox * back, y: p.my + p.oy * back, r: corner ? 0.058 : 0.052 };
+      const back = corner ? (thin ? 0.012 : 0.028) : thin ? 0.016 : 0.036;
+      const r = corner ? (thin ? 0.05 : 0.058) : thin ? 0.046 : 0.052;
+      return { x: p.mx + p.ox * back, y: p.my + p.oy * back, r };
     });
   }
 
@@ -89,9 +101,12 @@ export class Renderer {
     ctx.clearRect(0, 0, this.cssW, this.cssH);
 
     // Rails and cloth.
+    ctx.save();
     ctx.fillStyle = RAIL_WOOD;
-    roundRect(ctx, 0, 0, this.cssW, this.cssH, 0.035 * s);
+    roundRect(ctx, 0, 0, this.cssW, this.cssH, Math.min(0.035, this.rail * 0.7) * s);
     ctx.fill();
+    // Everything else stays inside the table's outline (pockets included).
+    ctx.clip();
     const [cx0, cy0] = this.toScreen(0, W);
     const [cx1, cy1] = this.toScreen(L, 0);
     const left = Math.min(cx0, cx1);
@@ -103,9 +118,9 @@ export class Renderer {
     ctx.fillStyle = 'rgba(238,240,243,.55)';
     for (let i = 1; i < 8; i++) {
       if (i === 4) continue;
-      for (const y of [-RAIL / 2, W + RAIL / 2]) this.dot((L * i) / 8, y, 0.006);
+      for (const y of [-this.rail / 2, W + this.rail / 2]) this.dot((L * i) / 8, y, 0.006);
     }
-    for (let i = 1; i < 4; i++) for (const x of [-RAIL / 2, L + RAIL / 2]) this.dot(x, (W * i) / 4, 0.006);
+    for (let i = 1; i < 4; i++) for (const x of [-this.rail / 2, L + this.rail / 2]) this.dot(x, (W * i) / 4, 0.006);
     if (view.kitchen) {
       ctx.strokeStyle = CLOTH_LINE;
       ctx.lineWidth = 1.5;
@@ -113,7 +128,7 @@ export class Renderer {
     }
 
     // Pockets.
-    const holes = Renderer.holes();
+    const holes = this.holes();
     holes.forEach((h, i) => {
       ctx.fillStyle = POCKET;
       this.circle(h.x, h.y, h.r);
@@ -146,6 +161,7 @@ export class Renderer {
     } else if (t.on[0]) this.ball(0, t.x[0], t.y[0], false);
 
     if (view.cue && view.aim) this.drawCue(view.cueFrom ?? { x: t.x[0], y: t.y[0] }, view.aim, view.cue.pull ?? 0);
+    ctx.restore();
   }
 
   drawGuide(g) {
