@@ -262,7 +262,13 @@ function afterState(fresh = false) {
     $('shot-row').hidden = true;
     $('fine').hidden = true;
     $('rematch').textContent = ui.mode === 'online' ? 'Rematch' : 'Play again';
-  } else if (ui.mode === 'computer') {
+  } else {
+    // A game in play (a rematch arrives here without passing enterPlay) shows the controls.
+    $('end-actions').hidden = true;
+    $('shot-row').hidden = false;
+    $('fine').hidden = false;
+  }
+  if (s.phase !== 'over' && ui.mode === 'computer') {
     if (s.turn === ui.me) startClock(SHOT_CLOCK_MS);
     else {
       stopClock();
