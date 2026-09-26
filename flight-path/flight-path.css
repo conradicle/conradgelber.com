@@ -107,7 +107,7 @@
 .mark{display:inline-block;flex:none;width:.95rem;height:.95rem;border:1.5px solid var(--ink)}
 .found .mark{background:var(--found);border-radius:50%;border-color:var(--found)}
 .missed .mark{background:repeating-linear-gradient(45deg,var(--missed) 0 3px,var(--ink) 3px 4.5px);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border:0;width:1.05rem;height:1.05rem}
-.wrong .mark{background:var(--wrong);border:0;clip-path:polygon(20% 0,50% 30%,80% 0,100% 20%,70% 50%,100% 80%,80% 100%,50% 70%,20% 100%,0 80%,30% 50%,0 20%)}
+.wrong .mark{background:radial-gradient(circle,var(--ink) 0 1px,transparent 1.4px) 0 0/4px 4px,var(--wrong);border:0;clip-path:polygon(20% 0,50% 30%,80% 0,100% 20%,70% 50%,100% 80%,80% 100%,50% 70%,20% 100%,0 80%,30% 50%,0 20%)}
 
 .controls .btn-quiet[hidden]{display:none}
 
