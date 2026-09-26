@@ -168,6 +168,35 @@ test('routes over Crimea are flagged', () => {
   assert.equal(route('Minsk', 'Istanbul').crimea, false);
 });
 
+test('a route over Crimea only requires neither Russia nor Ukraine', () => {
+  // No two cities in the pool cross Crimea without crossing mainland Russia
+  // or Ukraine too, so this route runs the length of the peninsula, from the
+  // Black Sea west of Yevpatoria to the Kerch peninsula.
+  const r = crossedBy(world, [32.6, 45.3], [36.2, 45.2]);
+  assert.ok(r.crimeaKm > 200, `${r.crimeaKm} km over Crimea`);
+  const list = r.list.map((c) => c.name);
+  assert.ok(!list.includes('Russia'), list.join(', '));
+  assert.ok(!list.includes('Ukraine'), list.join(', '));
+});
+
+test('Crimea plus mainland Russia still requires Russia', () => {
+  // Anchorage to Ankara crosses Siberia and European Russia, then Crimea.
+  const r = route('Anchorage', 'Ankara');
+  assert.equal(r.crimea, true);
+  const russia = r.counted.find((c) => c.name === 'Russia');
+  assert.ok(russia && russia.km > 1000, russia && `${russia.km} km`);
+});
+
+test('the Crimea stretch never counts toward Russia', () => {
+  // New York to Dubai passes over Crimea and mainland Ukraine but no other
+  // Russian land.
+  const r = route('New York', 'Dubai');
+  assert.equal(r.crimea, true);
+  assert.ok(names(r).includes('Ukraine'));
+  assert.ok(!names(r).includes('Russia'));
+  assert.ok(!r.all.some((c) => c.name === 'Russia'));
+});
+
 test('grazes under the minimum are not counted', () => {
   // San Jose to Saint Petersburg clips the Bahamas for under 100 m.
   const r = route('San José', 'Saint Petersburg');

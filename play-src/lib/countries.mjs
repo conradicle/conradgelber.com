@@ -133,22 +133,23 @@ export const SOVEREIGN = {
   'Åland Islands': 'Finland',
 };
 
-// Places the game lists on their own that another country claims. If the
-// player names the claimant on a route that crosses the place but not the
-// claimant, the guess is neither right nor wrong; the results say why.
-// Crimea is not a separate feature: Natural Earth draws it inside Russia,
-// so the build script flags routes that cross it.
+// Disputed places and the countries that claim them. Kosovo, Taiwan,
+// Palestine and Western Sahara are answers in their own right. Crimea is
+// scored for no one: scripts/build-routes.mjs leaves its stretch of a route
+// out of Russia and Ukraine and flags the route instead. If the player
+// names a claimant on a route that crosses the place but not the claimant,
+// the guess is neither right nor wrong; the results say why.
 export const DISPUTED = {
-  'Kosovo': 'Serbia',
-  'Taiwan': 'China',
-  'Palestine': 'Israel',
-  'Western Sahara': 'Morocco',
-  'Crimea': 'Ukraine',
+  'Kosovo': ['Serbia'],
+  'Taiwan': ['China'],
+  'Palestine': ['Israel'],
+  'Western Sahara': ['Morocco'],
+  'Crimea': ['Russia', 'Ukraine'],
 };
 
 export function disputedNote(place) {
   return place === 'Crimea'
-    ? 'This game\'s map data counts Crimea as part of Russia.'
+    ? "Crimea isn't scored in this game."
     : `${place} is listed separately in this game.`;
 }
 

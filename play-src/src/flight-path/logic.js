@@ -97,8 +97,8 @@ export function createRound(route) {
 //   already   found before
 //   wrong     not on the route (counted once per country)
 //   repeat    a wrong guess made before; each one counts once
-//   neutral   the claimant of a disputed place on the route; neither
 //   endpoint  the origin or destination country; neither
+//   neutral   a claimant of a disputed place on the route; neither
 //   unknown   not a country the game knows
 export function judge(round, lookup, text) {
   const names = lookup.get(normalize(text));
@@ -123,16 +123,18 @@ export function judge(round, lookup, text) {
   const done = names.find(isFound) || territories.find(isFound);
   if (done) return { kind: 'already', name: done };
 
-  for (const [place, claimant] of Object.entries(DISPUTED)) {
+  const end = names.find((n) => n === route.from.country || n === route.to.country);
+  if (end) return { kind: 'endpoint', name: end };
+
+  for (const [place, claimants] of Object.entries(DISPUTED)) {
     const crossed = place === 'Crimea' ? route.crimea : onRoute(place);
-    if (crossed && names.includes(claimant) && !onRoute(claimant)) {
+    const claimant = crossed && names.find((n) => claimants.includes(n) && !onRoute(n));
+    if (claimant) {
       const note = disputedNote(place);
       if (!round.notes.includes(note)) round.notes.push(note);
       return { kind: 'neutral', name: claimant, note };
     }
   }
-  const end = names.find((n) => n === route.from.country || n === route.to.country);
-  if (end) return { kind: 'endpoint', name: end };
 
   const name = names[0];
   if (round.wrong.includes(name)) return { kind: 'repeat', name };
