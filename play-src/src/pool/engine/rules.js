@@ -1,5 +1,5 @@
 import { Sim, BALLS, AIM_MAX, POWER_MAX, SPIN_MAX } from './physics.js';
-import { R, L, W, FOOT_SPOT, HEAD_SPOT, HEAD_STRING, POCKETS } from './table.js';
+import { R, L, W, FOOT_SPOT, HEAD_SPOT, HEAD_STRING, POCKETS, SEGS, SEG_COUNT, SEG_STRIDE } from './table.js';
 import { rack8, rack9 } from './rack.js';
 
 /**
@@ -66,10 +66,22 @@ export function onTheEight(state, player = state.turn) {
   return groupBalls(state.groups[player]).every((n) => !state.table.on[n]);
 }
 
-/** Is (x, y) a legal cue ball spot right now? */
+/**
+ * Is (x, y) a legal cue ball spot right now? On the cloth (never in a pocket
+ * mouth), clear of every cushion and jaw, clear of every ball, and behind the
+ * head string for a break.
+ */
 export function legalSpot(state, x, y) {
   if (!(x >= R && x <= L - R && y >= R && y <= W - R)) return false;
   if (state.ballInHand === 'kitchen' && x > HEAD_STRING) return false;
+  for (const k of POCKETS) if ((x - k.mx) * k.ox + (y - k.my) * k.oy > -R) return false;
+  for (let s = 0; s < SEG_COUNT; s++) {
+    const o = s * SEG_STRIDE;
+    const along = Math.max(0, Math.min(SEGS[o + 8], (x - SEGS[o]) * SEGS[o + 4] + (y - SEGS[o + 1]) * SEGS[o + 5]));
+    const dx = x - (SEGS[o] + along * SEGS[o + 4]);
+    const dy = y - (SEGS[o + 1] + along * SEGS[o + 5]);
+    if (dx * dx + dy * dy < R * R) return false;
+  }
   for (let n = 1; n < BALLS; n++) {
     if (!state.table.on[n]) continue;
     const dx = state.table.x[n] - x;
