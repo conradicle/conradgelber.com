@@ -1,10 +1,12 @@
 # Deploying conradgelber.com
 
 Static site, no build step on deploy. Cloudflare Pages serves the repo root
-as-is. The generated files (`play/play.js`, `flight-path/flight-path.js` and
-`flight-path/routes.json`) are built locally and committed; see
-[The /play/ game](#the-play-game) and [The /flight-path/ game](#the-flight-path-game)
-below.
+as-is. The generated files (`play/play.js`, `flight-path/flight-path.js`,
+`flight-path/routes.json` and `pool/pool.js`) are built locally and
+committed; see [The /play/ game](#the-play-game),
+[The /flight-path/ game](#the-flight-path-game) and
+[The /pool/ game](#the-pool-game) below. Pool's online rooms are a separate
+Worker, deployed by hand from `pool-worker/`.
 
 ## 1. Push the repo
 
@@ -72,7 +74,11 @@ four woff2 files, favicon). The console should be empty. On `/play/`, expect
 difficulty buttons should become clickable once the map loads (if they stay
 disabled, the CSP is blocking the script). On `/flight-path/`, expect
 `play.css`, `flight-path.css`, `flight-path.js`, `countries-50m.json` and
-`routes.json`, and the same three-button check.
+`routes.json`, and the same three-button check. On `/pool/`, expect
+`play.css`, `pool.css` and `pool.js`; "Play the computer" should open the
+setup form, and a started game should draw the table. Online rooms open a
+socket to `wss://conradgelber.com/pool/ws`, which is the pool Worker (see
+below), so check them on the live site.
 
 ## Notes
 
@@ -141,8 +147,11 @@ grep -h --no-group-separator -A7 '<nav class="tabs"' index.html 404.html */index
 Every line should show a count of 9. The same goes for the head (font
 preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
-`/play/`, `/flight-path/` and `/cambio/` do not get the tab bar. `/play/` and
-`/flight-path/` have a single "← Games" link in their header instead.
+`/play/`, `/flight-path/`, `/pool/` and `/cambio/` do not get the tab bar.
+`/play/`, `/flight-path/` and `/pool/` have a single "← Games" link in
+their header instead. During a game on a screen narrower than 600 px,
+`/pool/` hides that header and shows a round back button in its players bar,
+so the table can fill the screen; the skip link and the footer stay.
 
 `/cambio/` is not part of this repo: it is a separate Worker (`cambio`,
 source in `conradicle/cambio-game`) routed at `conradgelber.com/cambio` and
@@ -234,6 +243,99 @@ Data:
   aliases, the disputed-place rules and the weak-spot memory.
 
 The weak-spot memory lives in `localStorage` under `flight-path-stats`.
+
+## The /pool/ game
+
+8-ball and 9-ball, against the computer (entirely in the browser) or a
+friend (online rooms with six-letter codes). `pool/` is what Pages serves:
+`index.html`, `pool.css` and the bundled `pool.js`; the page also loads
+`/play/play.css` for the header and buttons. Bump `?v=` on the `pool.js` or
+`pool.css` link in `pool/index.html` whenever either changes.
+
+Source, in `play-src/src/pool/`:
+
+- `engine/` is shared by the page, the Worker and the computer player:
+  `physics.js` (the deterministic simulation: fixed 1/1024 s step, only
+  `+ - * /` and `Math.sqrt`, no randomness), `table.js`, `rack.js`,
+  `rules.js`, `guide.js` (the aim guide), `ai.js`, `protocol.js` (socket
+  path, room codes as in Cambio) and `version.js`.
+- `version.js` is generated: a hash of the other engine files. The page sends
+  it when it joins a room and the Worker turns away a page built from other
+  rules or physics ("Pool has been updated. Reload the page"). Deploying one
+  side before the other is therefore safe, only briefly unplayable.
+- The rest (`main.js`, `render.js`, `widgets.js`, `words.js`,
+  `online.js`) is the page.
+
+After any change there, rebuild and commit the bundle (the build also
+regenerates `version.js`):
+
+```bash
+npm --prefix play-src run build:pool
+```
+
+The production build defines `POOL_DEV` false, which removes the dev-only
+test handle at the end of `main.js`. Check with
+`grep -c poolDev pool/pool.js`: it should print 0.
+
+Tests (`npm --prefix play-src test` runs them with the rest):
+
+- `pool-rules.test.mjs`: every foul, groups, the 8 and the 9 on the break,
+  combinations on the 9, a scratch on the 8, the shot clock, input checks.
+- `pool-ai.test.mjs`: whole computer games finish with legal inputs and
+  replay exactly from their seeds.
+- `pool-determinism.test.mjs`: a frozen set of 200 shots
+  (`test/pool/shots.json`), run twice, must give the recorded hash. After a
+  change to the physics, the test says so; regenerate the set with
+  `node play-src/test/pool/make-fixture.mjs` and commit it.
+- `npm test` also fails if `version.js` is stale.
+
+### The pool Worker
+
+`pool-worker/` is a separate Cloudflare Worker, `pool`, routed only at
+`conradgelber.com/pool/ws`: one Durable Object per room (SQLite-backed,
+free plan), plus the per-IP `Limiter` from Cambio's Worker. The rest of
+`/pool/` stays on Pages. The socket is same-origin, so the site's
+`connect-src 'self'` covers it and `_headers` needs no change.
+
+- Pages serves `pool-worker/` publicly like everything else in the repo.
+  Never put a secret, key or token in it; if one is ever needed, use
+  `npx wrangler secret put` from `pool-worker/`.
+- The server runs every shot through the same engine, in slices (256 steps,
+  then 1,024 per alarm) so no single invocation comes near the free plan's
+  CPU limit; a slice is saved, so an evicted room carries on.
+- Worker routes exist only on the custom domain, so online rooms fail on
+  `*.pages.dev` previews (the page says so). Test them locally or live.
+
+Deploy (Wrangler must be logged in to the Cloudflare account):
+
+```bash
+npm --prefix pool-worker ci
+npm --prefix pool-worker run deploy
+```
+
+Local development runs the Worker with a copy of the site's files (and its
+`_headers`, so the production CSP) on one origin, at
+http://localhost:8797/pool/. The copy's bundle includes the dev-only test
+handle; `/pool-test/` runs the determinism set in the browser.
+
+```bash
+npm --prefix pool-worker run dev
+```
+
+Checks: `npm --prefix pool-worker test` (the room: codes, turns, bad input,
+sliced shots, the clock, disconnects, rematch), and against a running copy:
+
+```bash
+node pool-worker/test/ws-check.mjs http://localhost:8797
+```
+
+The last of its checks trips the per-IP limit on wrong room codes, so that
+address is turned away from joining rooms for a minute afterwards.
+
+Settings are kept per browser in `localStorage` under `pool-settings` (name,
+game, guide, level). An online seat's token is in `sessionStorage` (a refresh
+takes the seat back) and `localStorage` (`pool-session`, so a reopened tab
+can offer to rejoin within five minutes).
 
 ## After the first deploy
 
