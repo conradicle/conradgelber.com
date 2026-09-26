@@ -16,9 +16,9 @@ import { unit } from './rng.js';
  */
 
 export const LEVELS = {
-  easy: { aimSd: 1.6, powerSd: 0.16, maxCandidates: 10, powers: [0.45], spins: [0], position: 0, safeties: false, robust: 3, pickFromTop: 3 },
-  medium: { aimSd: 0.55, powerSd: 0.07, maxCandidates: 40, powers: [0.3, 0.55], spins: [0, 1, -1], position: 0.5, safeties: true, robust: 0, pickFromTop: 1 },
-  hard: { aimSd: 0.14, powerSd: 0.03, maxCandidates: 140, powers: [0.22, 0.38, 0.6, 0.85], spins: [0, 1, -1, 0.5, -0.5], position: 1, safeties: true, robust: 6, pickFromTop: 1 },
+  easy: { aimSd: 1.6, powerSd: 0.16, maxCandidates: 10, powers: [0.32], spins: [0], position: 0, safeties: false, robust: 3, pickFromTop: 3 },
+  medium: { aimSd: 0.55, powerSd: 0.07, maxCandidates: 40, powers: [0.24, 0.4], spins: [0, 1, -1], position: 0.5, safeties: true, robust: 6, pickFromTop: 1 },
+  hard: { aimSd: 0.14, powerSd: 0.03, maxCandidates: 140, powers: [0.18, 0.3, 0.45, 0.65], spins: [0, 1, -1, 0.5, -0.5], position: 1, safeties: true, robust: 8, pickFromTop: 1 },
 };
 
 const DEG = Math.PI / 180;
@@ -42,8 +42,12 @@ const toAim = (dx, dy) => {
 /** Where to send an object ball for pocket p: the middle of the mouth. */
 const pocketPoint = (p) => ({ x: POCKETS[p].mx, y: POCKETS[p].my });
 
-/** Is the straight path from a to b clear of every ball but the ones listed, for a ball of radius R? */
-function clear(table, ax, ay, bx, by, skip) {
+/**
+ * Is the straight path from a to b clear of every ball but the ones listed,
+ * for a ball of radius R, with `pad` metres to spare? A path that only just
+ * squeezes past a ball fouls on the smallest miss, so pots ask for a margin.
+ */
+function clear(table, ax, ay, bx, by, skip, pad = 0) {
   const dx = bx - ax;
   const dy = by - ay;
   const len2 = dx * dx + dy * dy;
@@ -52,7 +56,8 @@ function clear(table, ax, ay, bx, by, skip) {
     const t = Math.max(0, Math.min(1, ((table.x[n] - ax) * dx + (table.y[n] - ay) * dy) / len2));
     const px = ax + t * dx - table.x[n];
     const py = ay + t * dy - table.y[n];
-    if (px * px + py * py < 4 * R * R * 0.98) return false;
+    const need = 2 * R + pad;
+    if (px * px + py * py < need * need * 0.98) return false;
   }
   return true;
 }
@@ -82,7 +87,7 @@ export function potLine(table, cx, cy, n, p) {
   if (d1 < 1e-6) return null;
   const cut = Math.acos(Math.max(-1, Math.min(1, (cx2 * ux + cy2 * uy) / d1)));
   if (cut > MAX_CUT) return null;
-  if (!clear(table, cx, cy, gx, gy, [0, n]) || !clear(table, bx, by, pk.x, pk.y, [0, n])) return null;
+  if (!clear(table, cx, cy, gx, gy, [0, n], 0.004) || !clear(table, bx, by, pk.x, pk.y, [0, n], 0.002)) return null;
   const quality = (Math.cos(cut) ** 2) / (1 + 1.2 * d1 + 0.8 * d2);
   return { ghost: { x: gx, y: gy }, cut, dist: d1 + d2, quality };
 }
@@ -228,10 +233,15 @@ export function createThinker(state, player, level, rng) {
     }
   }
   let chosenFrom = list.slice(0, cfg.maxCandidates);
-  // Safeties (or, for Easy, just hitting something) when little is on.
-  if (chosenFrom.length < 3) {
+  // Safeties (or, for Easy, just hitting something) when little is on. Medium
+  // and Hard weigh a few safeties against their pots every time, since a pot
+  // that is on paper can still be a poor bet.
+  const fewPots = chosenFrom.length < 3;
+  if (fewPots || cfg.safeties) {
     const hand = state.ballInHand || !t.on[0];
-    for (const n of want) {
+    const cue = t.on[0] ? { x: t.x[0], y: t.y[0] } : { x: L / 4, y: W / 2 };
+    const near = [...want].sort((a, b) => Math.hypot(t.x[a] - cue.x, t.y[a] - cue.y) - Math.hypot(t.x[b] - cue.x, t.y[b] - cue.y));
+    for (const n of fewPots ? want : near.slice(0, 2)) {
       // With ball in hand, try spots all round the ball that have a clear line to it.
       const froms = [];
       if (!hand) froms.push({ x: t.x[0], y: t.y[0] });
@@ -248,12 +258,12 @@ export function createThinker(state, player, level, rng) {
         const bx = t.x[n] - from.x;
         const by = t.y[n] - from.y;
         const m = Math.hypot(bx, by);
-        const offsets = cfg.safeties ? [-0.8, -0.4, 0, 0.4, 0.8] : [0];
+        const offsets = !cfg.safeties ? [0] : fewPots ? [-0.8, -0.4, 0, 0.4, 0.8] : [-0.6, 0, 0.6];
         for (const off of offsets) {
           // Aim at a point beside the object ball: a thin or full hit.
           const px = t.x[n] + (-by / m) * off * 2 * R;
           const py = t.y[n] + (bx / m) * off * 2 * R;
-          for (const power of cfg.safeties ? [180, 320] : [400]) {
+          for (const power of !cfg.safeties ? [400] : fewPots ? [180, 320] : [260]) {
             const input = { shot: { ...toAim(px - from.x, py - from.y), power, side: 0, top: 0 } };
             if (from.placed) input.place = { x: Math.round(from.x * PLACE_SCALE), y: Math.round(from.y * PLACE_SCALE) };
             if (eight) input.call = 0;
@@ -301,7 +311,17 @@ export function createThinker(state, player, level, rng) {
             scored.sort((a, b) => b.s - a.s);
             if (cfg.robust) {
               // Replay the best few with the aim nudged either way; prefer shots that survive a small miss.
-              robustList = scored.slice(0, cfg.robust).map((c) => ({ ...c, variants: [-1, 1].map((sg) => nudge(c.input, sg * cfg.aimSd * 1.5)), total: c.s }));
+              // Replay the best few a little off in aim and in power; prefer shots that survive a small miss.
+              robustList = scored.slice(0, cfg.robust).map((c) => ({
+                ...c,
+                variants: [
+                  nudge(c.input, cfg.aimSd * 1.2, 0),
+                  nudge(c.input, -cfg.aimSd * 1.2, 0),
+                  nudge(c.input, 0, cfg.powerSd * 1.2),
+                  nudge(c.input, 0, -cfg.powerSd * 1.2),
+                ],
+                total: c.s,
+              }));
               phase = 'robust';
               robustAt = 0;
               continue;
@@ -318,7 +338,7 @@ export function createThinker(state, player, level, rng) {
         } else if (phase === 'robust') {
           const flat = robustList.flatMap((c) => c.variants.map((v) => ({ c, v })));
           if (robustAt >= flat.length) {
-            for (const c of robustList) c.s = c.total / 3;
+            for (const c of robustList) c.s = c.total / (1 + c.variants.length);
             scored.splice(0, robustList.length, ...robustList.sort((a, b) => b.s - a.s));
             phase = 'pick';
             continue;
@@ -343,13 +363,14 @@ export function createThinker(state, player, level, rng) {
   };
 }
 
-/** The same input with the aim turned by `deg` degrees. */
-function nudge(input, deg) {
+/** The same input with the aim turned by `deg` degrees and the power scaled by 1 + `dp`. */
+function nudge(input, deg, dp) {
   const a = deg * DEG;
   const c = Math.cos(a);
   const s = Math.sin(a);
-  const { ax, ay } = input.shot;
-  return { ...input, shot: { ...input.shot, ...toAim(ax * c - ay * s, ax * s + ay * c) } };
+  const { ax, ay, power } = input.shot;
+  const p = Math.max(1, Math.min(POWER_MAX, Math.round(power * (1 + dp))));
+  return { ...input, shot: { ...input.shot, ...toAim(ax * c - ay * s, ax * s + ay * c), power: p } };
 }
 
 /** Think to the end in one go (tests and server-free simulations of whole games). */
