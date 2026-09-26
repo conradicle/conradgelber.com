@@ -1,3 +1,4 @@
+/* global POOL_DEV */
 import { Sim, AIM_MAX, POWER_MAX, SPIN_MAX } from './engine/physics.js';
 import { R } from './engine/table.js';
 import {
@@ -240,6 +241,7 @@ const myTurn = () => ui.state && ui.state.phase !== 'over' && ui.state.turn === 
 /** Everything after the state changes: words, bars, the next player's turn. */
 function afterState(fresh = false) {
   const s = ui.state;
+  if (POOL_DEV && window.poolDev && s.last) window.poolDev.log.push({ ...s.last, groups: s.groups, onTable: s.table.on.map((o, i) => (o ? i : -1)).filter((i) => i >= 0) });
   ui.called = null;
   ui.keyPlacing = false;
   ui.opponentAim = null;
@@ -1166,3 +1168,11 @@ $('rejoin').addEventListener('click', () => {
 if (new URLSearchParams(location.search).has('room')) openSetup('join');
 online.resumeIfAny();
 
+/**
+ * Local testing only. The dev server's copy of the bundle is built with
+ * POOL_DEV true and gets this read-and-drive handle for scripted play; the
+ * production build defines it false, so none of this ships.
+ */
+if (POOL_DEV) {
+  window.poolDev = { ui, setAim, setPower, setSpin, setPlace, callPocket, myTurn, log: [] };
+}
