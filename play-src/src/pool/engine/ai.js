@@ -18,7 +18,7 @@ import { unit } from './rng.js';
 export const LEVELS = {
   easy: { aimSd: 1.6, powerSd: 0.16, maxCandidates: 10, powers: [0.32], spins: [0], position: 0, safeties: false, robust: 3, pickFromTop: 3 },
   medium: { aimSd: 0.55, powerSd: 0.07, maxCandidates: 40, powers: [0.24, 0.4], spins: [0, 1, -1], position: 0.5, safeties: true, robust: 6, pickFromTop: 1 },
-  hard: { aimSd: 0.14, powerSd: 0.03, maxCandidates: 140, powers: [0.18, 0.3, 0.45, 0.65], spins: [0, 1, -1, 0.5, -0.5], position: 1, safeties: true, robust: 8, pickFromTop: 1 },
+  hard: { aimSd: 0.2, powerSd: 0.04, maxCandidates: 100, powers: [0.18, 0.3, 0.45, 0.65], spins: [0, 1, -1, 0.5, -0.5], position: 0.8, safeties: true, robust: 6, pickFromTop: 1 },
 };
 
 const DEG = Math.PI / 180;
