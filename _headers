@@ -18,5 +18,8 @@
 /play/land.json
   Cache-Control: public, max-age=31536000, immutable
 
+/flight-path/countries-50m.json
+  Cache-Control: public, max-age=31536000, immutable
+
 /.well-known/security.txt
   Content-Type: text/plain; charset=utf-8
