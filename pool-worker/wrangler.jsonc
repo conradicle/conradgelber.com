@@ -19,5 +19,8 @@
   "workers_dev": false,
   // No Workers Logs: nothing about players (names, room codes, IPs) is kept beyond Cloudflare defaults.
   "observability": { "enabled": false },
-  "routes": [{ "pattern": "conradgelber.com/pool/ws", "zone_name": "conradgelber.com" }]
+  // The trailing * is needed: a route without it matches only the bare path,
+  // and every socket URL carries ?room= or ?create=1. Nothing else on the
+  // site starts with /pool/ws, and the Worker answers any other path with 404.
+  "routes": [{ "pattern": "conradgelber.com/pool/ws*", "zone_name": "conradgelber.com" }]
 }
