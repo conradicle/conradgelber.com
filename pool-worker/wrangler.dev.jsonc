@@ -1,0 +1,18 @@
+// Local development only: the same Worker, plus a copy of the site's files
+// (made by scripts/dev-assets.mjs, with the site's _headers) on the same
+// origin, so the page, its CSP and the socket behave as on conradgelber.com.
+{
+  "name": "pool-dev",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": { "directory": "./.wrangler/dev-assets", "binding": "ASSETS", "html_handling": "auto-trailing-slash", "not_found_handling": "404-page" },
+  "durable_objects": {
+    "bindings": [
+      { "name": "ROOMS", "class_name": "PoolRoom" },
+      { "name": "LIMITER", "class_name": "Limiter" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PoolRoom", "Limiter"] }],
+  "workers_dev": false,
+  "observability": { "enabled": false }
+}
