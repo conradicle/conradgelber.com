@@ -139,8 +139,11 @@ export class RoomCore {
   leave(id) {
     const i = this.seatOf(id);
     if (i < 0) return;
+    // Taken now: once the seat is gone, index i belongs to the player who stayed.
+    const name = this.s.seats[i].name;
     const g = this.s.game;
-    if (g && g.state.phase !== 'over' && this.s.seats.length === 2) {
+    const forfeited = !!(g && g.state.phase !== 'over' && this.s.seats.length === 2);
+    if (forfeited) {
       g.state = forfeit(g.state, i, 'left');
       g.seq++;
       g.pending = null;
@@ -152,13 +155,10 @@ export class RoomCore {
     this.d.sessionEnded(id, 'left');
     if (this.s.seats.length) {
       this.s.game = null;
-      this.d.send(this.s.seats[0].id, 'toast', { message: `${this.nameOf(i)} left the room.` });
+      // A forfeit already told them, and says they won; otherwise say who went.
+      if (!forfeited) this.d.send(this.s.seats[0].id, 'toast', { message: `${name} left the room.` });
       this.broadcastRoom();
     }
-  }
-
-  nameOf(i) {
-    return this.s.game?.names?.[i] ?? this.s.seats[i]?.name ?? 'The other player';
   }
 
   // ─── The game ─────────────────────────────────────────────────────────
