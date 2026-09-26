@@ -19,6 +19,12 @@ const src = resolve(site, 'play-src');
 const built = spawnSync('npx esbuild src/pool/main.js --bundle --format=iife --target=es2019 --define:POOL_DEV=true --outfile=' + JSON.stringify(resolve(out, 'pool/pool.js')), { cwd: src, shell: true, stdio: 'inherit' });
 if (built.status !== 0) process.exit(built.status ?? 1);
 
+// The browser half of the determinism test, at /pool-test/ (local only).
+mkdirSync(resolve(out, 'pool-test'), { recursive: true });
+cpSync(resolve(src, 'test/pool/browser.html'), resolve(out, 'pool-test/index.html'));
+const test = spawnSync('npx esbuild test/pool/browser-entry.mjs --bundle --format=iife --target=es2019 --outfile=' + JSON.stringify(resolve(out, 'pool-test/determinism.js')), { cwd: src, shell: true, stdio: 'inherit' });
+if (test.status !== 0) process.exit(test.status ?? 1);
+
 // wrangler dev can answer a revalidation with 304 for a file rebuilt since it
 // started, so the copy's links get a fresh ?v= each time.
 const page = resolve(out, 'pool/index.html');
