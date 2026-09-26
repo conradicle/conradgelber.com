@@ -138,7 +138,9 @@ export class Renderer {
         ctx.strokeStyle = view.called === i ? '#F2C21B' : PAPER;
         this.circle(h.x, h.y, h.r + 0.01);
         ctx.stroke();
-        this.label(h.x, h.y, String(i + 1), 0.045, view.called === i ? '#F2C21B' : PAPER);
+        // The number sits on the cloth just inside the mouth, where thin rails never clip it.
+        const k = POCKETS[i];
+        this.label(k.mx - k.ox * 0.06, k.my - k.oy * 0.06, String(i + 1), 0.045, view.called === i ? '#F2C21B' : PAPER);
       }
     });
 
