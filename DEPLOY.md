@@ -1,8 +1,10 @@
 # Deploying conradgelber.com
 
 Static site, no build step on deploy. Cloudflare Pages serves the repo root
-as-is. The one generated file, `play/play.js`, is built locally and committed;
-see [The /play/ game](#the-play-game) below.
+as-is. The generated files (`play/play.js`, `flight-path/flight-path.js` and
+`flight-path/routes.json`) are built locally and committed; see
+[The /play/ game](#the-play-game) and [The /flight-path/ game](#the-flight-path-game)
+below.
 
 ## 1. Push the repo
 
@@ -68,7 +70,9 @@ DevTools → Network: every request should be same-origin (HTML, `style.css`,
 four woff2 files, favicon). The console should be empty. On `/play/`, expect
 `play.css`, `play.js`, `land.json` and `places.json` as well, and the three
 difficulty buttons should become clickable once the map loads (if they stay
-disabled, the CSP is blocking the script).
+disabled, the CSP is blocking the script). On `/flight-path/`, expect
+`play.css`, `flight-path.css`, `flight-path.js`, `countries-50m.json` and
+`routes.json`, and the same three-button check.
 
 ## Notes
 
@@ -84,8 +88,9 @@ disabled, the CSP is blocking the script).
   override `/*`: Pages sends both, joined with a comma, and the browser
   enforces each policy separately, so anything either one blocks stays blocked.
 - Caching (`_headers`): HTML is served with `max-age=0` by Pages; `style.css`
-  is `no-cache`; `/fonts/*`, `/img/*` and `/play/land.json` are cached for a
-  year as immutable. So: never overwrite an image, font or `land.json` in
+  is `no-cache`; `/fonts/*`, `/img/*`, `/play/land.json` and
+  `/flight-path/countries-50m.json` are cached for a year as immutable. So:
+  never overwrite an image, font, `land.json` or `countries-50m.json` in
   place. A new crop or a new face
   gets a new filename (the images carry their dimensions in the name for
   this reason).
@@ -136,8 +141,8 @@ grep -h --no-group-separator -A7 '<nav class="tabs"' index.html 404.html */index
 Every line should show a count of 9. The same goes for the head (font
 preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
-`/play/` and `/cambio/` do not get the tab bar. `/play/` has a single
-"← Games" link in its header instead.
+`/play/`, `/flight-path/` and `/cambio/` do not get the tab bar. `/play/` and
+`/flight-path/` have a single "← Games" link in their header instead.
 
 `/cambio/` is not part of this repo: it is a separate Worker (`cambio`,
 source in `conradicle/cambio-game`) routed at `conradgelber.com/cambio` and
@@ -182,6 +187,53 @@ Data:
 
 Pages also serves `play-src/` itself (its source and package files, not
 `node_modules`). That is harmless; the same files are public on GitHub.
+
+## The /flight-path/ game
+
+`flight-path/` is what Pages serves: `index.html`, `flight-path.css`, the
+bundled `flight-path.js`, `countries-50m.json` (for drawing) and
+`routes.json` (every playable route and the countries it crosses). The page
+also loads `/play/play.css` for the header, buttons, difficulty rows and
+globe, so check `/flight-path/` after changing that file. The source is in
+`play-src/` next to /play/'s: `src/flight-path/` for the game, `src/globe.js`
+for the globe both games share, `lib/` for the great-circle math and the
+country model (names, aliases, territories, disputed places). After editing
+any of it, rebuild and commit the bundle, and bump `?v=` on its link in
+`flight-path/index.html`:
+
+```bash
+npm --prefix play-src run build:flight
+```
+
+A change to `src/globe.js` changes /play/ too: run `npm --prefix play-src run build`
+as well, bump `play.js?v=`, and check /play/ still behaves the same.
+
+Data:
+
+- `play-src/data/city-list.json` is the curated list of cities (same entry
+  format as `place-list.mjs`). `build-cities.mjs` looks each one up in
+  Natural Earth's populated places (the same download as for /play/, not
+  committed) and writes `play-src/data/cities.json`, checking each city
+  falls inside the right 1:10m country:
+
+  ```bash
+  node play-src/scripts/build-cities.mjs path/to/ne_10m_populated_places_simple.geojson
+  ```
+
+- `npm --prefix play-src run routes` rebuilds `flight-path/routes.json` from
+  `cities.json` against world-atlas's `countries-10m.json` (Natural Earth
+  1:10m, used only here, never shipped). A country counts when 2 km or more
+  of the route lies over its land. Add `-- --report some/file.txt` to write
+  every crossing under 10 km, for review. Bump `routes.json?v=` in
+  `play-src/src/flight-path/main.js` and rebuild the bundle after.
+- `npm --prefix play-src run countries` copies world-atlas's
+  `countries-50m.json` into `flight-path/`. It is cached as immutable; give
+  a new copy a new filename.
+- `npm --prefix play-src test` runs the tests: the great-circle math, known
+  routes (New York to Hong Kong, London to Tokyo, a Pacific crossing),
+  aliases, the disputed-place rules and the weak-spot memory.
+
+The weak-spot memory lives in `localStorage` under `flight-path-stats`.
 
 ## After the first deploy
 
