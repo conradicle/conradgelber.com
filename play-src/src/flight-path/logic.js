@@ -96,7 +96,7 @@ export function createRound(route) {
 //   found     a country on the route, newly found
 //   already   found before
 //   wrong     not on the route (counted once per country)
-//   repeat    a wrong guess made before, not counted again
+//   repeat    a wrong guess made before; each one counts once
 //   neutral   the claimant of a disputed place on the route; neither
 //   endpoint  the origin or destination country; neither
 //   unknown   not a country the game knows
