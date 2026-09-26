@@ -325,6 +325,15 @@ test('break placement must be behind the head string', () => {
   assert.equal(legalSpot(s, L / 5, W - R + 0.001), false);
 });
 
+test('ball in hand never goes in a pocket mouth or against a jaw', () => {
+  const s = eightBall();
+  for (let n = 1; n < BALLS; n++) s.table.on[n] = false;
+  s.ballInHand = 'table';
+  assert.equal(legalSpot(s, 0.055, 0.031), false, 'inside the corner mouth');
+  assert.equal(legalSpot(s, 0.5, R), true, 'frozen to a rail');
+  assert.equal(legalSpot(s, 0.12, R), true, 'on the rail just past the corner jaw');
+});
+
 test('a cue ball off the table must be placed', () => {
   const s = eightBall();
   s.table.on[0] = false;
