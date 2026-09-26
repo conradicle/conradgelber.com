@@ -2,15 +2,16 @@
   "name": "conradgelber-play",
   "private": true,
   "type": "module",
-  "description": "Source for the globe games: /play/ (pin drop) builds to ../play/play.js, /flight-path/ to ../flight-path/flight-path.js.",
+  "description": "Source for the browser games: /play/ (pin drop) builds to ../play/play.js, /flight-path/ to ../flight-path/flight-path.js, /pool/ to ../pool/pool.js.",
   "scripts": {
     "build": "esbuild src/main.js --bundle --minify --format=iife --target=es2019 --outfile=../play/play.js",
     "build:flight": "esbuild src/flight-path/main.js --bundle --minify --format=iife --target=es2019 --outfile=../flight-path/flight-path.js",
+    "build:pool": "node scripts/pool-version.mjs && esbuild src/pool/main.js --bundle --minify --format=iife --target=es2019 --outfile=../pool/pool.js",
     "land": "node scripts/copy-land.mjs",
     "check-places": "node scripts/check-places.mjs",
     "countries": "node scripts/copy-countries.mjs",
     "routes": "node scripts/build-routes.mjs",
-    "test": "node --test \"test/*.test.mjs\""
+    "test": "node scripts/pool-version.mjs --check && node --test \"test/*.test.mjs\""
   },
   "dependencies": {
     "d3-geo": "3.1.1",
