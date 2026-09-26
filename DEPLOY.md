@@ -292,7 +292,8 @@ Tests (`npm --prefix play-src test` runs them with the rest):
 ### The pool Worker
 
 `pool-worker/` is a separate Cloudflare Worker, `pool`, routed only at
-`conradgelber.com/pool/ws`: one Durable Object per room (SQLite-backed,
+`conradgelber.com/pool/ws*` (the `*` lets the route match the socket's query
+string): one Durable Object per room (SQLite-backed,
 free plan), plus the per-IP `Limiter` from Cambio's Worker. The rest of
 `/pool/` stays on Pages. The socket is same-origin, so the site's
 `connect-src 'self'` covers it and `_headers` needs no change.
