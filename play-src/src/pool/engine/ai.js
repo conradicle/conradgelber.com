@@ -78,7 +78,9 @@ export function potLine(table, cx, cy, n, p) {
   // Approach angle into the pocket.
   const k = POCKETS[p];
   const approach = Math.acos(Math.max(-1, Math.min(1, ux * k.ox + uy * k.oy)));
-  if (approach > (p === 1 || p === 4 ? SIDE_APPROACH : CORNER_APPROACH)) return null;
+  // A ball already sitting in the mouth goes in from any angle.
+  const inMouth = Math.hypot(bx - k.mx, by - k.my) < k.half + R;
+  if (!inMouth && approach > (p === 1 || p === 4 ? SIDE_APPROACH : CORNER_APPROACH)) return null;
   const gx = bx - ux * 2 * R;
   const gy = by - uy * 2 * R;
   const cx2 = gx - cx;
@@ -266,7 +268,10 @@ export function createThinker(state, player, level, rng) {
           for (const power of !cfg.safeties ? [400] : fewPots ? [180, 320] : [260]) {
             const input = { shot: { ...toAim(px - from.x, py - from.y), power, side: 0, top: 0 } };
             if (from.placed) input.place = { x: Math.round(from.x * PLACE_SCALE), y: Math.round(from.y * PLACE_SCALE) };
-            if (eight) input.call = 0;
+            if (eight) {
+              input.call = 0;
+              input.callWhereItGoes = true;
+            }
             chosenFrom.push(input);
           }
         }
@@ -279,7 +284,10 @@ export function createThinker(state, player, level, rng) {
     const from = t.on[0] ? { x: t.x[0], y: t.y[0] } : { x: L / 4, y: W / 2 };
     const input = { shot: { ...toAim(t.x[n] - from.x, t.y[n] - from.y), power: 350, side: 0, top: 0 } };
     if (!t.on[0] || state.ballInHand) input.place = { x: Math.round(from.x * PLACE_SCALE), y: Math.round(from.y * PLACE_SCALE) };
-    if (eight) input.call = 0;
+    if (eight) {
+      input.call = 0;
+      input.callWhereItGoes = true;
+    }
     chosenFrom = [input];
   }
 
@@ -331,6 +339,7 @@ export function createThinker(state, player, level, rng) {
           }
           budget = runSome(budget, chosenFrom[i]);
           if (!sim.done) return null;
+          settleCall(chosenFrom[i], sim);
           const after = applyResult(state, chosenFrom[i], sim);
           scored.push({ input: chosenFrom[i], s: score(state, after, player, cfg) });
           sim = null;
@@ -346,14 +355,16 @@ export function createThinker(state, player, level, rng) {
           const { c, v } = flat[robustAt];
           budget = runSome(budget, v);
           if (!sim.done) return null;
-          c.total += score(state, applyResult(state, v, sim), player, cfg);
+          c.total += score(state, applyResult(state, { ...v, call: c.input.call }, sim), player, cfg);
           sim = null;
           robustAt++;
         } else {
           // Easy picks loosely among the leaders, but never a shot it can see is much worse.
           const top = scored.slice(0, Math.max(1, Math.min(cfg.pickFromTop, scored.length))).filter((c) => c.s >= scored[0].s - 150);
           const pick = top[Math.floor(unit(rng) * top.length)];
-          const input = { ...pick.input, shot: perturb(pick.input.shot, cfg, rng) };
+          const { callWhereItGoes, ...chosen } = pick.input;
+          void callWhereItGoes;
+          const input = { ...chosen, shot: perturb(pick.input.shot, cfg, rng) };
           decided = input;
           return decided;
         }
@@ -361,6 +372,18 @@ export function createThinker(state, player, level, rng) {
       return null;
     },
   };
+}
+
+/**
+ * A shot on the 8 that was not planned as a pot (a safety, or a roll at the
+ * 8) calls the pocket the simulation sends the 8 into, as a player would
+ * call where they expect it to go. Without this, sinking the 8 by a safety
+ * counted as the wrong pocket, and a player on the 8 would rather foul.
+ */
+function settleCall(input, sim) {
+  if (!input.callWhereItGoes) return;
+  const eight = sim.pocketed.find((q) => q.ball === 8);
+  if (eight) input.call = eight.pocket;
 }
 
 /** The same input with the aim turned by `deg` degrees and the power scaled by 1 + `dp`. */

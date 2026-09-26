@@ -43,3 +43,26 @@ test('thinking in slices returns null until it has decided', () => {
   while (!r) r = th.think(5000);
   assert.deepEqual(r, decide(s, 0, 'hard', seededRng(1)));
 });
+
+test('on the 8 with the 8 hanging in a pocket mouth, the computer sinks it and wins', () => {
+  // Found in self-play: every safety called pocket 0, so sinking the 8 by one
+  // counted as the wrong pocket, and both players fouled on purpose forever.
+  for (const level of ['easy', 'medium', 'hard']) {
+    for (let seed = 1; seed <= 3; seed++) {
+      const s = newGame({ game: 8, guide: 'off', seed, breaker: 0 });
+      s.phase = 'play';
+      s.ballInHand = null;
+      s.groups = ['solids', 'stripes'];
+      for (let n = 1; n < 16; n++) s.table.on[n] = false;
+      s.table.on[8] = true;
+      s.table.x[8] = 1.0112;
+      s.table.y[8] = 0.003;
+      s.table.x[0] = 1.0;
+      s.table.y[0] = 0.5;
+      const input = decide(s, 0, level, seededRng(seed));
+      assert.equal(checkInput(s, 0, input), null);
+      const after = playShot(s, input);
+      assert.equal(after.winner, 0, `${level} seed ${seed}: ${JSON.stringify(after.last.win ?? after.last.fouls)}`);
+    }
+  }
+});
