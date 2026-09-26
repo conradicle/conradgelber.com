@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pool &middot; Conrad Gelber</title>
+<meta name="description" content="8-ball and 9-ball on a top-down table. Play the computer in your browser, or start a room and send the code to a friend.">
+<link rel="canonical" href="https://conradgelber.com/pool/">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=7">
+<link rel="stylesheet" href="/play/play.css?v=4">
+<link rel="stylesheet" href="/pool/pool.css?v=1">
+<script src="/pool/pool.js?v=1" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="wrap">
+
+  <header class="playhead">
+    <a href="/">Conrad Gelber</a>
+    <a class="back" href="/games/">&larr; Games</a>
+  </header>
+
+  <main id="main" class="game pool">
+
+    <section class="screen" id="screen-start">
+      <h1 class="game-title">Pool</h1>
+      <p class="game-intro">8-ball and 9-ball on a top-down table. Play the
+        computer, or start a room and send the code to a friend.</p>
+      <div class="tiers">
+        <button type="button" class="tier" data-mode="computer">
+          <span class="tier-name">Play the computer</span>
+          <span class="tier-desc">Easy, Medium or Hard. Runs in your browser.</span>
+        </button>
+        <button type="button" class="tier" data-mode="host">
+          <span class="tier-name">Start a room</span>
+          <span class="tier-desc">You get a six-letter code to send to a friend.</span>
+        </button>
+        <button type="button" class="tier" data-mode="join">
+          <span class="tier-name">Join a room</span>
+          <span class="tier-desc">Enter the code a friend sent you.</span>
+        </button>
+      </div>
+      <p class="rejoin" id="rejoin-box" hidden><button type="button" class="btn" id="rejoin">Rejoin your game</button></p>
+      <details class="rules">
+        <summary>How the rules work</summary>
+        <h2>Both games</h2>
+        <ul>
+          <li>Fouls: scratching, hitting no ball, hitting the wrong ball first, or no ball reaching a rail after contact when nothing is pocketed. A foul gives the other player ball in hand anywhere on the table.</li>
+          <li>Each shot has a 60-second clock. Running out is a foul.</li>
+        </ul>
+        <h2>8-ball</h2>
+        <ul>
+          <li>The table is open after the break. The first ball legally pocketed decides who has solids and who has stripes.</li>
+          <li>Pocketing a ball on the break keeps your turn. The 8 on the break goes back on the foot spot and the breaker carries on.</li>
+          <li>Once your group is down, call a pocket and sink the 8 to win. You lose if the 8 goes down early, in the wrong pocket, or with a scratch.</li>
+        </ul>
+        <h2>9-ball</h2>
+        <ul>
+          <li>Hit the lowest-numbered ball first. Pocketing any ball on a legal shot keeps your turn.</li>
+          <li>Legally pocketing the 9 wins at any time, even on the break or a combination. A 9 pocketed on a foul goes back on the foot spot.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="screen" id="screen-setup" hidden>
+      <h1 class="game-title" id="setup-title" tabindex="-1">Play the computer</h1>
+      <form class="setup" id="setup-form" novalidate>
+        <div class="field" id="name-field">
+          <label for="name">Your name</label>
+          <input id="name" name="name" type="text" maxlength="16" autocomplete="nickname" spellcheck="false">
+        </div>
+        <div class="field" id="code-field">
+          <label for="code">Room code</label>
+          <input id="code" name="code" type="text" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" aria-describedby="code-help">
+          <p class="hint" id="code-help">Six letters.</p>
+        </div>
+        <fieldset class="choice" id="game-field">
+          <legend>Game</legend>
+          <label><input type="radio" name="game" value="8" checked> 8-ball</label>
+          <label><input type="radio" name="game" value="9"> 9-ball</label>
+        </fieldset>
+        <fieldset class="choice" id="guide-field">
+          <legend>Aim guide</legend>
+          <label><input type="radio" name="guide" value="off"> Off <span class="choice-desc">A short line from the cue ball.</span></label>
+          <label><input type="radio" name="guide" value="medium" checked> Medium <span class="choice-desc">The ghost ball and the object ball's direction.</span></label>
+          <label><input type="radio" name="guide" value="full"> Full <span class="choice-desc">Both balls traced off two cushions, with spin.</span></label>
+        </fieldset>
+        <fieldset class="choice" id="level-field">
+          <legend>Computer</legend>
+          <label><input type="radio" name="level" value="easy" checked> Easy</label>
+          <label><input type="radio" name="level" value="medium"> Medium</label>
+          <label><input type="radio" name="level" value="hard"> Hard</label>
+        </fieldset>
+        <p class="game-status" id="setup-status" role="status"></p>
+        <div class="end-actions">
+          <button type="submit" class="btn" id="setup-go">Start</button>
+          <button type="button" class="btn btn-quiet" id="setup-back">Back</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="screen" id="screen-wait" hidden>
+      <h1 class="game-title" id="wait-title" tabindex="-1">Your room</h1>
+      <p class="room-code" id="room-code"></p>
+      <p class="game-intro" id="wait-text">Send this code to a friend. The game starts as soon as they join.</p>
+      <p class="game-status" id="wait-status" role="status"></p>
+      <div class="end-actions">
+        <button type="button" class="btn" id="copy-code">Copy code</button>
+        <button type="button" class="btn btn-quiet" id="wait-cancel">Cancel</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-play" hidden aria-labelledby="play-title">
+      <h1 class="visually-hidden" id="play-title">Pool</h1>
+      <div class="players">
+        <div class="player" id="player-0">
+          <span class="player-name" id="name-0"></span>
+          <span class="player-group" id="group-0"></span>
+        </div>
+        <div class="clock" id="clock-box">
+          <span class="clock-text" id="clock-text"></span>
+          <progress class="clock-bar" id="clock-bar" max="60" value="60" aria-hidden="true"></progress>
+        </div>
+        <div class="player player-right" id="player-1">
+          <span class="player-name" id="name-1"></span>
+          <span class="player-group" id="group-1"></span>
+        </div>
+      </div>
+      <p class="banner" id="banner" aria-hidden="true"></p>
+
+      <div class="table-box" id="table-box">
+        <canvas class="table landscape" id="table" tabindex="0" role="application"
+          aria-roledescription="pool table"
+          aria-label="Pool table"
+          aria-describedby="table-summary table-help"></canvas>
+      </div>
+
+      <div class="fine" id="fine">
+        <button type="button" class="btn btn-quiet fine-nudge" id="fine-left" aria-label="Aim a little anticlockwise">&lsaquo;</button>
+        <canvas class="wheel" id="wheel" tabindex="0" role="slider" aria-label="Fine aim"
+          aria-valuemin="0" aria-valuemax="360" aria-valuenow="0"></canvas>
+        <button type="button" class="btn btn-quiet fine-nudge" id="fine-right" aria-label="Aim a little clockwise">&rsaquo;</button>
+      </div>
+
+      <div class="shot-row" id="shot-row">
+        <button type="button" class="spin-btn" id="spin-btn" aria-expanded="false" aria-controls="spin-panel">
+          <canvas class="spin-mini" id="spin-mini" aria-hidden="true"></canvas>
+          <span class="visually-hidden" id="spin-btn-text">Spin: none</span>
+        </button>
+        <label class="power">
+          <span class="power-label">Power <span id="power-value">50%</span></span>
+          <input type="range" id="power" min="1" max="100" value="50" aria-describedby="power-help">
+        </label>
+        <button type="button" class="btn" id="shoot">Shoot</button>
+        <button type="button" class="btn btn-quiet" id="skip" hidden>Skip animation</button>
+      </div>
+      <p class="hint" id="power-help">Drag the slider and let go to shoot, or set it and press Shoot.</p>
+
+      <div class="spin-panel" id="spin-panel" hidden>
+        <p class="spin-title" id="spin-title">Where the tip hits the cue ball</p>
+        <canvas class="spin-ball" id="spin-ball" tabindex="0" role="slider"
+          aria-roledescription="two-way slider" aria-labelledby="spin-title"
+          aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"></canvas>
+        <p class="hint">Top is follow, bottom is draw, left and right are side spin.</p>
+        <div class="end-actions">
+          <button type="button" class="btn btn-quiet" id="spin-reset">Centre</button>
+          <button type="button" class="btn" id="spin-done">Done</button>
+        </div>
+      </div>
+
+      <div class="end-actions play-end" id="end-actions" hidden>
+        <button type="button" class="btn" id="rematch">Rematch</button>
+        <button type="button" class="btn btn-quiet" id="new-game">New game</button>
+      </div>
+
+      <details class="keys">
+        <summary>Controls</summary>
+        <p class="hint" id="table-help">Drag on the table to aim, or tap a ball to aim straight at it.
+          With ball in hand, drag the cue ball. With the table focused: arrow keys aim, Shift and
+          an arrow aims finely, Plus and Minus set power, W, A, S and D move the tip for spin, 0
+          centres it, Enter shoots. With ball in hand, press M to move the cue ball with the arrow
+          keys, then Enter to place it. On the 8, press 1 to 6 to call a pocket.</p>
+      </details>
+      <p class="visually-hidden" id="table-summary"></p>
+      <div class="play-menu">
+        <button type="button" class="btn btn-quiet btn-small" id="leave">Leave game</button>
+      </div>
+    </section>
+
+    <p class="visually-hidden" id="announce" aria-live="polite"></p>
+
+  </main>
+
+  <footer>
+    <p class="colophon"><a href="/accessibility/">Accessibility</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
