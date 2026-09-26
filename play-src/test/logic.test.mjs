@@ -131,6 +131,9 @@ test('Ukraine is neutral on a route over Crimea without Ukraine', () => {
 test('type-ahead suggestions', () => {
   const index = suggestionIndex(data.countries);
   assert.equal(suggest(index, 'ger')[0].name, 'Germany');
+  // Names starting with the text come before a later word matching it.
+  const gu = suggest(index, 'gu').map((s) => s.name);
+  assert.ok(gu.indexOf('Guatemala') < gu.indexOf('Equatorial Guinea'), gu.join(', '));
   assert.ok(suggest(index, 'ivory').some((s) => s.name === "Côte d'Ivoire"));
   assert.ok(suggest(index, 'burma').some((s) => s.label === 'Myanmar (Burma)'));
   assert.ok(suggest(index, 'guinea').length > 3);

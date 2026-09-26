@@ -59,22 +59,26 @@ export function suggestionIndex(countries) {
   return out;
 }
 
-// Up to `max` suggestions for what the player has typed: matches at the
-// start of a name come before matches inside one, one row per country.
+// Up to `max` suggestions for what the player has typed, one row per
+// country: names that start with it first ("gu": Guam, Guatemala), then
+// names with a word that starts with it (Equatorial Guinea), then names
+// that contain it anywhere.
 export function suggest(index, text, max = 8, skip = new Set()) {
   const q = normalize(text);
   if (!q) return [];
   const starts = [];
+  const words = [];
   const inside = [];
   for (const s of index) {
     if (skip.has(s.name)) continue;
     const at = s.key.indexOf(q);
-    if (at === 0 || s.key.includes(' ' + q)) starts.push(s);
+    if (at === 0) starts.push(s);
+    else if (s.key.includes(' ' + q)) words.push(s);
     else if (at > 0) inside.push(s);
   }
   const seen = new Set();
   const out = [];
-  for (const s of [...starts, ...inside]) {
+  for (const s of [...starts, ...words, ...inside]) {
     if (seen.has(s.name)) continue;
     seen.add(s.name);
     // Show the plain name when the country itself matched.
