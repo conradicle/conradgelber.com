@@ -119,13 +119,33 @@ test('the claimant is wrong when the route misses the disputed place', () => {
   assert.equal(judge(round, lookup, 'Serbia').kind, 'wrong');
 });
 
-test('Ukraine is neutral on a route over Crimea without Ukraine', () => {
-  const round = createRound(fake(['Russia', 'Georgia'], { crimea: true }));
-  const r = judge(round, lookup, 'Ukraine');
-  assert.equal(r.kind, 'neutral');
-  assert.match(r.note, /Crimea/);
-  const plain = createRound(fake(['Russia', 'Georgia']));
+test('over Crimea only, Russia and Ukraine are both neutral', () => {
+  const round = createRound(fake(['Turkey', 'Georgia'], { crimea: true }));
+  for (const guess of ['Russia', 'Ukraine', 'Russian Federation']) {
+    const r = judge(round, lookup, guess);
+    assert.equal(r.kind, 'neutral', guess);
+    assert.equal(r.note, "Crimea isn't scored in this game.");
+  }
+  assert.deepEqual(round.wrong, []);
+  assert.deepEqual(round.notes, ["Crimea isn't scored in this game."]);
+  // Without Crimea on the route they are ordinary wrong guesses.
+  const plain = createRound(fake(['Turkey', 'Georgia']));
+  assert.equal(judge(plain, lookup, 'Russia').kind, 'wrong');
   assert.equal(judge(plain, lookup, 'Ukraine').kind, 'wrong');
+});
+
+test('over Crimea plus mainland Russia, Russia is found and Ukraine neutral', () => {
+  const round = createRound(fake(['Russia', 'Turkey'], { crimea: true }));
+  assert.equal(judge(round, lookup, 'Russia').kind, 'found');
+  assert.equal(judge(round, lookup, 'Ukraine').kind, 'neutral');
+  assert.equal(isComplete(round), false);
+  assert.equal(judge(round, lookup, 'Turkey').kind, 'found');
+  assert.equal(isComplete(round), true);
+});
+
+test('an endpoint claimant gets the endpoint message', () => {
+  const round = createRound(fake(['Turkey', 'Georgia'], { crimea: true, from: { name: 'Moscow', country: 'Russia' } }));
+  assert.equal(judge(round, lookup, 'Russia').kind, 'endpoint');
 });
 
 test('type-ahead suggestions', () => {

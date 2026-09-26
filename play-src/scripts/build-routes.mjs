@@ -8,9 +8,14 @@
 // Output: { countries: [name], points: { country: [lon, lat] },
 // cities: [[name, country, lat, lon]], routes: [[from, to, [country...],
 // crimea]] }, all by index. points covers countries missing from the
-// 1:50m drawing data. Countries are
-// in the order the route reaches them; the trailing 1 marks a route over
-// Crimea. The page works out distances from the city coordinates.
+// 1:50m drawing data. Countries are in the order the route reaches them;
+// the trailing 1 marks a route over Crimea. The page works out distances
+// from the city coordinates.
+//
+// Crimea is scored for no one. Natural Earth draws it inside Russia, so
+// its stretch of a route is taken out of Russia's (and, to be safe,
+// Ukraine's) before the 2 km test: a route whose only Russian land is
+// Crimea does not require Russia.
 //
 // A country counts when at least MIN_KM of the route lies over its land.
 // Routes are kept when they cross at least two countries other than the
@@ -21,11 +26,12 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { makeArc, intervals, union, subtract, lengthKm, contains, distanceKm, EARTH_KM } from '../lib/sphere.mjs';
-import { gameName, EXCLUDE_ROUTES, CARVE } from '../lib/countries.mjs';
+import { gameName, EXCLUDE_ROUTES, CARVE, DISPUTED } from '../lib/countries.mjs';
 import { geoCentroid } from 'd3-geo';
 import { loadFeatures, crimeaRings } from './world.mjs';
 
 export const MIN_KM = 2;
+const CRIMEA_CLAIMANTS = DISPUTED.Crimea;
 const REVIEW_KM = 10;
 const MIN_COUNTRIES = 2;
 
@@ -69,11 +75,14 @@ export function crossedBy(world, a, b) {
       over.set(carveFrom, subtract(over.get(carveFrom), over.get(keep)));
     }
   }
+  const crimeaIv = intervals(arc, world.crimea, startsInside(arc, world.crimea, a));
+  for (const name of CRIMEA_CLAIMANTS) {
+    if (over.has(name)) over.set(name, subtract(over.get(name), crimeaIv));
+  }
   const list = [...over]
     .map(([name, iv]) => ({ name, km: lengthKm(arc, iv), at: iv.length ? iv[0][0] : 1, iv }))
     .filter((c) => c.km > 0)
     .sort((x, y) => x.at - y.at);
-  const crimeaIv = intervals(arc, world.crimea, startsInside(arc, world.crimea, a));
   return { km: arc.w * EARTH_KM, list, crimeaKm: lengthKm(arc, crimeaIv), arc };
 }
 

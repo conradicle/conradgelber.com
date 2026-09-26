@@ -465,7 +465,7 @@ const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(r.s
 
 Promise.all([
   getJSON('/flight-path/countries-50m.json'),
-  getJSON('/flight-path/routes.json?v=1'),
+  getJSON('/flight-path/routes.json?v=2'),
 ]).then(([topo, json]) => {
   data = parseData(json);
   lookup = buildLookup(data.countries);
