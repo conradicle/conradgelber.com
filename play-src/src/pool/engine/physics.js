@@ -198,6 +198,36 @@ export class Sim {
     this.rescanAt = -Infinity;
   }
 
+  /**
+   * Everything needed to carry on later, as plain JSON (numbers survive
+   * JSON exactly). The broad-phase caches are left out: they only ever skip
+   * pairs that cannot touch, so rebuilding them changes no result.
+   */
+  save() {
+    return {
+      on: Array.from(this.on), x: Array.from(this.x), y: Array.from(this.y),
+      vx: Array.from(this.vx), vy: Array.from(this.vy),
+      wx: Array.from(this.wx), wy: Array.from(this.wy), wz: Array.from(this.wz),
+      moving: Array.from(this.moving),
+      steps: this.steps, t: this.t, done: this.done,
+      firstHit: this.firstHit, railAfterHit: this.railAfterHit,
+      railed: [...this.railed], pocketed: this.pocketed.map((p) => ({ ...p })),
+    };
+  }
+
+  /** A Sim that carries on from save(). */
+  static restore(saved) {
+    const sim = new Sim({ on: saved.on.map(Boolean), x: saved.x, y: saved.y }, { ax: 1, ay: 0, power: 0, side: 0, top: 0 });
+    for (const k of ['on', 'vx', 'vy', 'wx', 'wy', 'wz', 'moving']) sim[k].set(saved[k]);
+    Object.assign(sim, {
+      steps: saved.steps, t: saved.t, done: saved.done,
+      firstHit: saved.firstHit, railAfterHit: saved.railAfterHit,
+      railed: [...saved.railed], pocketed: saved.pocketed.map((p) => ({ ...p })),
+    });
+    for (let i = 0; i < BALLS; i++) sim.rebound(i);
+    return sim;
+  }
+
   /** Run to the end. Returns this. */
   run() {
     while (!this.done) this.step();
