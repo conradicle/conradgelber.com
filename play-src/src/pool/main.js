@@ -11,6 +11,7 @@ import { Renderer, pocketName, outer, RAIL, RAIL_COMPACT } from './render.js';
 import { describe, summary } from './words.js';
 import { drawSpinBall, spinFromPoint, spinWords, drawWheel } from './widgets.js';
 import { Online, rejoinable, rejoin } from './online.js';
+import { tableHash } from './engine/protocol.js';
 
 const $ = (id) => document.getElementById(id);
 const SHOT_CLOCK_MS = 60_000;
@@ -434,8 +435,9 @@ function finishShot() {
   const a = ui.anim;
   const local = applyResult(ui.state, a.input, a.sim);
   if (ui.mode === 'online') {
-    // The server's result is the truth; ours is only checked against it.
+    // The server's result is the truth; ours is only checked against it, here and on the server.
     a.local = local;
+    online.check(a.seq, tableHash(local.table));
     a.finished = true;
     if (ui.pendingResult && ui.pendingResult.seq === a.seq) applyServerResult(ui.pendingResult);
     else {
