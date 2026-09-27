@@ -147,7 +147,7 @@ grep -h --no-group-separator -A7 '<nav class="tabs"' index.html 404.html */index
 Every line should show a count of 9. The same goes for the head (font
 preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
-`/play/`, `/flight-path/`, `/pool/` and `/cambio/` do not get the tab bar.
+`/play/`, `/flight-path/`, `/pool/`, `/cambio/` and `/poker/` do not get the tab bar.
 `/play/`, `/flight-path/` and `/pool/` have a single "← Games" link in
 their header instead. During a game on a screen narrower than 600 px,
 `/pool/` hides that header and shows a round back button in its players bar,
@@ -159,6 +159,12 @@ source in `conradicle/cambio-game`) routed at `conradgelber.com/cambio` and
 exist only on the custom domain, so `/cambio/` 404s on `*.pages.dev` preview
 deploys; test that link on the live site. The game loads `/fonts/*.woff2` and
 `/favicon.svg` from this site, so do not rename those.
+
+`/poker/` works the same way: the `poker` Worker, from the same
+`conradicle/cambio-game` repo (`packages/poker-worker`), routed at
+`conradgelber.com/poker` and `conradgelber.com/poker/*`, deployed by hand
+with `npm run deploy:poker` there. It also loads `/fonts/*.woff2` and
+`/favicon.svg` from this site.
 
 ## The /play/ game
 
