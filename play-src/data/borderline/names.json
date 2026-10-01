@@ -1,0 +1,488 @@
+{
+  "_about": [
+    "Labels shown on the Borderline map. For each unit (g + Gleditsch-Ward code, as in CShapes), entries give the base label for a date range; dates are inclusive and 'present' means still in use.",
+    "Dependencies add their owner in brackets, '(Br.)', from the CShapes status and owner columns, unless an entry sets suffix false or names an owner itself.",
+    "A label change is a tell like a border change. 'source' backs the date of an entry that starts on a date of its own; an entry that starts on a CShapes record boundary takes that date from CShapes and its source backs the name.",
+    "precision: 'month' or 'year' where sources agree on less than the day; the reveal then prints only that much."
+  ],
+  "post2019": {
+    "checkedOn": "2026-10-01",
+    "renames": [
+      "Turkey to Türkiye, 1 June 2022 (entry under g640)."
+    ],
+    "borders": "No border change recognized in international law since 31 December 2019. CShapes coded Russia's 2014 annexation of Crimea (record split 2014-03-18), but no CShapes release covers Russia's 2022 annexation claims, so windows that would run to the present are not allowed where Ukraine is on the map.",
+    "noPresentWithUnits": [
+      "g369"
+    ],
+    "sources": [
+      "https://www.aa.com.tr/en/americas/un-registers-turkiye-as-new-country-name-to-replace-turkey/2603492",
+      "https://www.rnz.co.nz/news/pacific/1147105/long-time-coming-after-decades-of-struggle-is-bougainville-on-the-brink-of-statehood"
+    ],
+    "watch": "Bougainville (Papua New Guinea): independence vote pending in the PNG parliament as of September 2026; no change yet."
+  },
+  "owners": {
+    "0": { "abbr": "League of Nations", "adj": ["Free City"], "word": "League of Nations" },
+    "1": { "abbr": "UN", "adj": ["UN"], "word": "United Nations" },
+    "2": { "abbr": "U.S.", "adj": ["American"], "word": "American" },
+    "200": { "abbr": "Br.", "adj": ["British", "Anglo-Egyptian"], "word": "British" },
+    "210": { "abbr": "Neth.", "adj": ["Dutch", "Netherlands"], "word": "Dutch" },
+    "211": { "abbr": "Belg.", "adj": ["Belgian"], "word": "Belgian" },
+    "220": { "abbr": "Fr.", "adj": ["French"], "word": "French" },
+    "230": { "abbr": "Sp.", "adj": ["Spanish"], "word": "Spanish" },
+    "235": { "abbr": "Port.", "adj": ["Portuguese"], "word": "Portuguese" },
+    "255": { "abbr": "Ger.", "adj": ["German"], "word": "German" },
+    "300": { "abbr": "Aust.-Hung.", "adj": ["Austrian"], "word": "Austro-Hungarian" },
+    "325": { "abbr": "It.", "adj": ["Italian"], "word": "Italian" },
+    "365": { "abbr": "Russ.", "adj": ["Russian"], "word": "Russian" },
+    "390": { "abbr": "Den.", "adj": ["Danish"], "word": "Danish" },
+    "560": { "abbr": "S. Afr.", "adj": ["South African"], "word": "South African" },
+    "563": { "abbr": "Transvaal", "adj": ["Transvaal"], "word": "Transvaal" },
+    "740": { "abbr": "Jap.", "adj": ["Japanese"], "word": "Japanese" },
+    "750": { "abbr": "India", "adj": ["Indian"], "word": "Indian" },
+    "900": { "abbr": "Austr.", "adj": ["Australian"], "word": "Australian" }
+  },
+  "units": {
+    "g2": [
+      { "from": "1816-01-01", "to": "present", "label": "United States" }
+    ],
+    "g31": [
+      { "from": "1886-01-01", "to": "present", "label": "Bahamas" }
+    ],
+    "g80": [
+      { "from": "1886-01-01", "to": "1973-05-31", "label": "British Honduras", "source": "https://en.wikipedia.org/wiki/British_Honduras" },
+      { "from": "1973-06-01", "to": "present", "label": "Belize", "source": "https://en.wikipedia.org/wiki/British_Honduras" }
+    ],
+    "g110": [
+      { "from": "1886-01-01", "to": "1966-05-25", "label": "British Guiana", "source": "https://en.wikipedia.org/wiki/British_Guiana" },
+      { "from": "1966-05-26", "to": "present", "label": "Guyana", "source": "https://en.wikipedia.org/wiki/British_Guiana" }
+    ],
+    "g115": [
+      { "from": "1886-01-01", "to": "present", "label": "Suriname" }
+    ],
+    "g120": [
+      { "from": "1886-01-01", "to": "present", "label": "French Guiana" }
+    ],
+    "g200": [
+      { "from": "1816-01-01", "to": "present", "label": "United Kingdom" }
+    ],
+    "g205": [
+      { "from": "1921-12-06", "to": "1937-12-28", "label": "Irish Free State", "source": "https://en.wikipedia.org/wiki/1937_in_Ireland" },
+      { "from": "1937-12-29", "to": "present", "label": "Ireland", "source": "https://en.wikipedia.org/wiki/1937_in_Ireland" }
+    ],
+    "g255": [
+      { "from": "1816-01-01", "to": "1867-06-30", "label": "Prussia", "source": "https://en.wikipedia.org/wiki/North_German_Confederation" },
+      { "from": "1867-07-01", "to": "1870-12-31", "label": "North German Confederation", "source": "https://en.wikipedia.org/wiki/North_German_Confederation" },
+      { "from": "1871-01-01", "to": "1945-05-07", "label": "Germany", "source": "https://en.wikipedia.org/wiki/Constitution_of_the_German_Confederation_(1871)" }
+    ],
+    "g260": [
+      { "from": "1945-05-08", "to": "1949-09-20", "label": "Germany (Allied zones)", "note": "Western zones under Allied occupation.", "source": "https://en.wikipedia.org/wiki/Allied-occupied_Germany" },
+      { "from": "1949-09-21", "to": "1990-10-02", "label": "West Germany", "source": "https://en.wikipedia.org/wiki/West_Germany" },
+      { "from": "1990-10-03", "to": "present", "label": "Germany", "source": "https://en.wikipedia.org/wiki/German_reunification" }
+    ],
+    "g265": [
+      { "from": "1945-05-08", "to": "1949-10-04", "label": "Germany (Soviet zone)", "source": "https://en.wikipedia.org/wiki/Soviet_occupation_zone_in_Germany" },
+      { "from": "1949-10-05", "to": "1990-10-02", "label": "East Germany", "source": "https://en.wikipedia.org/wiki/East_Germany" }
+    ],
+    "g291": [
+      { "from": "1919-06-28", "to": "1938-08-31", "label": "Free City of Danzig" }
+    ],
+    "g300": [
+      { "from": "1816-01-01", "to": "1867-07-27", "label": "Austria", "note": "Austrian Empire.", "source": "https://www.britannica.com/event/Ausgleich" },
+      { "from": "1867-07-28", "to": "1918-11-02", "label": "Austria-Hungary", "precision": "year", "note": "The Compromise was concluded in February 1867 and its laws promulgated on 28 July 1867.", "source": "https://www.britannica.com/event/Ausgleich" }
+    ],
+    "g316": [
+      { "from": "1993-01-01", "to": "2016-06-30", "label": "Czech Republic" },
+      { "from": "2016-07-01", "to": "present", "label": "Czechia", "note": "Short name registered with the UN on 1 July 2016.", "source": "https://www.expats.cz/czech-news/article/czechia-officially-entered-in-un-database" }
+    ],
+    "g325": [
+      { "from": "1816-01-01", "to": "present", "label": "Italy" }
+    ],
+    "g343": [
+      { "from": "1991-11-20", "to": "2019-02-11", "label": "Macedonia" },
+      { "from": "2019-02-12", "to": "present", "label": "North Macedonia", "source": "https://en.wikipedia.org/wiki/Prespa_Agreement" }
+    ],
+    "g345": [
+      { "from": "1918-12-01", "to": "1929-10-02", "label": "Serbs, Croats and Slovenes", "source": "https://en.wikipedia.org/wiki/Kingdom_of_Yugoslavia" },
+      { "from": "1929-10-03", "to": "2003-02-03", "label": "Yugoslavia", "source": "https://en.wikipedia.org/wiki/Kingdom_of_Yugoslavia" },
+      { "from": "2003-02-04", "to": "2006-06-02", "label": "Serbia and Montenegro", "source": "https://en.wikipedia.org/wiki/Serbia_and_Montenegro" }
+    ],
+    "g346": [
+      { "from": "1992-04-27", "to": "present", "label": "Bosnia and Herzegovina" }
+    ],
+    "g360": [
+      { "from": "1816-01-01", "to": "present", "label": "Romania" }
+    ],
+    "g365": [
+      { "from": "1816-01-01", "to": "1922-12-29", "label": "Russia" },
+      { "from": "1922-12-30", "to": "1991-12-25", "label": "U.S.S.R.", "source": "https://en.wikipedia.org/wiki/Treaty_on_the_Creation_of_the_Union_of_Soviet_Socialist_Republics" },
+      { "from": "1991-12-26", "to": "present", "label": "Russia", "source": "https://en.wikipedia.org/wiki/Treaty_on_the_Creation_of_the_Union_of_Soviet_Socialist_Republics" }
+    ],
+    "g370": [
+      { "from": "1991-08-25", "to": "1991-09-18", "label": "Byelorussia" },
+      { "from": "1991-09-19", "to": "present", "label": "Belarus", "source": "https://en.wikipedia.org/wiki/Byelorussian_Soviet_Socialist_Republic" }
+    ],
+    "g380": [
+      { "from": "1816-01-01", "to": "1905-08-25", "label": "Sweden-Norway", "note": "Sweden and Norway in personal union; CShapes draws them as one unit until Norway's own record begins.", "source": "https://en.wikipedia.org/wiki/Union_between_Sweden_and_Norway" },
+      { "from": "1905-08-26", "to": "present", "label": "Sweden" }
+    ],
+    "g395": [
+      { "from": "1816-01-01", "to": "1918-11-30", "label": "Iceland", "owner": "390" },
+      { "from": "1918-12-01", "to": "present", "label": "Iceland", "suffix": false, "note": "Sovereign kingdom in personal union with Denmark from the Act of Union.", "source": "https://en.wikipedia.org/wiki/Danish%E2%80%93Icelandic_Act_of_Union" }
+    ],
+    "g338": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Malta", "owner": "200" },
+      { "from": "1886-01-01", "to": "present", "label": "Malta" }
+    ],
+    "g703": [
+      { "from": "1991-09-01", "to": "present", "label": "Kyrgyzstan" }
+    ],
+    "g402": [
+      { "from": "1886-01-01", "to": "2013-10-23", "label": "Cape Verde" },
+      { "from": "2013-10-24", "to": "present", "label": "Cabo Verde", "source": "https://www.un.org/en/about-us/member-states/cabo-verde" }
+    ],
+    "g404": [
+      { "from": "1886-01-01", "to": "1974-09-09", "label": "Portuguese Guinea", "source": "https://en.wikipedia.org/wiki/Portuguese_Guinea" },
+      { "from": "1974-09-10", "to": "present", "label": "Guinea-Bissau" }
+    ],
+    "g411": [
+      { "from": "1886-01-01", "to": "1968-10-11", "label": "Spanish Guinea", "source": "https://en.wikipedia.org/wiki/Spanish_Guinea" },
+      { "from": "1968-10-12", "to": "present", "label": "Equatorial Guinea" }
+    ],
+    "g432": [
+      { "from": "1905-01-01", "to": "1920-12-03", "label": "Upper Senegal and Niger", "source": "https://en.wikipedia.org/wiki/Upper_Senegal_and_Niger" },
+      { "from": "1920-12-04", "to": "1960-09-21", "label": "French Sudan", "precision": "month", "source": "https://en.wikipedia.org/wiki/Postage_stamps_and_postal_history_of_French_Sudan" },
+      { "from": "1960-09-22", "to": "present", "label": "Mali" }
+    ],
+    "g434": [
+      { "from": "1895-01-01", "to": "1975-11-29", "label": "Dahomey", "source": "https://en.wikipedia.org/wiki/Republic_of_Dahomey" },
+      { "from": "1975-11-30", "to": "present", "label": "Benin", "source": "https://en.wikipedia.org/wiki/Republic_of_Dahomey" }
+    ],
+    "g437": [
+      { "from": "1889-01-10", "to": "1985-10-11", "label": "Ivory Coast" },
+      { "from": "1985-10-12", "to": "present", "label": "Côte d'Ivoire", "precision": "month", "note": "The PDCI congress of 9 to 12 October 1985 decided the name would no longer be translated.", "source": "https://www.newworldencyclopedia.org/entry/C%C3%B4te_d%27Ivoire" }
+    ],
+    "g438": [
+      { "from": "1894-01-01", "to": "1958-10-01", "label": "French Guinea", "source": "https://en.wikipedia.org/wiki/French_Guinea" },
+      { "from": "1958-10-02", "to": "present", "label": "Guinea" }
+    ],
+    "g439": [
+      { "from": "1919-03-01", "to": "1984-08-03", "label": "Upper Volta", "source": "https://en.wikipedia.org/wiki/Republic_of_Upper_Volta" },
+      { "from": "1984-08-04", "to": "present", "label": "Burkina Faso", "source": "https://en.wikipedia.org/wiki/Republic_of_Upper_Volta" }
+    ],
+    "g452": [
+      { "from": "1886-01-01", "to": "1957-03-05", "label": "Gold Coast", "source": "https://en.wikipedia.org/wiki/Gold_Coast_(British_colony)" },
+      { "from": "1957-03-06", "to": "present", "label": "Ghana" }
+    ],
+    "g460": [
+      { "from": "1886-01-01", "to": "1922-07-19", "label": "Togoland" }
+    ],
+    "g471": [
+      { "from": "1919-06-28", "to": "1959-12-31", "label": "French Cameroons", "source": "https://en.wikipedia.org/wiki/French_Cameroon" },
+      { "from": "1960-01-01", "to": "present", "label": "Cameroon" }
+    ],
+    "g482": [
+      { "from": "1906-02-11", "to": "1958-11-30", "label": "Ubangi-Shari", "source": "https://en.wikipedia.org/wiki/Ubangi-Shari" },
+      { "from": "1958-12-01", "to": "present", "label": "Central African Republic", "source": "https://en.wikipedia.org/wiki/Ubangi-Shari" }
+    ],
+    "g484": [
+      { "from": "1886-01-01", "to": "1903-12-28", "label": "French Congo", "source": "https://en.wikipedia.org/wiki/French_Congo" },
+      { "from": "1903-12-29", "to": "1960-08-14", "label": "Middle Congo", "precision": "year", "source": "https://en.wikipedia.org/wiki/Middle_Congo" },
+      { "from": "1960-08-15", "to": "1971-10-26", "label": "Congo (Brazzaville)" },
+      { "from": "1971-10-27", "to": "present", "label": "Congo", "note": "Plain 'Congo' once its neighbour became Zaire.", "source": "https://en.wikipedia.org/wiki/Zaire" }
+    ],
+    "g490": [
+      { "from": "1886-01-01", "to": "1908-11-14", "label": "Congo Free State", "suffix": false, "source": "https://en.wikipedia.org/wiki/Congo_Free_State" },
+      { "from": "1908-11-15", "to": "1960-06-29", "label": "Belgian Congo", "source": "https://en.wikipedia.org/wiki/Congo_Free_State" },
+      { "from": "1960-06-30", "to": "1966-06-30", "label": "Congo (Léopoldville)" },
+      { "from": "1966-07-01", "to": "1971-10-26", "label": "Congo (Kinshasa)", "precision": "year", "note": "Léopoldville was renamed Kinshasa in 1966; sources differ on the day.", "source": "https://en.wikipedia.org/wiki/History_of_Kinshasa" },
+      { "from": "1971-10-27", "to": "1997-05-16", "label": "Zaire", "source": "https://en.wikipedia.org/wiki/Zaire" },
+      { "from": "1997-05-17", "to": "present", "label": "Dem. Rep. of the Congo", "source": "https://www.britannica.com/print/article/309264" }
+    ],
+    "g501": [
+      { "from": "1888-10-15", "to": "1920-07-22", "label": "British East Africa", "source": "https://en.wikipedia.org/wiki/East_Africa_Protectorate" },
+      { "from": "1920-07-23", "to": "present", "label": "Kenya" }
+    ],
+    "g510": [
+      { "from": "1891-01-01", "to": "1920-01-09", "label": "German East Africa", "source": "https://en.wikipedia.org/wiki/German_East_Africa" },
+      { "from": "1920-01-10", "to": "1964-04-25", "label": "Tanganyika", "precision": "year", "note": "Named Tanganyika Territory in 1920; British suffix comes from the CShapes owner once the mandate begins.", "source": "https://en.wikipedia.org/wiki/Tanganyika_Territory" },
+      { "from": "1964-04-26", "to": "1964-10-28", "label": "Tanganyika and Zanzibar", "source": "https://www.sahistory.org.za/dated-event/united-republic-tanganyika-and-zanzibar-renamed-united-republic-tanzania" },
+      { "from": "1964-10-29", "to": "present", "label": "Tanzania", "source": "https://www.sahistory.org.za/dated-event/united-republic-tanganyika-and-zanzibar-renamed-united-republic-tanzania" }
+    ],
+    "g515": [
+      { "from": "1920-06-28", "to": "1962-06-30", "label": "Ruanda-Urundi" }
+    ],
+    "g521": [
+      { "from": "1886-01-01", "to": "1960-06-30", "label": "British Somaliland" }
+    ],
+    "g522": [
+      { "from": "1886-01-01", "to": "1967-07-04", "label": "French Somaliland", "source": "https://en.wikipedia.org/wiki/French_Somaliland" },
+      { "from": "1967-07-05", "to": "1977-06-26", "label": "Afars and Issas", "source": "https://en.wikipedia.org/wiki/French_Territory_of_the_Afars_and_the_Issas" },
+      { "from": "1977-06-27", "to": "present", "label": "Djibouti" }
+    ],
+    "g550": [
+      { "from": "1953-08-01", "to": "1964-01-21", "label": "Rhodesia and Nyasaland" }
+    ],
+    "g551": [
+      { "from": "1911-08-18", "to": "1964-01-21", "label": "Northern Rhodesia", "source": "https://en.wikipedia.org/wiki/Northern_Rhodesia" },
+      { "from": "1964-01-22", "to": "1964-10-23", "label": "Northern Rhodesia", "owner": "200", "note": "CShapes starts the independent record in January 1964; independence came on 24 October 1964.", "source": "https://en.wikipedia.org/wiki/Zambia_Independence_Act_1964" },
+      { "from": "1964-10-24", "to": "present", "label": "Zambia", "source": "https://en.wikipedia.org/wiki/Zambia_Independence_Act_1964" }
+    ],
+    "g552": [
+      { "from": "1889-01-01", "to": "1895-05-02", "label": "British South Africa Company", "source": "https://en.wikipedia.org/wiki/British_South_Africa_Company" },
+      { "from": "1895-05-03", "to": "1898-10-19", "label": "Rhodesia", "precision": "month", "source": "https://en.wikipedia.org/wiki/Rhodesia_(name)" },
+      { "from": "1898-10-20", "to": "1964-10-23", "label": "Southern Rhodesia", "source": "https://en.wikipedia.org/wiki/Legislative_Council_of_Southern_Rhodesia" },
+      { "from": "1964-10-24", "to": "1979-05-31", "label": "Rhodesia", "precision": "month", "note": "The government dropped 'Southern' when Northern Rhodesia became Zambia.", "source": "https://en.wikipedia.org/wiki/Rhodesia_(name)" },
+      { "from": "1979-06-01", "to": "1979-12-11", "label": "Zimbabwe Rhodesia", "source": "https://en.wikipedia.org/wiki/Zimbabwe_Rhodesia" },
+      { "from": "1979-12-12", "to": "1980-04-17", "label": "Southern Rhodesia", "owner": "200", "precision": "month", "source": "https://en.wikipedia.org/wiki/Zimbabwe_Rhodesia" },
+      { "from": "1980-04-18", "to": "present", "label": "Zimbabwe", "source": "https://en.wikipedia.org/wiki/Zimbabwe_Rhodesia" }
+    ],
+    "g553": [
+      { "from": "1891-06-10", "to": "1907-07-05", "label": "British Central Africa", "source": "https://en.wikipedia.org/wiki/British_Central_Africa_Protectorate" },
+      { "from": "1907-07-06", "to": "1964-07-05", "label": "Nyasaland", "source": "https://en.wikipedia.org/wiki/British_Central_Africa_Protectorate" },
+      { "from": "1964-07-06", "to": "present", "label": "Malawi" }
+    ],
+    "g560": [
+      { "from": "1910-05-31", "to": "1961-05-30", "label": "Union of South Africa", "source": "https://en.wikipedia.org/wiki/South_African_Constitution_of_1961" },
+      { "from": "1961-05-31", "to": "present", "label": "South Africa", "source": "https://en.wikipedia.org/wiki/South_African_Constitution_of_1961" }
+    ],
+    "g561": [
+      { "from": "1886-01-01", "to": "1910-05-29", "label": "Cape Colony" }
+    ],
+    "g565": [
+      { "from": "1886-01-01", "to": "1915-08-15", "label": "German South West Africa", "source": "https://en.wikipedia.org/wiki/German_South_West_Africa" },
+      { "from": "1915-08-16", "to": "1990-03-20", "label": "South West Africa", "source": "https://en.wikipedia.org/wiki/South_West_Africa" },
+      { "from": "1990-03-21", "to": "present", "label": "Namibia" }
+    ],
+    "g570": [
+      { "from": "1886-01-01", "to": "1966-10-03", "label": "Basutoland", "source": "https://en.wikipedia.org/wiki/Basutoland" },
+      { "from": "1966-10-04", "to": "present", "label": "Lesotho" }
+    ],
+    "g571": [
+      { "from": "1886-01-01", "to": "1966-09-29", "label": "Bechuanaland", "source": "https://en.wikipedia.org/wiki/Bechuanaland_Protectorate" },
+      { "from": "1966-09-30", "to": "present", "label": "Botswana" }
+    ],
+    "g572": [
+      { "from": "1895-02-21", "to": "2018-04-18", "label": "Swaziland" },
+      { "from": "2018-04-19", "to": "present", "label": "Eswatini", "source": "https://iol.co.za/news/africa/2018-04-19-king-of-swaziland-renames-country-eswatini/" }
+    ],
+    "g580": [
+      { "from": "1886-01-01", "to": "1958-10-13", "label": "Madagascar" },
+      { "from": "1958-10-14", "to": "1975-12-30", "label": "Malagasy Republic", "source": "https://en.wikipedia.org/wiki/Malagasy_Republic" },
+      { "from": "1975-12-31", "to": "present", "label": "Madagascar", "source": "https://www.archontology.org/nations/madagascar/01_polity.php" }
+    ],
+    "g585": [
+      { "from": "1886-01-01", "to": "present", "label": "Réunion" }
+    ],
+    "g600": [
+      { "from": "1886-01-01", "to": "present", "label": "Morocco" }
+    ],
+    "g6021": [
+      { "from": "1956-04-07", "to": "1958-04-09", "label": "Tarfaya" }
+    ],
+    "g610": [
+      { "from": "1886-01-01", "to": "1958-10-09", "label": "Spanish West Africa" }
+    ],
+    "g625": [
+      { "from": "1899-01-19", "to": "1955-12-31", "label": "Anglo-Egyptian Sudan", "source": "https://en.wikipedia.org/wiki/Anglo-Egyptian_Sudan" },
+      { "from": "1956-01-01", "to": "present", "label": "Sudan" }
+    ],
+    "g630": [
+      { "from": "1886-01-01", "to": "1935-03-20", "label": "Persia" },
+      { "from": "1935-03-21", "to": "present", "label": "Iran", "source": "https://en.wikipedia.org/wiki/Name_of_Iran" }
+    ],
+    "g640": [
+      { "from": "1816-01-01", "to": "1923-10-28", "label": "Ottoman Empire" },
+      { "from": "1923-10-29", "to": "2022-05-31", "label": "Turkey", "source": "https://en.wikipedia.org/wiki/Proclamation_of_the_Republic_of_Turkey" },
+      { "from": "2022-06-01", "to": "present", "label": "Türkiye", "note": "Name registered at the UN on receipt of the foreign minister's letter, 1 June 2022.", "source": "https://www.aa.com.tr/en/americas/un-registers-turkiye-as-new-country-name-to-replace-turkey/2603492" }
+    ],
+    "g645": [
+      { "from": "1920-04-26", "to": "1920-12-23", "label": "Mesopotamia", "source": "https://en.wikipedia.org/wiki/Occupied_Enemy_Territory_Administration" },
+      { "from": "1920-12-24", "to": "present", "label": "Iraq" }
+    ],
+    "g651": [
+      { "from": "1816-01-01", "to": "1914-12-17", "label": "Egypt", "suffix": false, "note": "Under British occupation but still an Ottoman vassal; atlases did not mark it British.", "source": "https://en.wikipedia.org/wiki/Khedivate_of_Egypt" },
+      { "from": "1914-12-18", "to": "present", "label": "Egypt" }
+    ],
+    "g663": [
+      { "from": "1920-04-26", "to": "1946-05-24", "label": "Transjordan", "source": "https://en.wikipedia.org/wiki/Emirate_of_Transjordan", "owner": "200", "note": "Occupied in April 1920 by the power that then held the League mandate; marked with that power throughout." },
+      { "from": "1946-05-25", "to": "1949-04-25", "label": "Transjordan" },
+      { "from": "1949-04-26", "to": "present", "label": "Jordan", "source": "https://en.wikipedia.org/wiki/Transjordan_(region)" }
+    ],
+    "g678": [
+      { "from": "1918-10-30", "to": "present", "label": "Yemen" }
+    ],
+    "g680": [
+      { "from": "1967-11-30", "to": "1990-05-21", "label": "South Yemen" }
+    ],
+    "g696": [
+      { "from": "1892-03-08", "to": "1971-12-01", "label": "Trucial States", "source": "https://en.wikipedia.org/wiki/Trucial_States" },
+      { "from": "1971-12-02", "to": "present", "label": "United Arab Emirates" }
+    ],
+    "g698": [
+      { "from": "1886-01-01", "to": "1970-08-08", "label": "Muscat and Oman", "source": "https://en.wikipedia.org/wiki/Muscat_and_Oman" },
+      { "from": "1970-08-09", "to": "present", "label": "Oman", "source": "https://en.wikipedia.org/wiki/Muscat_and_Oman" }
+    ],
+    "g700": [
+      { "from": "1886-01-01", "to": "present", "label": "Afghanistan", "suffix": false, "note": "A British protectorate in foreign affairs only, 1879 to 1919; atlases did not mark it British.", "source": "https://en.wikipedia.org/wiki/Emirate_of_Afghanistan" }
+    ],
+    "g713": [
+      { "from": "1895-04-17", "to": "1945-08-14", "label": "Formosa", "source": "https://en.wikipedia.org/wiki/Taiwan_under_Japanese_rule" },
+      { "from": "1949-12-08", "to": "present", "label": "Taiwan" }
+    ],
+    "g731": [
+      { "from": "1945-08-15", "to": "1948-09-08", "label": "Korea (Soviet zone)", "source": "https://en.wikipedia.org/wiki/Soviet_Civil_Administration" },
+      { "from": "1948-09-09", "to": "present", "label": "North Korea" }
+    ],
+    "g732": [
+      { "from": "1945-08-15", "to": "1948-08-14", "label": "Korea (U.S. zone)", "source": "https://en.wikipedia.org/wiki/United_States_Army_Military_Government_in_Korea" },
+      { "from": "1948-08-15", "to": "present", "label": "South Korea" }
+    ],
+    "g760": [
+      { "from": "1886-01-01", "to": "present", "label": "Bhutan", "suffix": false }
+    ],
+    "g775": [
+      { "from": "1937-04-01", "to": "1989-06-17", "label": "Burma" },
+      { "from": "1989-06-18", "to": "present", "label": "Myanmar", "source": "https://en.wikipedia.org/wiki/Names_of_Myanmar" }
+    ],
+    "g780": [
+      { "from": "1886-01-01", "to": "1972-05-21", "label": "Ceylon" },
+      { "from": "1972-05-22", "to": "present", "label": "Sri Lanka", "source": "https://en.wikipedia.org/wiki/Sri_Lankan_Constitution_of_1972" }
+    ],
+    "g800": [
+      { "from": "1886-01-01", "to": "1939-06-23", "label": "Siam" },
+      { "from": "1939-06-24", "to": "1945-09-07", "label": "Thailand", "source": "https://en.wikipedia.org/wiki/Thailand" },
+      { "from": "1945-09-08", "to": "1949-05-10", "label": "Siam", "precision": "month", "note": "Sources give 7, 8 or 9 September 1945.", "source": "https://www.ebsco.com/research-starters/history/siam-changes-its-name-thailand" },
+      { "from": "1949-05-11", "to": "present", "label": "Thailand", "source": "https://www.ebsco.com/research-starters/history/siam-changes-its-name-thailand" }
+    ],
+    "g811": [
+      { "from": "1886-01-01", "to": "1970-10-08", "label": "Cambodia" },
+      { "from": "1970-10-09", "to": "1975-04-16", "label": "Khmer Republic", "source": "https://en.wikipedia.org/wiki/Khmer_Republic" },
+      { "from": "1975-04-17", "to": "1976-01-04", "label": "Cambodia", "source": "https://en.wikipedia.org/wiki/Khmer_Republic" },
+      { "from": "1976-01-05", "to": "1989-04-29", "label": "Kampuchea", "source": "https://en.wikipedia.org/wiki/Democratic_Kampuchea" },
+      { "from": "1989-04-30", "to": "present", "label": "Cambodia", "precision": "year", "source": "https://en.wikipedia.org/wiki/Names_of_Cambodia" }
+    ],
+    "g815": [
+      { "from": "1886-01-01", "to": "1954-04-30", "label": "Annam", "note": "The usual English atlas name for the Vietnamese lands.", "source": "https://en.wikipedia.org/wiki/Names_of_Vietnam" }
+    ],
+    "g816": [
+      { "from": "1954-05-01", "to": "1975-04-30", "label": "North Vietnam" },
+      { "from": "1975-05-01", "to": "present", "label": "Vietnam" }
+    ],
+    "g817": [
+      { "from": "1954-05-01", "to": "1975-04-30", "label": "South Vietnam" }
+    ],
+    "g820": [
+      { "from": "1946-04-01", "to": "1963-09-15", "label": "Malaya", "source": "https://en.wikipedia.org/wiki/Federation_of_Malaya" },
+      { "from": "1963-09-16", "to": "present", "label": "Malaysia" }
+    ],
+    "g821": [
+      { "from": "1896-07-01", "to": "1946-03-31", "label": "Federated Malay States" }
+    ],
+    "g823": [
+      { "from": "1888-05-12", "to": "1963-09-15", "label": "North Borneo" }
+    ],
+    "g850": [
+      { "from": "1886-01-01", "to": "1945-08-16", "label": "Dutch East Indies", "source": "https://en.wikipedia.org/wiki/Dutch_East_Indies" },
+      { "from": "1945-08-17", "to": "present", "label": "Indonesia" }
+    ],
+    "g851": [
+      { "from": "1949-12-29", "to": "1962-08-14", "label": "Dutch New Guinea" },
+      { "from": "1962-08-15", "to": "1963-04-30", "label": "West New Guinea" },
+      { "from": "1963-05-01", "to": "1969-09-16", "label": "West Irian" }
+    ],
+    "g860": [
+      { "from": "1886-01-01", "to": "1976-07-16", "label": "Portuguese Timor", "source": "https://en.wikipedia.org/wiki/Portuguese_Timor" },
+      { "from": "2002-05-20", "to": "present", "label": "Timor-Leste" }
+    ],
+    "g910": [
+      { "from": "1949-07-01", "to": "present", "label": "Papua New Guinea" }
+    ],
+    "g911": [
+      { "from": "1886-01-01", "to": "1906-08-31", "label": "British New Guinea", "source": "https://en.wikipedia.org/wiki/British_New_Guinea" },
+      { "from": "1906-09-01", "to": "1949-06-30", "label": "Papua", "owner": "900", "source": "https://en.wikipedia.org/wiki/Papua_Act_1905" }
+    ],
+    "g912": [
+      { "from": "1886-01-01", "to": "1914-11-10", "label": "German New Guinea" },
+      { "from": "1914-11-11", "to": "1949-06-30", "label": "New Guinea" }
+    ],
+    "g930": [
+      { "from": "1886-01-01", "to": "present", "label": "New Caledonia" }
+    ],
+    "g940": [
+      { "from": "1893-03-15", "to": "present", "label": "Solomon Islands" }
+    ],
+    "g4782": [
+      { "from": "1886-01-01", "to": "1893-05-11", "label": "Oil Rivers" },
+      { "from": "1893-05-12", "to": "1898-12-31", "label": "Niger Coast", "source": "https://en.wikipedia.org/wiki/Niger_Coast_Protectorate" }
+    ],
+    "g5518": [
+      { "from": "1900-01-29", "to": "1911-08-17", "label": "North-Eastern Rhodesia" }
+    ],
+    "g5519": [
+      { "from": "1900-01-29", "to": "1911-08-17", "label": "North-Western Rhodesia" }
+    ],
+    "g6511": [
+      { "from": "1948-05-14", "to": "1967-06-09", "label": "Gaza Strip" }
+    ],
+    "g7351": [
+      { "from": "1905-09-05", "to": "1945-08-14", "label": "Karafuto", "source": "https://en.wikipedia.org/wiki/Karafuto_Prefecture" }
+    ],
+    "g7708": [
+      { "from": "1947-08-15", "to": "1949-01-04", "label": "Azad Kashmir" }
+    ],
+    "g8202": [
+      { "from": "1886-01-01", "to": "1896-06-30", "label": "Selangor" }
+    ],
+    "g10002": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Anhalt-Bernburg" }
+    ],
+    "g10007": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Chechnya" }
+    ],
+    "g10016": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Two Sicilies", "note": "CShapes-Europe calls it the Kingdom of Naples.", "source": "https://en.wikipedia.org/wiki/Kingdom_of_the_Two_Sicilies" }
+    ],
+    "g10017": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Lippe" }
+    ],
+    "g10023": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Sardinia", "note": "CShapes-Europe calls it Piedmont.", "source": "https://en.wikipedia.org/wiki/Kingdom_of_Sardinia" }
+    ],
+    "g10030": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Saxe-Gotha-Altenburg" }
+    ],
+    "g10031": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Saxe-Hildburghausen" }
+    ],
+    "g10034": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Schaumburg-Lippe" }
+    ],
+    "g10037": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Brunswick", "note": "CShapes-Europe calls it Wolfenbuttel.", "source": "https://en.wikipedia.org/wiki/Duchy_of_Brunswick" }
+    ],
+    "g273": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Hesse-Kassel" }
+    ],
+    "g275": [
+      { "from": "1816-01-01", "to": "1885-12-31", "label": "Hesse-Darmstadt" }
+    ],
+    "g483": [
+      { "from": "1900-09-05", "to": "1960-08-10", "label": "Chad", "owner": "220", "note": "French military territory before it became a colony in 1920.", "source": "https://en.wikipedia.org/wiki/French_Chad" }
+    ],
+    "g620": [
+      { "from": "1912-10-18", "to": "1943-05-12", "label": "Libya" },
+      { "from": "1943-05-13", "to": "present", "label": "Libya", "suffix": false, "note": "British and French military administration, then UN-supervised transition, 1943 to 1951; not marked as a dependency.", "source": "https://en.wikipedia.org/wiki/Allied_administration_of_Libya" }
+    ],
+    "g652": [
+      { "from": "1920-04-26", "to": "1945-12-31", "label": "Syria", "owner": "220", "note": "Occupied in April 1920 by the power that then held the League mandate; marked with that power throughout.", "source": "https://en.wikipedia.org/wiki/San_Remo_conference" },
+      { "from": "1946-01-01", "to": "present", "label": "Syria" }
+    ],
+    "g660": [
+      { "from": "1920-04-26", "to": "1944-11-21", "label": "Lebanon", "owner": "220", "note": "Occupied in April 1920 by the power that then held the League mandate; marked with that power throughout.", "source": "https://en.wikipedia.org/wiki/San_Remo_conference" },
+      { "from": "1944-11-22", "to": "present", "label": "Lebanon" }
+    ],
+    "g665": [
+      { "from": "1920-04-26", "to": "1948-05-13", "label": "Palestine", "owner": "200", "note": "Occupied in April 1920 by the power that then held the League mandate; marked with that power throughout.", "source": "https://en.wikipedia.org/wiki/San_Remo_conference" }
+    ]
+  }
+}
