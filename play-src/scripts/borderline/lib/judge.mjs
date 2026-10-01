@@ -139,7 +139,14 @@ export class Crop {
       for (const id of labeled) {
         const a = near === 'B' ? bToA.get(id) : id;
         const b = near === 'B' ? id : match.aToB.get(id);
-        if (a === undefined || b === undefined || a <= 0 || b <= 0) continue;
+        if (a === undefined || b === undefined) continue;
+        // A labeled country whose whole visible part becomes unclaimed land
+        // (or appears on it) keeps its outline but loses or gains its fill
+        // and label: a visible change.
+        if (a <= 0 || b <= 0) {
+          if (a > 0 || b > 0) { tell = this.borderTell(date, A, B, [[a, b, 0]]); break; }
+          continue;
+        }
         const la = this.label(A, a), lb = this.label(B, b);
         if (la && lb && la.text !== lb.text) {
           // Same outline, new label: a rename when the unit is the same,
