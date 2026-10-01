@@ -1,0 +1,146 @@
+/* /borderline/: date an old map. Loads after /style.css and /play/play.css
+   and uses their tokens, header, tiers, buttons and end table. The chrome
+   takes the felt, leather and brass of Cambio and Poker; the map itself
+   carries all its colours as SVG attributes (see play-src/src/borderline). */
+
+:root{
+  --felt:#4d101b;      /* white on it 14.6:1; on paper 13.2:1 */
+  --felt-lit:#7c1f2d;  /* white on it 9.6:1 */
+  --leather:#1b1213;
+  --leather-hi:#3a282c;
+  --brass:#e3b758;     /* decorative keylines only */
+  --brass-deep:#8e6723;
+  --gold-wash:#fff4d6;
+}
+
+.tier:hover .tier-name{color:var(--felt-lit)}
+.tier:focus-visible,
+.btn:focus-visible{outline-color:var(--felt-lit)}
+.tier:disabled{cursor:progress}
+.tier:disabled .tier-name{color:var(--ink-soft)}
+
+/* The map plate: a leather mount with a brass keyline */
+.atlas-frame{
+  max-width:600px;
+  margin:.4rem auto 0;
+  padding:6px;
+  border-radius:3px;
+  background:linear-gradient(160deg,var(--leather-hi),var(--leather));
+  box-shadow:0 1px 2px rgba(27,18,19,.35),0 6px 18px rgba(27,18,19,.18);
+}
+.atlas{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:360/400;
+  background:#e9e2cc;
+  outline:1px solid var(--brass);
+  outline-offset:-1px;
+}
+.atlas[aria-busy="true"]{opacity:.6}
+
+/* Guess */
+.guess-panel{max-width:600px;margin:1.2rem auto 0}
+.guess-label{display:block;font-weight:500;margin:0 0 .4rem}
+.year-row{display:flex;gap:.8rem;align-items:center}
+.year-range{flex:1 1 auto;min-width:0;height:44px;accent-color:var(--felt);cursor:pointer}
+.year-input{
+  flex:0 0 6.2rem;
+  width:6.2rem;
+  min-height:44px;
+  padding:.4rem .6rem;
+  border:1px solid var(--ink-soft);
+  border-radius:2px;
+  background:#fff;
+  color:var(--ink);
+  font:inherit;
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:1.2rem;
+  font-variant-numeric:tabular-nums;
+  text-align:center;
+}
+.year-input:focus-visible,
+.year-range:focus-visible{outline:2px solid var(--felt-lit);outline-offset:2px}
+.hint{margin:.4rem 0 0;font-size:.88rem;color:var(--ink-soft)}
+.guess-actions{display:flex;flex-wrap:wrap;gap:.7rem;margin:.9rem 0 0}
+.hint-text{margin:.9rem 0 0;padding:0;min-height:0;max-width:var(--measure)}
+.hint-text:not(:empty){padding:.7rem .9rem;border-left:3px solid var(--brass-deep);background:var(--gold-wash)}
+
+.btn-felt{background:var(--felt);border-color:var(--felt);color:#fff}
+.btn-felt:hover{background:var(--felt-lit);border-color:var(--felt-lit)}
+.btn-quiet:hover{color:var(--felt-lit);border-color:var(--felt-lit)}
+
+/* Reveal */
+.reveal{max-width:600px;margin:1.4rem auto 0}
+.reveal-title{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:1.6rem;
+  line-height:1.15;
+  margin:0;
+}
+.reveal-title:focus{outline:none}
+.reveal-points{margin:.25rem 0 0;font-weight:500;color:var(--felt);font-variant-numeric:tabular-nums}
+.reveal-window{margin:.4rem 0 .6rem}
+.timeline{display:block;width:100%;height:auto;margin:.2rem 0 1rem;overflow:visible}
+.tl-axis{stroke:var(--ink-soft);stroke-width:1.5}
+.tl-tick{stroke:var(--ink-soft);stroke-width:1}
+.tl-label{fill:var(--ink-soft);font-size:19px;text-anchor:middle;font-variant-numeric:tabular-nums}
+.tl-window{fill:var(--gold-wash);stroke:var(--brass-deep);stroke-width:1.5}
+.tl-guess{fill:var(--felt)}
+.tl-guess-label{fill:var(--felt);font-size:20px;font-weight:500;text-anchor:middle;font-variant-numeric:tabular-nums}
+.reveal-sub{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:1.15rem;
+  margin:1.2rem 0 .5rem;
+}
+.tells{list-style:none;margin:0 0 1.4rem;padding:0;border-top:1px solid var(--rule)}
+.tells li{padding:.8rem 0;border-bottom:1px solid var(--rule)}
+.tell-edge{
+  display:block;
+  font-size:.8rem;
+  font-weight:500;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.tells strong{font-weight:500}
+.tell-source{font-size:.88rem}
+
+/* End */
+.end-total{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:clamp(1.8rem,6vw,2.6rem);
+  margin:0 0 .4rem;
+  font-variant-numeric:tabular-nums;
+}
+.share{
+  max-width:var(--measure);
+  margin:0 0 1rem;
+  padding:.8rem 1rem;
+  border:1px solid var(--rule);
+  border-radius:2px;
+  background:#fff;
+  font:inherit;
+  font-size:.96rem;
+  line-height:1.6;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+/* About */
+.about{max-width:var(--measure);margin:3.5rem 0 0;padding:1.6rem 0 0;border-top:1px solid var(--rule)}
+.about-title{font-family:Spectral,Georgia,serif;font-weight:600;font-size:1.35rem;margin:0 0 .6rem}
+.about-sub{font-family:Spectral,Georgia,serif;font-weight:600;font-size:1.08rem;margin:1.2rem 0 .4rem}
+.about p{margin:0 0 .8rem}
+.credits{margin:0;padding-left:1.1rem}
+.credits li{margin:0 0 .6rem}
+
+@media (max-width:640px){
+  .guess-actions .btn,
+  .end-actions .btn{flex:1 1 100%}
+  .year-input{flex-basis:5.4rem;width:5.4rem}
+}
