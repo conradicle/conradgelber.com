@@ -2,9 +2,11 @@
 
 Static site, no build step on deploy. Cloudflare Pages serves the repo root
 as-is. The generated files (`play/play.js`, `flight-path/flight-path.js`,
-`flight-path/routes.json` and `pool/pool.js`) are built locally and
-committed; see [The /play/ game](#the-play-game),
-[The /flight-path/ game](#the-flight-path-game) and
+`flight-path/routes.json`, `pool/pool.js`, `borderline/borderline.js` and
+`borderline/data/`) are built locally and committed; see
+[The /play/ game](#the-play-game),
+[The /flight-path/ game](#the-flight-path-game),
+[The /borderline/ game](#the-borderline-game) and
 [The /pool/ game](#the-pool-game) below. Pool's online rooms are a separate
 Worker, deployed by hand from `pool-worker/`.
 
@@ -249,6 +251,61 @@ Data:
   aliases, the disputed-place rules and the weak-spot memory.
 
 The weak-spot memory lives in `localStorage` under `flight-path-stats`.
+
+## The /borderline/ game
+
+Date an old political map from its borders and names. Static, no Worker:
+`borderline/` is what Pages serves (`index.html`, `borderline.css`, the
+bundled `borderline.js`) plus the generated data in `borderline/data/`. The
+page also loads `/play/play.css`. Bump `?v=` on the `borderline.js` or
+`borderline.css` link whenever either changes.
+
+Source, in `play-src/`:
+
+- `src/borderline/`: the page (`main.js`), the map drawing shared with the
+  PNG renderer (`render.js`, `projection.js`), the window function
+  (`window.js`), scoring with its tunable constants (`score.js`: `K.N`,
+  `K.H`, `HINT_COST`) and daily seeding (`seed.js`).
+- `scripts/borderline/`: the data pipeline. Tunable fairness settings are in
+  `config.mjs` (`VISIBLE_MIN_AREA`, `MAX_WINDOW_YEARS`, crop widths).
+- `data/borderline/`: the hand-made tables, each date with a source:
+  `names.json` (labels and renames), `eu-dates.json` (real dates for
+  CShapes-Europe changes), `curated.json` (the pre-1886 maps).
+
+Rebuild the data (downloads about 20 MB into the git-ignored
+`play-src/data/borderline/raw/`; the bank takes about an hour):
+
+```bash
+npm --prefix play-src run borderline:data
+```
+
+That fetches and hash-checks the sources, builds the geometry, judges a few
+thousand crops into `borderline/data/bank/`, and adds the curated maps.
+`borderline/data/bank.csv` lists every puzzle for skimming. Spot-check any
+puzzle as a PNG (written to `play-src/data/borderline/build/png/`):
+
+```bash
+node play-src/scripts/borderline/render-puzzle.mjs N0042 H0007 C01
+```
+
+After a change to the names or the judge, also regenerate the test fixture
+with `node play-src/scripts/borderline/make-fixture.mjs`. Then rebuild the
+page bundle:
+
+```bash
+npm --prefix play-src run build:borderline
+```
+
+Tests (`borderline.test.mjs`, run by `npm --prefix play-src test`): the
+window function, scoring, the New York daily date, the renames, the known
+cases through the real judge on the fixture (Austria-Hungary ends in 1918,
+the U.S.S.R. in 1991, Zaire starts in 1971 and so on), the Russian Alaska
+map ending in 1867, and checks over every committed puzzle.
+
+Licenses: the files in `borderline/data/` made from CShapes and
+CShapes-Europe are CC BY-NC-SA 4.0 like their sources, and `geo/hb.json`
+(from historical-basemaps) is GPL-3.0. The About section on the page
+credits all three.
 
 ## The /pool/ game
 
