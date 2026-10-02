@@ -5,7 +5,7 @@
 // about what the map shows, each with a source, through the same
 // windowFromSpans() the tests use.
 //
-//   node scripts/borderline/build-curated.mjs           write geo/hb.json and bank/C-00.json
+//   node scripts/borderline/build-curated.mjs           write build/hb.json and bank/C-00.json
 //   node scripts/borderline/build-curated.mjs --peek    PNGs of each crop with every feature named
 import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
@@ -20,6 +20,7 @@ import { Crop } from './lib/judge.mjs';
 import { adjacency } from './lib/raster.mjs';
 import { loadWorld } from './lib/world.mjs';
 import { when } from './lib/tells.mjs';
+import { legible, readableSize } from './lib/fairness.mjs';
 
 const peek = process.argv.includes('--peek');
 const curated = JSON.parse(readFileSync(path.join(HAND_DIR, 'curated.json'), 'utf8'));
@@ -29,6 +30,23 @@ function clockwise(geom) {
   const fix = (poly) => (geoArea({ type: 'Polygon', coordinates: poly }) > 2 * Math.PI ? poly.map((r) => r.slice().reverse()) : poly);
   if (geom.type === 'Polygon') return { type: 'Polygon', coordinates: fix(geom.coordinates) };
   return { type: 'MultiPolygon', coordinates: geom.coordinates.map(fix) };
+}
+
+// historical-basemaps cuts lakes out of the countries around them, where
+// CShapes paints straight across; a hole would show as bare paper on the
+// curated maps only. Fill every hole that holds no other feature.
+function fillLakes(features) {
+  const points = features.map((f) => geoCentroid(f));
+  for (const [k, f] of features.entries()) {
+    const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+    for (const poly of polys) {
+      for (let h = poly.length - 1; h >= 1; h--) {
+        let hole = { type: 'Polygon', coordinates: [poly[h].slice().reverse()] };
+        if (geoArea(hole) > 2 * Math.PI) hole = { type: 'Polygon', coordinates: [poly[h]] };
+        if (!points.some((pt, j) => j !== k && geoContains(hole, pt))) poly.splice(h, 1);
+      }
+    }
+  }
 }
 
 const snapshots = new Map();
@@ -41,6 +59,7 @@ function snapshot(year) {
       type: 'Feature', geometry: clockwise(f.geometry),
       properties: { rid: 'h' + year + '-' + i, name: f.properties.NAME || '' },
     }));
+    fillLakes(fc.features);
     snapshots.set(year, fc);
   }
   return snapshots.get(year);
@@ -161,9 +180,17 @@ for (const q of curated.puzzles) {
   const edges = { first: '1600-01-01', last: 'present' };
   const spans = q.facts.map((f) => ({
     from: f.from || '1600-01-01', to: f.to || 'present', unit: f.about,
-    tell: { start: f.fromText, end: f.toText, source: f.source, whenStart: f.whenStart, whenEnd: f.whenEnd },
+    tell: { start: f.fromText, end: f.toText, source: f.source, whenStart: f.whenStart, whenEnd: f.whenEnd, needs: f.needs || [f.about] },
   }));
   const win = windowFromSpans(q.shown, spans, edges);
+  // The labels each tell points at must be readable, as in the bank.
+  const sizeOf = new Map(placed.map(([, l]) => [l.lines.join(' ').toUpperCase(), readableSize(l)]));
+  for (const t of [win.startTell, win.endTell]) {
+    for (const need of t?.needs || []) {
+      const size = sizeOf.get(need.toUpperCase()) || 0;
+      if (!legible(size)) problems.push(q.id + ': tell label ' + need + (size ? ' is ' + size : ' is missing or touches the frame') + ' (' + [...sizeOf].map(([k, s]) => k + '@' + s).join(', ') + ')');
+    }
+  }
   if (win.startCensored || win.endCensored) problems.push(q.id + ': window open at one end');
   const [sy, ey] = windowYears(win, CURRENT_YEAR);
   if (ey - sy > MAX_WINDOW_YEARS) problems.push(q.id + ': window ' + sy + '-' + ey + ' is wider than ' + MAX_WINDOW_YEARS + ' years');
@@ -177,14 +204,14 @@ for (const q of curated.puzzles) {
   const color = crop.colors(v.st);
   if (q.distinct) distinctColors(q, v.st, color);
   out.push({
-    id: q.id, d: q.d, era: 'hb', snapshot: q.snapshot, shown: q.shown, src: 'hb', geo: 'geo/hb.json',
+    id: q.id, d: q.d, era: 'hb', snapshot: q.snapshot, shown: q.shown, src: 'hb',
     p: crop.p,
     draw: v.st.recs.map((r) => [r.rid, color.get(crop.unitId.get(r.unit))]),
     labels: placed.map(([, l]) => ({ t: l.lines, x: l.x, y: l.y, s: l.size, w: l.w })),
     win: { start: win.start, end: win.end, sy, ey },
     tells: {
-      start: { date: win.startTell.date, kind: 'fact', unit: win.startTell.unit, text: text(win.startTell, 'start'), source: win.startTell.source },
-      end: { date: win.endTell.date, kind: 'fact', unit: win.endTell.unit, text: text(win.endTell, 'end'), source: win.endTell.source },
+      start: { date: win.startTell.date, kind: 'fact', unit: win.startTell.unit, text: text(win.startTell, 'start'), source: win.startTell.source, needs: win.startTell.needs.map((n) => n.toUpperCase()) },
+      end: { date: win.endTell.date, kind: 'fact', unit: win.endTell.unit, text: text(win.endTell, 'end'), source: win.endTell.source, needs: win.endTell.needs.map((n) => n.toUpperCase()) },
     },
   });
 }
@@ -193,19 +220,17 @@ if (problems.length) {
   process.exit(1);
 }
 
-// Write: hb geometry holding only what the puzzles draw, the shard, and
-// the curated block of index.json.
-const usedRids = new Set(out.flatMap((p) => p.draw.map(([rid]) => rid)));
-const keep = { type: 'FeatureCollection', features: [...hbFeatures.values()].filter((f) => usedRids.has(f.properties.rid)).map((f) => ({ type: 'Feature', properties: { rid: f.properties.rid }, geometry: f.geometry })) };
-writeFileSync(tmpIn, JSON.stringify(keep));
-mkdirSync(path.join(OUT_DIR, 'geo'), { recursive: true });
+// Write the shard and the curated block of index.json. build-maps.mjs cuts
+// each puzzle's map file from build/hb.json.
 mkdirSync(path.join(OUT_DIR, 'bank'), { recursive: true });
-await mapshaper.runCommands('-i ' + tmpIn + ' name=hb -o ' + path.join(OUT_DIR, 'geo/hb.json') + ' format=topojson quantization=100000');
 rmSync(tmpIn, { force: true });
 rmSync(tmpLand, { force: true });
 writeFileSync(path.join(OUT_DIR, 'bank/C-00.json'), JSON.stringify(out));
 const indexFile = path.join(OUT_DIR, 'index.json');
 const index = existsSync(indexFile) ? JSON.parse(readFileSync(indexFile, 'utf8')) : {};
-index.curated = { file: 'bank/C-00.json', N: out.filter((p) => p.d === 'N').map((p) => p.id), H: out.filter((p) => p.d === 'H').map((p) => p.id) };
+// Curated maps are Normal only: their looser borders would stand out on
+// the tight Hard crops.
+if (out.some((p) => p.d !== 'N')) throw new Error('curated puzzles must be Normal');
+index.curated = { file: 'bank/C-00.json', N: out.map((p) => p.id) };
 writeFileSync(indexFile, JSON.stringify(index, null, 1));
 console.log('wrote ' + out.length + ' curated puzzles');

@@ -2,6 +2,7 @@
  "_about": [
   "Hand-curated puzzles for the years CShapes does not reach outside Europe, drawn from historical-basemaps snapshots (GPL-3.0, commit da7a4b7).",
   "draw: snapshot feature NAME (or NAME@lon,lat for one of several features with that name) mapped to the label shown; null keeps the fill but shows no label. Features not listed are drawn as land with no unit.",
+  "needs: the labels a fact asks the player to find, when they differ from 'about' (an empty list for a fact about something the map leaves out). Each must be readable on a phone, as for the bank.",
   "facts: dated statements about what the map shows. A fact with 'from' holds from that day; one with 'to' holds through that day. The window runs from the latest 'from' to the earliest 'to'; the facts that set the two ends are the tells. '{when}' in a text becomes the date. Every fact has a source.",
   "historical-basemaps snapshots are not consistent to the year (the 1815 file draws the 1846 Oregon line and New Spain, which ended in 1821). Each crop here was checked so that everything it shows fits one window; crops that could not be made consistent were left out."
  ],
@@ -11,10 +12,10 @@
    "d": "N",
    "snapshot": 1815,
    "center": [
-    -138,
-    62
+    -133,
+    58
    ],
-   "km": 3000,
+   "km": 2700,
    "shown": "1855-01-01",
    "draw": {
     "Russian Empire": "Russian Empire",
@@ -116,10 +117,10 @@
    "d": "N",
    "snapshot": 1815,
    "center": [
-    8,
-    39
+    13.5,
+    41.5
    ],
-   "km": 1600,
+   "km": 1350,
    "shown": "1820-01-01",
    "draw": {
     "Spain": "Spain",
@@ -193,7 +194,8 @@
      "about": "New Guinea",
      "to": "1884-11-02",
      "toText": "Eastern New Guinea is still unclaimed. Germany declared a protectorate over its north-east {when}, and Britain over its south-east three days later.",
-     "source": "https://en.wikipedia.org/wiki/German_New_Guinea"
+     "source": "https://en.wikipedia.org/wiki/German_New_Guinea",
+     "needs": []
     }
    ]
   },
@@ -230,69 +232,14 @@
    ]
   },
   {
-   "id": "C09",
-   "d": "N",
-   "snapshot": 1880,
-   "center": [
-    -6,
-    8
-   ],
-   "km": 1500,
-   "shown": "1881-01-01",
-   "draw": {
-    "Senegal (FR)": "Senegal",
-    "Gambia": "Gambia",
-    "Sierra Leone": "Sierra Leone",
-    "Liberia": "Liberia",
-    "Gold Coast (GB)": "Gold Coast",
-    "Lagos": "Lagos",
-    "Portuguese Guinea": "Portuguese Guinea",
-    "Asante": "Ashanti",
-    "Dahomey": "Dahomey",
-    "Tukular Caliphate": null,
-    "Futa Toro": null,
-    "Futa Jalon": null,
-    "Wassoulou Empire": null,
-    "Kong Empire": null,
-    "Mossi States": null,
-    "Borgu States": null,
-    "Dendi Kingdom": null,
-    "Sokoto Caliphate": null,
-    "Oyo": null,
-    "Ibadan": null
-   },
-   "maxBlank": 0.65,
-   "facts": [
-    {
-     "about": "Gold Coast",
-     "from": "1874-07-24",
-     "fromText": "The Gold Coast is a British colony, proclaimed {when}.",
-     "source": "https://countrystudies.us/ghana/8.htm"
-    },
-    {
-     "about": "Wassoulou",
-     "from": "1878-01-01",
-     "whenStart": "in 1878",
-     "fromText": "Samori Ture's Wassoulou Empire (unlabeled, in the interior) is on the map; he proclaimed it {when}.",
-     "source": "https://en.wikipedia.org/wiki/Samori_Ture"
-    },
-    {
-     "about": "Togo",
-     "to": "1884-07-04",
-     "toText": "The coast between the Gold Coast and Dahomey is still unclaimed. Germany made it the Togoland protectorate {when}.",
-     "source": "https://en.wikipedia.org/wiki/Togoland"
-    }
-   ]
-  },
-  {
    "id": "C10",
    "d": "N",
    "snapshot": 1880,
    "center": [
-    36,
-    15
+    38,
+    12
    ],
-   "km": 3600,
+   "km": 3000,
    "shown": "1880-01-01",
    "draw": {
     "Egypt": "Egypt",
@@ -512,7 +459,11 @@
      "about": "Sicily (Savoy)",
      "to": "1720-02-16",
      "toText": "Sicily still shares the colour of Savoy, and Sardinia the Habsburg colour. The Treaty of The Hague swapped them {when}.",
-     "source": "https://en.wikipedia.org/wiki/Treaty_of_The_Hague_(1720)"
+     "source": "https://en.wikipedia.org/wiki/Treaty_of_The_Hague_(1720)",
+     "needs": [
+      "Savoy",
+      "Habsburg Lands"
+     ]
     }
    ],
    "distinct": [
@@ -521,176 +472,14 @@
    ]
   },
   {
-   "id": "C32",
-   "d": "H",
-   "snapshot": 1783,
-   "center": [
-    -80,
-    45
-   ],
-   "km": 1200,
-   "shown": "1787-01-01",
-   "draw": {
-    "United States of America": "United States",
-    "Quebec": "Quebec",
-    "Rupert's Land": "Rupert's Land"
-   },
-   "facts": [
-    {
-     "about": "United States",
-     "from": "1783-09-03",
-     "fromText": "The United States has the borders of the Treaty of Paris, signed {when}.",
-     "source": "https://www.archives.gov/milestone-documents/treaty-of-paris"
-    },
-    {
-     "about": "Quebec",
-     "to": "1791-12-25",
-     "toText": "Quebec is still one province. It was split into Upper and Lower Canada {when}.",
-     "source": "https://en.wikipedia.org/wiki/Constitutional_Act_1791"
-    }
-   ]
-  },
-  {
-   "id": "C33",
-   "d": "H",
-   "snapshot": 1815,
-   "center": [
-    -58,
-    -28
-   ],
-   "km": 1500,
-   "shown": "1815-06-01",
-   "draw": {
-    "Viceroyalty of Brazil": "Brazil",
-    "Paraguay": "Paraguay",
-    "United Provinces of the Río de la Plata": "Río de la Plata"
-   },
-   "facts": [
-    {
-     "about": "Paraguay",
-     "from": "1811-05-15",
-     "fromText": "Paraguay stands apart from the Río de la Plata, as it has since its revolution {when}.",
-     "source": "https://en.wikipedia.org/wiki/Independence_of_Paraguay"
-    },
-    {
-     "about": "Río de la Plata",
-     "from": "1814-06-23",
-     "fromText": "The Banda Oriental (Uruguay) belongs to the Río de la Plata, whose army took Montevideo {when}.",
-     "source": "https://en.wikipedia.org/wiki/Siege_of_Montevideo_(1812%E2%80%931814)"
-    },
-    {
-     "about": "Río de la Plata",
-     "to": "1817-01-19",
-     "toText": "The Banda Oriental is still part of the Río de la Plata. Portuguese troops took Montevideo {when}.",
-     "source": "https://en.wikipedia.org/wiki/Division_of_Royal_Volunteers"
-    }
-   ]
-  },
-  {
-   "id": "C34",
-   "d": "H",
-   "snapshot": 1815,
-   "center": [
-    9,
-    35.5
-   ],
-   "km": 1200,
-   "shown": "1820-01-01",
-   "draw": {
-    "Kingdom of the Two Sicilies": "Two Sicilies",
-    "Tunis": "Tunis",
-    "Kingdom of Sardinia": "Sardinia",
-    "Algiers": "Algiers"
-   },
-   "facts": [
-    {
-     "about": "Two Sicilies",
-     "from": "1816-12-08",
-     "fromText": "Naples and Sicily appear as one Kingdom of the Two Sicilies, founded {when}.",
-     "source": "https://en.wikipedia.org/wiki/Kingdom_of_the_Two_Sicilies"
-    },
-    {
-     "about": "Algiers",
-     "to": "1830-07-04",
-     "toText": "Algiers is still a regency of its own. France captured it {when}.",
-     "source": "https://en.wikipedia.org/wiki/French_conquest_of_Algeria"
-    }
-   ],
-   "maxBlank": 0.55
-  },
-  {
-   "id": "C35",
-   "d": "H",
-   "snapshot": 1880,
-   "center": [
-    139,
-    -13
-   ],
-   "km": 1700,
-   "shown": "1870-01-01",
-   "draw": {
-    "Netherlands Indies": "Dutch East Indies",
-    "Queensland (UK)": "Queensland",
-    "Northern Territory (UK)": "Northern Territory"
-   },
-   "maxBlank": 0.4,
-   "facts": [
-    {
-     "about": "Northern Territory",
-     "from": "1863-07-06",
-     "fromText": "The Northern Territory exists, annexed to South Australia {when}.",
-     "source": "https://www.foundingdocs.gov.au/item-did-49.html"
-    },
-    {
-     "about": "New Guinea",
-     "to": "1884-11-02",
-     "toText": "Eastern New Guinea is still unclaimed. Germany declared a protectorate over its north-east {when}, and Britain over its south-east three days later.",
-     "source": "https://en.wikipedia.org/wiki/German_New_Guinea"
-    }
-   ]
-  },
-  {
-   "id": "C36",
-   "d": "H",
-   "snapshot": 1880,
-   "center": [
-    40,
-    12
-   ],
-   "km": 1500,
-   "shown": "1880-01-01",
-   "draw": {
-    "Harer (Egypt)": "Harar",
-    "Ethiopia": "Ethiopia",
-    "Egypt": "Egypt",
-    "Arabia": null
-   },
-   "maxBlank": 0.75,
-   "facts": [
-    {
-     "about": "Harar",
-     "from": "1875-10-11",
-     "fromText": "Harar and the Somali coast are drawn as Egyptian; Egypt took Harar {when}.",
-     "source": "https://en.wikipedia.org/wiki/Egyptian_invasion_of_Harar"
-    },
-    {
-     "about": "Harar",
-     "to": "1884-12-31",
-     "whenEnd": "in 1884",
-     "toText": "Egypt still holds the Somali coast. It gave up its Somali territories {when}.",
-     "source": "https://en.wikipedia.org/wiki/Khedivate%27s_Somali_Coast"
-    }
-   ]
-  },
-  {
    "id": "C37",
-   "d": "H",
+   "d": "N",
    "snapshot": 1880,
    "center": [
-    0,
-    7
+    1,
+    7.5
    ],
-   "km": 1000,
+   "km": 1250,
    "shown": "1880-01-01",
    "draw": {
     "Gold Coast (GB)": "Gold Coast",
@@ -702,103 +491,6 @@
     "Kong Empire": null,
     "Oyo": null,
     "Ibadan": null
-   },
-   "maxBlank": 0.5,
-   "facts": [
-    {
-     "about": "Gold Coast",
-     "from": "1874-07-24",
-     "fromText": "The Gold Coast is a British colony, proclaimed {when}.",
-     "source": "https://countrystudies.us/ghana/8.htm"
-    },
-    {
-     "about": "Togo",
-     "to": "1884-07-04",
-     "toText": "The coast between the Gold Coast and Dahomey is still unclaimed. Germany made it the Togoland protectorate {when}.",
-     "source": "https://en.wikipedia.org/wiki/Togoland"
-    }
-   ]
-  },
-  {
-   "id": "C38",
-   "d": "H",
-   "snapshot": 1783,
-   "center": [
-    32,
-    46.5
-   ],
-   "km": 1100,
-   "shown": "1792-06-01",
-   "draw": {
-    "Russian Empire": "Russian Empire",
-    "Ottoman Empire": "Ottoman Empire",
-    "Poland": "Poland"
-   },
-   "facts": [
-    {
-     "about": "Russian Empire",
-     "from": "1792-01-09",
-     "fromText": "Russia holds the coast between the Bug and the Dniester, gained by the Treaty of Jassy {when}.",
-     "source": "https://en.wikipedia.org/wiki/Treaty_of_Jassy"
-    },
-    {
-     "about": "Poland",
-     "to": "1793-01-22",
-     "toText": "Poland has not yet lost the land of the Second Partition, agreed by Russia and Prussia {when}.",
-     "source": "https://en.wikipedia.org/wiki/Second_Partition_of_Poland"
-    }
-   ]
-  },
-  {
-   "id": "C40",
-   "d": "H",
-   "snapshot": 1783,
-   "center": [
-    19,
-    54
-   ],
-   "km": 900,
-   "shown": "1780-01-01",
-   "draw": {
-    "Prussia": "Prussia",
-    "Poland": "Poland",
-    "Russian Empire": "Russian Empire",
-    "Sweden": "Sweden"
-   },
-   "facts": [
-    {
-     "about": "Poland",
-     "from": "1772-08-05",
-     "fromText": "Poland has already lost the land of the First Partition, agreed {when}.",
-     "source": "https://www.britannica.com/event/Partitions-of-Poland"
-    },
-    {
-     "about": "Poland",
-     "to": "1793-01-22",
-     "toText": "Poland has not yet lost the land of the Second Partition, agreed by Russia and Prussia {when}.",
-     "source": "https://en.wikipedia.org/wiki/Second_Partition_of_Poland"
-    }
-   ],
-   "maxBlank": 0.35
-  },
-  {
-   "id": "C42",
-   "d": "H",
-   "snapshot": 1880,
-   "center": [
-    3,
-    7
-   ],
-   "km": 1000,
-   "shown": "1880-01-01",
-   "draw": {
-    "Lagos": "Lagos",
-    "Dahomey": "Dahomey",
-    "Gold Coast (GB)": "Gold Coast",
-    "Oyo": null,
-    "Ibadan": null,
-    "Borgu States": null,
-    "Asante": "Ashanti"
    },
    "maxBlank": 0.7,
    "facts": [
@@ -812,7 +504,8 @@
      "about": "Togo",
      "to": "1884-07-04",
      "toText": "The coast between the Gold Coast and Dahomey is still unclaimed. Germany made it the Togoland protectorate {when}.",
-     "source": "https://en.wikipedia.org/wiki/Togoland"
+     "source": "https://en.wikipedia.org/wiki/Togoland",
+     "needs": []
     }
    ]
   },
@@ -845,75 +538,8 @@
      "about": "New Guinea",
      "to": "1884-11-02",
      "toText": "Eastern New Guinea is still unclaimed. Germany declared a protectorate over its north-east {when}, and Britain over its south-east three days later.",
-     "source": "https://en.wikipedia.org/wiki/German_New_Guinea"
-    }
-   ]
-  },
-  {
-   "id": "C45",
-   "d": "H",
-   "snapshot": 1880,
-   "center": [
-    -57,
-    -26
-   ],
-   "km": 1100,
-   "shown": "1880-01-01",
-   "draw": {
-    "Paraguay": "Paraguay",
-    "Argentina": "Argentina",
-    "Kingdom of Brazil": "Empire of Brazil",
-    "Uruguay": "Uruguay"
-   },
-   "facts": [
-    {
-     "about": "Argentina",
-     "from": "1876-02-03",
-     "fromText": "Argentina holds the land south of the Pilcomayo and Misiones, as the Machaín-Irigoyen Treaty set {when}.",
-     "source": "https://en.wikipedia.org/wiki/Macha%C3%ADn-Irigoyen_Treaty"
-    },
-    {
-     "about": "Empire of Brazil",
-     "to": "1889-11-14",
-     "toText": "Brazil is still an empire. The republic was proclaimed {when}.",
-     "source": "https://en.wikipedia.org/wiki/Proclamation_of_the_Republic_(Brazil)"
-    }
-   ]
-  },
-  {
-   "id": "C46",
-   "d": "H",
-   "snapshot": 1783,
-   "center": [
-    26,
-    48.5
-   ],
-   "km": 900,
-   "shown": "1785-01-01",
-   "draw": {
-    "Poland": "Poland",
-    "Austrian Empire": "Habsburg Monarchy",
-    "Ottoman Empire": "Ottoman Empire",
-    "Russian Empire": "Russian Empire"
-   },
-   "facts": [
-    {
-     "about": "Poland",
-     "from": "1772-08-05",
-     "fromText": "Poland has already lost the land of the First Partition, agreed {when}.",
-     "source": "https://www.britannica.com/event/Partitions-of-Poland"
-    },
-    {
-     "about": "Habsburg Monarchy",
-     "from": "1775-05-07",
-     "fromText": "Bukovina is Austrian, ceded by the Ottomans {when}.",
-     "source": "https://en.wikipedia.org/wiki/Bukovina"
-    },
-    {
-     "about": "Poland",
-     "to": "1793-01-22",
-     "toText": "Poland has not yet lost the land of the Second Partition, agreed by Russia and Prussia {when}.",
-     "source": "https://en.wikipedia.org/wiki/Second_Partition_of_Poland"
+     "source": "https://en.wikipedia.org/wiki/German_New_Guinea",
+     "needs": []
     }
    ]
   }
