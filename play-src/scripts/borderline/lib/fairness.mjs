@@ -1,9 +1,12 @@
 // Two late checks on a judged crop: the countries its tells name must have
-// readable labels, and it must not draw a contested border as settled.
+// readable labels, and it must not show an area in CONTESTED_REJECT.
 import { geoDistance } from 'd3-geo';
 import { makeProjection, FRAME_W as W, FRAME_H as H } from '../../../src/borderline/projection.js';
-import { CONTESTED_REJECT, LABEL_INSET, LABEL_READABLE } from '../config.mjs';
+import { CONTESTED_REJECT, LABEL_INSET, LABEL_READABLE, MISSING_LAND_MIN_PX } from '../config.mjs';
 import { boxH } from './labels.mjs';
+import { addDays } from '../../../src/borderline/window.js';
+
+const EARTH_KM = 6371.0088;
 
 const NOT_A_UNIT = new Set(['blank', 'sea']);
 
@@ -62,10 +65,14 @@ export function inFrame(p, pt) {
  * `end` is the last day of the window or 'present'.
  */
 export function contestedIn(p, start, end) {
+  // Equal-area projection: one frame unit is EARTH_KM / s kilometres.
+  const km2PerUnit = (EARTH_KM / p.s) ** 2;
   for (const area of CONTESTED_REJECT) {
-    const reaches = end === 'present' || end >= area.from;
+    const last = area.endsOn ? addDays(area.from, -1) : area.from;
+    const reaches = end === 'present' || end >= last;
     const before = area.to && start > area.to;
-    if (reaches && !before && area.points.some((pt) => inFrame(p, pt))) return area.name;
+    const seen = !area.km2 || area.km2 / km2PerUnit >= MISSING_LAND_MIN_PX;
+    if (reaches && !before && seen && area.points.some((pt) => inFrame(p, pt))) return area.name;
   }
   return null;
 }

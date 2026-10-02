@@ -155,11 +155,29 @@ test('a label in the corner or over the frame rule is not readable', () => {
   assert.equal(readableSize({ lines: ['UPPER VOLTA'], x: 44, y: 14, size: 13, w: 80 }), 0);
 });
 
-test('Crimea after 18 March 2014 is never in a window', () => {
+test('Crimea after 18 March 2014 is never in a window, nor its annexation as a tell', () => {
   const p = { c: [34, 46], s: scaleForWidth(1500) };
   assert.equal(contestedIn(p, '2014-03-18', 'present'), 'Crimea');
-  assert.equal(contestedIn(p, '1992-01-01', '2014-03-17'), null);
+  assert.equal(contestedIn(p, '1992-01-01', '2014-03-17'), 'Crimea');
+  assert.equal(contestedIn(p, '1992-01-01', '2014-03-16'), null);
   assert.equal(contestedIn({ c: [10, 50], s: scaleForWidth(1500) }, '2014-03-18', 'present'), null);
+});
+
+test('the West Bank, Gaza and Golan after 10 June 1967 and Western Sahara after 1975 are rejected', () => {
+  const levant = { c: [35, 32], s: scaleForWidth(2500) };
+  assert.equal(contestedIn(levant, '1957-01-01', '1967-06-10'), 'West Bank, Gaza and Golan');
+  assert.equal(contestedIn(levant, '1957-01-01', '1967-06-09'), null);
+  const sahara = { c: [-12, 25], s: scaleForWidth(2500) };
+  assert.equal(contestedIn(sahara, '1960-01-01', '1975-11-14'), 'Western Sahara');
+  assert.equal(contestedIn(sahara, '1960-01-01', '1975-11-13'), null);
+});
+
+test('missing land is rejected only where it would be visible', () => {
+  assert.equal(contestedIn({ c: [-60, -50], s: scaleForWidth(3000) }, '1950-01-01', '1960-01-01'), 'Falklands (missing land)');
+  // Gibraltar is under a speck even on a tight crop; Macau shows on one.
+  assert.equal(contestedIn({ c: [-5, 37], s: scaleForWidth(700) }, '1950-01-01', '1960-01-01'), null);
+  assert.equal(contestedIn({ c: [113.5, 22.5], s: scaleForWidth(650) }, '1950-01-01', '1960-01-01'), 'Macau (missing land)');
+  assert.equal(contestedIn({ c: [113.5, 22.5], s: scaleForWidth(3000) }, '1950-01-01', '1960-01-01'), null);
 });
 
 // ---------- names
@@ -263,7 +281,7 @@ test('bank: every tell label is readable and inside the frame', () => {
   }
 });
 
-test('bank: no map shows Crimea on or after 18 March 2014, and curated maps are Normal only', () => {
+test('bank: no map shows a rejected contested or missing area, and curated maps are Normal only', () => {
   for (const p of bank) {
     if (p.src === 'hb') { assert.equal(p.d, 'N', p.id); continue; }
     assert.equal(contestedIn(p.p, p.win.start, p.win.end), null, p.id);
