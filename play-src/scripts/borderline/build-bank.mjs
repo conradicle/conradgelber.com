@@ -269,6 +269,9 @@ async function main() {
     }
     const fill = ['N', 'H'].map((d) => d + ' ' + kept[d].map((l, e) => l.length + '/' + quota(d, e)).join(' ')).join('  ');
     console.log('round ' + round + ': ' + specs.length + ' crops in ' + ((Date.now() - t0) / 1000).toFixed(0) + 's  ' + fill);
+    // A resumed build saves after every round, so a chunk stopped part way
+    // keeps every round it finished.
+    if (resume && !dry) await write(kept, names);
   }
   console.log(Object.entries(stats).sort().map(([k, v]) => k + '=' + v).join('\n'));
   if (unverified.size) {
