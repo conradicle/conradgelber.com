@@ -179,6 +179,10 @@ test('land CShapes leaves unclaimed for years is rejected while it is blank', ()
   assert.equal(contestedIn({ c: [1, 8], s: scaleForWidth(1500) }, '1920-01-01', '1921-01-01'), 'Togoland 1919-1922 (blank land)');
   assert.equal(contestedIn({ c: [-11, 28.5], s: scaleForWidth(1000) }, '1905-01-01', '1912-11-26'), 'Cape Juby strip 1904-1912 (blank land)');
   assert.equal(contestedIn({ c: [-11, 28.5], s: scaleForWidth(1000) }, '1912-11-27', '1920-01-01'), null);
+  assert.equal(contestedIn({ c: [21.3, 42], s: scaleForWidth(700) }, '1913-06-01', '1913-07-01'), 'Balkans 1913 (blank land)');
+  assert.equal(contestedIn({ c: [5, 13.8], s: scaleForWidth(1000) }, '1898-07-01', '1898-08-01'), 'West Africa 1898 (blank land)');
+  assert.equal(contestedIn({ c: [47.7, 29.3], s: scaleForWidth(600) }, '1915-01-01', '1922-12-01'), 'Kuwait 1914-1922 (blank land)');
+  assert.equal(contestedIn({ c: [47.7, 29.3], s: scaleForWidth(600) }, '1932-09-23', '1950-01-01'), null);
 });
 
 test('missing land is rejected only where it would be visible', () => {
