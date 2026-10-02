@@ -195,7 +195,7 @@ async function rejudge() {
   const seen = new Set();
   specs.forEach((spec, k) => {
     const r = res[k];
-    const key = spec.diff + ':' + (r.reject || 'ok');
+    const key = spec.diff + ':' + (r.reject === 'contested' ? 'contested ' + r.contested : r.reject || 'ok');
     stats[key] = (stats[key] || 0) + 1;
     if (r.reject === 'error') console.error(r.error);
     if (r.reject === 'illegible' || !r.reject) sizes.push([spec.diff, r.tellLabel]);
