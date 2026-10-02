@@ -85,6 +85,27 @@ export const VISIBLE_MIN_AREA = 120;
 // Labels: smallest and largest font sizes, in frame units.
 export const LABEL_MIN = 10;
 export const LABEL_MAX = { N: 15, H: 19 };
+
+// A tell names countries, so each country it names that is on the shown
+// map must have a label a player can read. The map is drawn 308 CSS px
+// wide on a 360 px phone (20 px page gutters and the 6 px mount), 323 px
+// on a 375 px phone and 338 px on a 390 px phone, so 12 frame units is
+// 10.3, 10.8 and 11.3 CSS px of all-capital text with a light halo. Below
+// that the smaller labels stop being readable at arm's length.
+export const LABEL_READABLE = 12;
+// The whole label box must sit inside the inner frame rule (5 units in
+// from the edge) with a unit to spare, clear of the double frame.
+export const LABEL_INSET = 6;
+
+// Contested territory. A crop is rejected when one of these points falls
+// inside the frame and the puzzle's window reaches `from` or later: the
+// map would take a side on a border most of the world does not recognize.
+export const CONTESTED_REJECT = [
+  {
+    name: 'Crimea', from: '2014-03-18',
+    points: [[33.52, 44.6], [34.1, 44.95], [35.38, 45.03], [36.47, 45.36], [33.37, 45.19], [34.4, 45.71], [32.55, 45.45]],
+  },
+];
 // Average small-caps advance of Spectral as a fraction of the font size.
 export const LABEL_ADVANCE = 0.66;
 

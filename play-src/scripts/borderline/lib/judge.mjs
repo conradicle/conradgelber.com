@@ -10,6 +10,7 @@ import {
 import { projectRings, fillRings, largestChange, matchRegions, regionAreas, adjacency, SEA, BLANK } from './raster.mjs';
 import { placeLabels } from './labels.mjs';
 import { labelFor, nameDates } from './names.mjs';
+import { contestedIn, legible, tellLabelSize } from './fairness.mjs';
 import { OPEN } from './world.mjs';
 
 const EU_FIRST = EU_FIRST_YEAR + '-01-01';
@@ -34,6 +35,8 @@ export class Crop {
     this.landRings = projectRings(world.land.geometry, this.proj);
     // Widest window allowed; the tests lift it to see full windows.
     this.maxYears = MAX_WINDOW_YEARS;
+    // Label and contested-territory checks; the window tests turn them off.
+    this.checkFairness = true;
   }
 
   ringsOf(r) {
@@ -284,6 +287,13 @@ export class Crop {
       if ((this.names.post2019?.noPresentWithUnits || []).some((u) => shownUnits.has(u))) return { reject: 'post2019', nLabels };
     }
     for (const t of [startTell, endTell]) if (t) t.precision = this.precisionOf(t);
+    const end = endTell ? addDays(endTell.date, -1) : 'present';
+
+    const contested = contestedIn(this.p, startTell.date, end);
+    if (contested && this.checkFairness) return { reject: 'contested', nLabels, contested };
+    const labelOf = new Map([...placed].map(([id, l]) => [st.recOf.get(id).unit, l]));
+    const tellLabel = tellLabelSize(labelOf, startTell, endTell);
+    if (!legible(tellLabel) && this.checkFairness) return { reject: 'illegible', nLabels, tellLabel };
 
     const color = this.colors(st);
 
@@ -291,10 +301,11 @@ export class Crop {
       nLabels,
       sea,
       blank,
+      tellLabel,
       draw: st.recs.map((r) => [r.rid, color.get(this.unitId.get(r.unit))]),
       labels: [...placed].map(([id, l]) => ({ ...l, unit: st.recOf.get(id).unit })),
       start: startTell.date,
-      end: endTell ? addDays(endTell.date, -1) : 'present',
+      end,
       startTell,
       endTell,
     };
