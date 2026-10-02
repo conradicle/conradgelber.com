@@ -43,14 +43,15 @@ export function loadWorld(file = path.join(BUILD_DIR, 'geo.json'), { strict = tr
   return { topo, records, land, euVerified, byRid: new Map(records.map((r) => [r.rid, r])) };
 }
 
-/** Sourced corrections to CShapes 2.0 record start dates (cs-dates.json). */
+/** Sourced corrections to CShapes 2.0 record dates (cs-dates.json). */
 function applyCsDates(records, strict, file = path.join(HAND_DIR, 'cs-dates.json')) {
   if (!existsSync(file)) return;
   for (const ch of JSON.parse(readFileSync(file, 'utf8')).changes) {
-    if (!ch.source) throw new Error('cs-dates: no source for ' + ch.unit + ' ' + ch.date);
-    const rec = records.find((r) => r.src === 'cs' && r.unit === ch.unit && r.start === ch.from);
-    if (!rec) { if (strict) throw new Error('cs-dates: no ' + ch.unit + ' record from ' + ch.from); continue; }
-    rec.start = ch.date;
+    if (!ch.source) throw new Error('cs-dates: no source for ' + ch.unit);
+    const side = 'start' in ch ? 'start' : 'end';
+    const mine = records.filter((r) => r.src === 'cs' && r.unit === ch.unit && r[side] === ch[side]);
+    if (!mine.length) { if (strict) throw new Error('cs-dates: no ' + ch.unit + ' record with ' + side + ' ' + ch[side]); continue; }
+    for (const r of mine) r[side] = side === 'start' ? ch.newStart : ch.newEnd;
   }
 }
 
