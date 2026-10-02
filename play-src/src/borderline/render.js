@@ -24,21 +24,24 @@ function trim(d) {
   return d ? d.replace(/-?\d+\.\d+/g, (n) => String(r1(Number(n)))) : '';
 }
 
+// Hand-inked wobble: every coast and border, on every map, is pushed up to
+// about a unit either way by one fixed noise field, so CShapes and
+// historical-basemaps lines read as the same engraver's hand.
+export const WOBBLE = { frequency: 0.045, octaves: 2, seed: 11, scale: 2.4 };
+
 /**
  * @param {object} puzzle  a bank puzzle (p, draw, labels)
- * @param {object} topo    TopoJSON holding the puzzle's records (object "era"
- *                         with a rid property, or "hb" for curated maps)
- * @param {object} land    TopoJSON with object "land"
+ * @param {object} topo    the puzzle's map file: TopoJSON with object "r"
+ *                         (records, each with a rid) and object "land"
  * @param {{idPrefix?: string}} [opts]
  * @returns {string} inner SVG markup for a viewBox of 0 0 W H
  */
-export function mapMarkup(puzzle, topo, land, opts = {}) {
+export function mapMarkup(puzzle, topo, opts = {}) {
   const id = opts.idPrefix || 'bl';
   const projection = makeProjection(puzzle.p);
   const path = geoPath(projection);
-  const objName = Object.keys(topo.objects)[0];
   const byRid = new Map();
-  for (const g of topo.objects[objName].geometries) byRid.set(g.properties.rid, g);
+  for (const g of topo.objects.r.geometries) byRid.set(g.properties.rid, g);
 
   const drawn = [];
   for (const [rid, color] of puzzle.draw) {
@@ -46,7 +49,7 @@ export function mapMarkup(puzzle, topo, land, opts = {}) {
     if (!g) throw new Error('map data has no record ' + rid);
     drawn.push({ g, color, d: trim(path(feature(topo, g))) });
   }
-  const landD = trim(path(feature(land, land.objects.land)));
+  const landD = trim(path(feature(topo, topo.objects.land)));
   const borders = trim(path(mesh(topo, { type: 'GeometryCollection', geometries: drawn.map((x) => x.g) }, (a, b) => a !== b)));
   const grat = trim(path(geoGraticule().step([5, 5])()));
 
@@ -59,6 +62,11 @@ export function mapMarkup(puzzle, topo, land, opts = {}) {
     '<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/>' +
     '<feColorMatrix in="n" type="matrix" values="0 0 0 0 0.36  0 0 0 0 0.25  0 0 0 0 0.14  0 0 0 -1.1 0.62"/>' +
     '</filter>');
+  out.push('<filter id="' + id + '-ink" x="-2%" y="-2%" width="104%" height="104%">' +
+    '<feTurbulence type="fractalNoise" baseFrequency="' + WOBBLE.frequency + '" numOctaves="' + WOBBLE.octaves +
+    '" seed="' + WOBBLE.seed + '" result="w"/>' +
+    '<feDisplacementMap in="SourceGraphic" in2="w" scale="' + WOBBLE.scale + '" xChannelSelector="R" yChannelSelector="G"/>' +
+    '</filter>');
   out.push('<radialGradient id="' + id + '-rim" cx="50%" cy="50%" r="72%">' +
     '<stop offset="62%" stop-color="#6b4a2a" stop-opacity="0"/>' +
     '<stop offset="100%" stop-color="#6b4a2a" stop-opacity="0.22"/></radialGradient>');
@@ -69,6 +77,7 @@ export function mapMarkup(puzzle, topo, land, opts = {}) {
   out.push('<path d="' + grat + '" fill="none" stroke="' + GRATICULE + '" stroke-width="0.5"/>');
   // Engraved water lines: rings stroked outward from the coast, each
   // covered by a slightly narrower ring of sea, then the land on top.
+  out.push('<g filter="url(#' + id + '-ink)">');
   for (const off of [7.5, 5, 2.5]) {
     out.push('<path d="' + landD + '" fill="none" stroke="' + WATERLINE + '" stroke-width="' + (2 * off + 0.6) + '" stroke-linejoin="round"/>');
     out.push('<path d="' + landD + '" fill="none" stroke="' + SEA + '" stroke-width="' + (2 * off - 0.6) + '" stroke-linejoin="round"/>');
@@ -78,9 +87,12 @@ export function mapMarkup(puzzle, topo, land, opts = {}) {
   // Hand-tinted bands just inside each border.
   drawn.forEach((x, i) => out.push('<path d="' + x.d + '" fill="none" stroke="' + BANDS[x.color] +
     '" stroke-width="5" stroke-opacity="0.55" clip-path="url(#' + id + '-c' + i + ')"/>'));
+  out.push('</g>');
   out.push('<path d="' + grat + '" fill="none" stroke="' + GRATICULE + '" stroke-width="0.4" stroke-opacity="0.6"/>');
+  out.push('<g filter="url(#' + id + '-ink)">');
   out.push('<path d="' + borders + '" fill="none" stroke="' + BORDER + '" stroke-width="0.8" stroke-dasharray="3 1.2 0.8 1.2" stroke-linejoin="round"/>');
   out.push('<path d="' + landD + '" fill="none" stroke="' + INK + '" stroke-width="0.9" stroke-linejoin="round"/>');
+  out.push('</g>');
 
   for (const l of puzzle.labels) {
     const lines = l.t;

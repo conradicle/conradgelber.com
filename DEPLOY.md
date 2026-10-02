@@ -265,9 +265,11 @@ Source, in `play-src/`:
 - `src/borderline/`: the page (`main.js`), the map drawing shared with the
   PNG renderer (`render.js`, `projection.js`), the window function
   (`window.js`), scoring with its tunable constants (`score.js`: `K.N`,
-  `K.H`, `HINT_COST`) and daily seeding (`seed.js`).
+  `K.H`, `HINT_COST`) and the daily schedule (`seed.js`: one fixed shuffle
+  dealt five a day, so a puzzle repeats only after the whole bank).
 - `scripts/borderline/`: the data pipeline. Tunable fairness settings are in
-  `config.mjs` (`VISIBLE_MIN_AREA`, `MAX_WINDOW_YEARS`, crop widths).
+  `config.mjs` (`VISIBLE_MIN_AREA`, `MAX_WINDOW_YEARS`, crop widths,
+  `LABEL_READABLE` for tell labels, `CONTESTED_REJECT`).
 - `data/borderline/`: the hand-made tables, each date with a source:
   `names.json` (labels and renames), `eu-dates.json` (real dates for
   CShapes-Europe changes), `curated.json` (the pre-1886 maps).
@@ -280,13 +282,22 @@ npm --prefix play-src run borderline:data
 ```
 
 That fetches and hash-checks the sources, builds the geometry, judges a few
-thousand crops into `borderline/data/bank/`, and adds the curated maps.
+thousand crops into `borderline/data/bank/`, adds the curated maps, and cuts
+the map files in `borderline/data/geo/` (one per difficulty, era and grid
+cell, holding only what its puzzles draw, so a game downloads a few hundred
+KB). After a rules change, `node play-src/scripts/borderline/build-bank.mjs
+--rejudge` re-checks the committed bank in about a minute, and `--resume`
+also refills the quotas; run `build-curated.mjs` and `build-maps.mjs` after
+either.
 `borderline/data/bank.csv` lists every puzzle for skimming. Spot-check any
 puzzle as a PNG (written to `play-src/data/borderline/build/png/`):
 
 ```bash
 node play-src/scripts/borderline/render-puzzle.mjs N0042 H0007 C01
 ```
+
+`--blind 20 --curated 5 --out dir` instead writes shuffled maps with no ids
+and an `answer-key.txt`, to test whether the curated maps stand out.
 
 After a change to the names or the judge, also regenerate the test fixture
 with `node play-src/scripts/borderline/make-fixture.mjs`. Then rebuild the
@@ -303,8 +314,8 @@ the U.S.S.R. in 1991, Zaire starts in 1971 and so on), the Russian Alaska
 map ending in 1867, and checks over every committed puzzle.
 
 Licenses: the files in `borderline/data/` made from CShapes and
-CShapes-Europe are CC BY-NC-SA 4.0 like their sources, and `geo/hb.json`
-(from historical-basemaps) is GPL-3.0. The About section on the page
+CShapes-Europe are CC BY-NC-SA 4.0 like their sources, and the curated
+map files `geo/g-C*.json` (from historical-basemaps) are GPL-3.0. The About section on the page
 credits all three.
 
 ## The /pool/ game
