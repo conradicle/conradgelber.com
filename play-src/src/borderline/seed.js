@@ -29,42 +29,59 @@ export function rng(seed) {
   };
 }
 
-/**
- * The pools a game draws from: the curated pre-1886 maps, then one pool
- * per era of the bank. Each round picks a pool by weight, then a puzzle.
- * @returns {{weight:number, ids:string[]}[]}
- */
-export function pools(index, diff) {
-  const out = [];
-  const curated = index.curated ? index.curated[diff] || [] : [];
-  if (curated.length) out.push({ weight: 0.6, ids: curated });
-  const d = index.difficulties[diff];
-  d.eraOffsets.forEach((start, era) => {
-    const end = era + 1 < d.eraOffsets.length ? d.eraOffsets[era + 1] : d.count;
-    const ids = [];
-    for (let n = start; n < end; n++) ids.push(diff + String(n).padStart(4, '0'));
-    if (ids.length) out.push({ weight: 1, ids });
-  });
-  return out;
+/** Every puzzle id of a difficulty: the curated maps, then the bank. */
+export function allIds(index, diff) {
+  const ids = [...(index.curated?.[diff] || [])];
+  for (let n = 0; n < index.difficulties[diff].count; n++) ids.push(diff + String(n).padStart(4, '0'));
+  return ids;
 }
 
-/** Pick `count` distinct puzzle ids. */
+/**
+ * Pick `count` distinct ids, every puzzle equally likely, so each era turns
+ * up in proportion to how many puzzles it has.
+ */
 export function pick(index, diff, rand, count, avoid = new Set()) {
-  const ps = pools(index, diff);
-  const total = ps.reduce((s, p) => s + p.weight, 0);
+  const ids = allIds(index, diff);
+  const fresh = ids.filter((id) => !avoid.has(id));
+  const from = fresh.length >= count ? fresh : ids;
   const chosen = [];
-  let guard = 0;
-  while (chosen.length < count && guard++ < 1000) {
-    let r = rand() * total;
-    let pool = ps[ps.length - 1];
-    for (const p of ps) { if ((r -= p.weight) < 0) { pool = p; break; } }
-    const id = pool.ids[Math.floor(rand() * pool.ids.length)];
-    if (chosen.includes(id) || avoid.has(id)) continue;
-    chosen.push(id);
+  while (chosen.length < count && chosen.length < from.length) {
+    const id = from[Math.floor(rand() * from.length)];
+    if (!chosen.includes(id)) chosen.push(id);
   }
   return chosen;
 }
 
+// The daily schedule: one fixed shuffle of every puzzle of a difficulty,
+// dealt out `count` a day from this date. A puzzle comes back only when the
+// whole shuffle has been dealt, so the gap between repeats is exactly
+// scheduleDays() days. Five consecutive ids of a uniform shuffle are a
+// uniform sample, so eras appear in proportion to their size.
+export const DAILY_EPOCH = '2026-10-01';
+
+export const scheduleDays = (index, diff, count) => Math.floor(allIds(index, diff).length / count);
+
+function dayNumber(key) {
+  return Math.round((Date.parse(key + 'T00:00:00Z') - Date.parse(DAILY_EPOCH + 'T00:00:00Z')) / 864e5);
+}
+
+const schedules = new Map();
+function schedule(index, diff) {
+  const cacheKey = diff + '|' + index.difficulties[diff].count + '|' + (index.curated?.[diff] || []).length;
+  if (!schedules.has(cacheKey)) {
+    const ids = allIds(index, diff);
+    const rand = rng(hashString('borderline|' + diff));
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    schedules.set(cacheKey, ids);
+  }
+  return schedules.get(cacheKey);
+}
+
 export function dailyPicks(index, diff, key, count) {
-  return pick(index, diff, rng(hashString('borderline|' + key + '|' + diff)), count);
+  const days = scheduleDays(index, diff, count);
+  const d = ((dayNumber(key) % days) + days) % days;
+  return schedule(index, diff).slice(d * count, d * count + count);
 }
