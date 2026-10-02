@@ -187,6 +187,20 @@
    "owner": "200",
    "why": "Kuwait was a British protectorate with borders set by the Uqair Protocol of 2 December 1922 until independence on 19 June 1961; CShapes leaves it unclaimed. Drawn with its 1961 shape. Before the protocol, crops that show it are rejected (config.mjs).",
    "source": "https://en.wikipedia.org/wiki/Uqair_Protocol_of_1922"
+  },
+  {
+   "fill": "g692",
+   "from": "1886-01-01",
+   "to": "1971-08-14",
+   "shape": {
+    "unit": "g692",
+    "start": "1971-08-15"
+   },
+   "name": "Bahrain",
+   "status": "protectorate",
+   "owner": "200",
+   "why": "Bahrain was a British protectorate until independence on 15 August 1971; CShapes leaves it unclaimed. Drawn with its 1971 shape (an island group, so its borders did not move).",
+   "source": "https://en.wikipedia.org/wiki/History_of_Bahrain_(1783%E2%80%931971)"
   }
  ]
 }
