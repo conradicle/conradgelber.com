@@ -97,15 +97,33 @@ export const LABEL_READABLE = 12;
 // from the edge) with a unit to spare, clear of the double frame.
 export const LABEL_INSET = 6;
 
-// Contested territory. A crop is rejected when one of these points falls
-// inside the frame and the puzzle's window reaches `from` or later: the
-// map would take a side on a border most of the world does not recognize.
+// Areas no crop may show. A crop is rejected when one of an area's points
+// falls inside the frame and the puzzle's window reaches `from` or later
+// (or, with `endsOn`, ends the day before `from`, so the change itself is a
+// tell). Contested ones would have the map take a side most of the world
+// does not; the land ones are missing from CShapes and would draw as sea,
+// which only matters where they would be visible: `km2` is their area, and
+// they count once they would cover MISSING_LAND_MIN_PX of the frame.
 export const CONTESTED_REJECT = [
   {
-    name: 'Crimea', from: '2014-03-18',
+    name: 'Crimea', from: '2014-03-18', endsOn: true,
     points: [[33.52, 44.6], [34.1, 44.95], [35.38, 45.03], [36.47, 45.36], [33.37, 45.19], [34.4, 45.71], [32.55, 45.45]],
   },
+  {
+    name: 'West Bank, Gaza and Golan', from: '1967-06-10',
+    points: [[35.2, 31.9], [35.27, 32.3], [35.1, 31.5], [35.45, 31.85], [34.45, 31.5], [34.3, 31.3], [35.75, 33.0], [35.82, 33.12]],
+  },
+  {
+    name: 'Western Sahara', from: '1975-11-14',
+    points: [[-13.2, 27.15], [-12.9, 24.5], [-14.3, 22.6], [-16.0, 23.7], [-10.6, 26.15], [-15.2, 21.5]],
+  },
+  { name: 'Falklands (missing land)', from: '1816-01-01', km2: 12173, points: [[-59.0, -51.7], [-60.0, -51.7], [-58.8, -51.8]] },
+  { name: 'Southern Kurils (missing land)', from: '1816-01-01', km2: 5036, points: [[145.9, 44.0], [148.0, 45.0], [146.75, 43.8]] },
+  { name: 'Gibraltar (missing land)', from: '1816-01-01', km2: 6.8, points: [[-5.35, 36.14]] },
+  { name: 'Macau (missing land)', from: '1816-01-01', km2: 33, points: [[113.55, 22.17]] },
 ];
+// Two by two units: the smallest speck a player could see as land.
+export const MISSING_LAND_MIN_PX = 4;
 // Average small-caps advance of Spectral as a fraction of the font size.
 export const LABEL_ADVANCE = 0.66;
 
