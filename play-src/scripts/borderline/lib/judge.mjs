@@ -219,6 +219,35 @@ export class Crop {
     return color;
   }
 
+  /**
+   * The records the page draws, in paint order: those with pixels on the
+   * shown map, less any record its own unit already covers in full (a
+   * record extended by cs-dates.json can sit over a smaller one of the same
+   * unit). The renderer merges what is left per unit.
+   */
+  drawn(st) {
+    const areas = regionAreas(st.buf);
+    const byUnit = new Map();
+    for (const r of st.recs) {
+      if (!areas.get(this.unitId.get(r.unit))) continue;
+      if (!byUnit.has(r.unit)) byUnit.set(r.unit, []);
+      byUnit.get(r.unit).push(r);
+    }
+    const keep = new Set();
+    for (const list of byUnit.values()) {
+      if (list.length === 1) { keep.add(list[0]); continue; }
+      const union = new Uint8Array(W * H);
+      for (const r of [...list].sort((a, b) => b.area - a.area)) {
+        const mask = new Int16Array(W * H);
+        fillRings(mask, W, H, this.ringsOf(r), 1);
+        let added = false;
+        for (let i = 0; i < mask.length; i++) if (mask[i] && !union[i]) { union[i] = 1; added = true; }
+        if (added) keep.add(r);
+      }
+    }
+    return st.recs.filter((r) => keep.has(r));
+  }
+
   /** The shown map: sea and blank shares, and its labels. */
   view(shown, diff, { maxBlank = MAX_BLANK_SHARE, maxSea = MAX_OCEAN_SHARE } = {}) {
     const st = this.paint(shown);
@@ -302,7 +331,7 @@ export class Crop {
       sea,
       blank,
       tellLabel,
-      draw: st.recs.map((r) => [r.rid, color.get(this.unitId.get(r.unit))]),
+      draw: this.drawn(st).map((r) => [r.rid, color.get(this.unitId.get(r.unit))]),
       labels: [...placed].map(([id, l]) => ({ ...l, unit: st.recOf.get(id).unit })),
       start: startTell.date,
       end,

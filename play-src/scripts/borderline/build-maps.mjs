@@ -111,7 +111,7 @@ for (const g of groups.values()) {
   const records = { type: 'FeatureCollection', features: [...g.rids].map((rid) => {
     const geometry = geometryOf(rid);
     if (!geometry) throw new Error('no geometry for ' + rid);
-    return { type: 'Feature', properties: { rid }, geometry };
+    return { type: 'Feature', properties: { rid, u: world.byRid.get(rid)?.unit || rid }, geometry };
   }) };
   const land = { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: world.land.geometry }] };
   const clip = { type: 'FeatureCollection', features: clipShapes(g.box) };

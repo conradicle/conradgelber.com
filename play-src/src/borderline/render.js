@@ -2,8 +2,8 @@
 // every year, so the style itself never hints at the date. Every colour and
 // stroke is a presentation attribute (no style attributes, which the site
 // CSP forbids), so the browser and render-puzzle.mjs draw the same picture.
-import { geoPath, geoGraticule } from 'd3-geo';
-import { feature, mesh } from 'topojson-client';
+import { geoPath, geoGraticule, geoBounds, geoContains } from 'd3-geo';
+import { feature, mesh, mergeArcs } from 'topojson-client';
 import { makeProjection, FRAME_W as W, FRAME_H as H } from './projection.js';
 
 // Hand-tint fills and the deeper band painted inside each border.
@@ -30,6 +30,33 @@ function trim(d) {
 export const WOBBLE = { frequency: 0.045, octaves: 2, seed: 11, scale: 2.4 };
 
 /**
+ * Border lines: every edge two drawn units share, plus the edges of a unit
+ * drawn over another (Danzig over the German record that already includes
+ * it), which belong to no other shape. Coasts are left to the land outline.
+ */
+function borderLines(topo, drawn) {
+  const landGeoms = topo.objects.land.geometries || [topo.objects.land];
+  const isLand = new Set(landGeoms);
+  const all = { type: 'GeometryCollection', geometries: [...drawn.map((x) => x.obj), ...landGeoms] };
+  const lines = [...mesh(topo, all, (a, b) => a !== b && !isLand.has(a) && !isLand.has(b)).coordinates];
+  drawn.forEach((x, k) => {
+    if (!k) return;
+    const under = drawn.slice(0, k).map((y) => ({ f: y.f, b: y.b || (y.b = geoBounds(y.f)) }));
+    const inside = (pt) => under.some(({ f, b }) => pt[1] >= b[0][1] && pt[1] <= b[1][1] && geoContains(f, pt));
+    for (const line of mesh(topo, all, (a, b) => a === x.obj && b === x.obj).coordinates) {
+      let run = [];
+      for (let i = 1; i < line.length; i++) {
+        const mid = [(line[i - 1][0] + line[i][0]) / 2, (line[i - 1][1] + line[i][1]) / 2];
+        if (inside(mid)) { if (!run.length) run.push(line[i - 1]); run.push(line[i]); }
+        else if (run.length) { lines.push(run); run = []; }
+      }
+      if (run.length) lines.push(run);
+    }
+  });
+  return lines;
+}
+
+/**
  * @param {object} puzzle  a bank puzzle (p, draw, labels)
  * @param {object} topo    the puzzle's map file: TopoJSON with object "r"
  *                         (records, each with a rid) and object "land"
@@ -43,14 +70,24 @@ export function mapMarkup(puzzle, topo, opts = {}) {
   const byRid = new Map();
   for (const g of topo.objects.r.geometries) byRid.set(g.properties.rid, g);
 
+  // One shape per unit, in paint order (later units sit on top); a unit
+  // drawn from more than one record is merged so no seam shows inside it.
   const drawn = [];
+  const byUnit = new Map();
   for (const [rid, color] of puzzle.draw) {
     const g = byRid.get(rid);
     if (!g) throw new Error('map data has no record ' + rid);
-    drawn.push({ g, color, d: trim(path(feature(topo, g))) });
+    const u = g.properties.u || rid;
+    if (!byUnit.has(u)) { byUnit.set(u, { color, geoms: [] }); drawn.push(byUnit.get(u)); }
+    byUnit.get(u).geoms.push(g);
+  }
+  for (const x of drawn) {
+    x.obj = x.geoms.length === 1 ? x.geoms[0] : mergeArcs(topo, x.geoms);
+    x.f = feature(topo, x.obj);
+    x.d = trim(path(x.f));
   }
   const landD = trim(path(feature(topo, topo.objects.land)));
-  const borders = trim(path(mesh(topo, { type: 'GeometryCollection', geometries: drawn.map((x) => x.g) }, (a, b) => a !== b)));
+  const borders = trim(path({ type: 'MultiLineString', coordinates: borderLines(topo, drawn) }));
   const grat = trim(path(geoGraticule().step([5, 5])()));
 
   const out = [];
