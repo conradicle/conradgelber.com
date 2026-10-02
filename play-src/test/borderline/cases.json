@@ -8,5 +8,6 @@
   {"name":"Persia is Iran from 1935","center":[55,32],"km":800,"shown":"1950-06-01","start":"1935-03-21","startKind":"name","source":"https://en.wikipedia.org/wiki/Name_of_Iran"},
   {"name":"The Serb-Croat-Slovene kingdom becomes Yugoslavia in 1929","center":[19,44],"km":500,"shown":"1925-06-01","end":"1929-10-02","endKind":"name","source":"https://en.wikipedia.org/wiki/Kingdom_of_Yugoslavia"},
   {"name":"Turkey is Türkiye from 2022 and still is","center":[35,39],"km":700,"shown":"2023-06-01","start":"2022-06-01","startKind":"name","end":"present","source":"https://www.aa.com.tr/en/americas/un-registers-turkiye-as-new-country-name-to-replace-turkey/2603492"},
-  {"name":"German Alsace runs from the Treaty of Frankfurt to Versailles","center":[7,48.5],"km":400,"shown":"1880-06-01","start":"1871-05-10","end":"1919-06-27","source":"https://en.wikipedia.org/wiki/Treaty_of_Frankfurt_(1871)"}
+  {"name":"German Alsace runs from the Treaty of Frankfurt to Versailles","center":[7,48.5],"km":400,"shown":"1880-06-01","start":"1871-05-10","end":"1919-06-27","source":"https://en.wikipedia.org/wiki/Treaty_of_Frankfurt_(1871)"},
+  {"name":"Kosovo starts on its declaration of independence, 17 February 2008","center":[20.9,42.6],"km":700,"shown":"2012-06-01","start":"2008-02-17","source":"https://en.wikipedia.org/wiki/2008_Kosovo_declaration_of_independence"}
 ]

@@ -271,7 +271,8 @@ Source, in `play-src/`:
   `config.mjs` (`VISIBLE_MIN_AREA`, `MAX_WINDOW_YEARS`, crop widths,
   `LABEL_READABLE` for tell labels, `CONTESTED_REJECT`).
 - `data/borderline/`: the hand-made tables, each date with a source:
-  `names.json` (labels and renames), `eu-dates.json` (real dates for
+  `names.json` (labels and renames), `cs-dates.json` (sourced fixes to
+  CShapes dates, such as Kosovo on 17 February 2008), `eu-dates.json` (real dates for
   CShapes-Europe changes), `curated.json` (the pre-1886 maps).
 
 Rebuild the data (downloads about 20 MB into the git-ignored
