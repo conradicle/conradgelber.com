@@ -84,7 +84,7 @@
       { "from": "1949-10-05", "to": "1990-10-02", "label": "East Germany", "source": "https://en.wikipedia.org/wiki/East_Germany" }
     ],
     "g291": [
-      { "from": "1919-06-28", "to": "1938-08-31", "label": "Free City of Danzig" }
+      { "from": "1919-06-28", "to": "1939-08-31", "label": "Free City of Danzig" }
     ],
     "g300": [
       { "from": "1816-01-01", "to": "1867-07-27", "label": "Austria", "note": "Austrian Empire.", "source": "https://www.britannica.com/event/Ausgleich" },
@@ -104,7 +104,7 @@
     "g345": [
       { "from": "1918-12-01", "to": "1929-10-02", "label": "Serbs, Croats and Slovenes", "source": "https://en.wikipedia.org/wiki/Kingdom_of_Yugoslavia" },
       { "from": "1929-10-03", "to": "2003-02-03", "label": "Yugoslavia", "source": "https://en.wikipedia.org/wiki/Kingdom_of_Yugoslavia" },
-      { "from": "2003-02-04", "to": "2006-06-02", "label": "Serbia and Montenegro", "source": "https://en.wikipedia.org/wiki/Serbia_and_Montenegro" }
+      { "from": "2003-02-04", "to": "2006-06-05", "label": "Serbia and Montenegro", "source": "https://en.wikipedia.org/wiki/Serbia_and_Montenegro" }
     ],
     "g346": [
       { "from": "1992-04-27", "to": "present", "label": "Bosnia and Herzegovina" }
@@ -246,7 +246,7 @@
       { "from": "1961-05-31", "to": "present", "label": "South Africa", "source": "https://en.wikipedia.org/wiki/South_African_Constitution_of_1961" }
     ],
     "g561": [
-      { "from": "1886-01-01", "to": "1910-05-29", "label": "Cape Colony" }
+      { "from": "1886-01-01", "to": "1910-05-30", "label": "Cape Colony" }
     ],
     "g565": [
       { "from": "1886-01-01", "to": "1915-08-15", "label": "German South West Africa", "source": "https://en.wikipedia.org/wiki/German_South_West_Africa" },
