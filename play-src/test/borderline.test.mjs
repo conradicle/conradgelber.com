@@ -9,12 +9,15 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { windowAround, windowFromSpans, windowYears, addDays } from '../src/borderline/window.js';
 import { scoreGuess, yearsOff, MAX, K, HINT_COST } from '../src/borderline/score.js';
-import { dailyKey, dailyPicks } from '../src/borderline/seed.js';
+import { dailyKey, dailyPicks, scheduleDays, allIds, pick, rng } from '../src/borderline/seed.js';
 import { titleCase } from '../src/borderline/text.js';
 import { loadNames, labelFor } from '../scripts/borderline/lib/names.mjs';
 import { loadWorld } from '../scripts/borderline/lib/world.mjs';
 import { Crop } from '../scripts/borderline/lib/judge.mjs';
 import { scaleForWidth } from '../src/borderline/projection.js';
+import { tellNeeds, readableSize, contestedIn } from '../scripts/borderline/lib/fairness.mjs';
+import { LABEL_READABLE, LABEL_INSET } from '../scripts/borderline/config.mjs';
+import { boxH } from '../scripts/borderline/lib/labels.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const site = path.resolve(here, '../..');
@@ -94,6 +97,71 @@ test('daily picks are the same for everyone and distinct', () => {
   assert.notDeepEqual(a, dailyPicks(index, 'N', '2026-10-02', 5));
 });
 
+test('a daily puzzle comes back only after the whole schedule, exactly that many days later', () => {
+  const index = read(path.join(site, 'borderline/data/index.json'));
+  for (const d of ['N', 'H']) {
+    const days = scheduleDays(index, d, 5);
+    const seenOn = new Map();
+    const start = Date.parse('2026-09-01T00:00:00Z');
+    for (let k = 0; k < days * 2 + 3; k++) {
+      const key = new Date(start + k * 864e5).toISOString().slice(0, 10);
+      for (const id of dailyPicks(index, d, key, 5)) {
+        if (seenOn.has(id)) assert.equal(k - seenOn.get(id), days, d + ' ' + id + ' repeats after ' + (k - seenOn.get(id)) + ' days');
+        seenOn.set(id, k);
+      }
+    }
+    // One full schedule covers every puzzle but the remainder, once each.
+    assert.equal(seenOn.size, days * 5);
+  }
+});
+
+test('a full daily schedule matches the bank era by era', () => {
+  const index = read(path.join(site, 'borderline/data/index.json'));
+  const n = index.difficulties.N;
+  const eraOf = (id) => (id[0] === 'C' ? 'C' : n.eraOffsets.filter((o) => Number(id.slice(1)) >= o).length - 1);
+  const want = new Map(), got = new Map();
+  for (const id of allIds(index, 'N')) want.set(eraOf(id), (want.get(eraOf(id)) || 0) + 1);
+  for (let k = 0; k < scheduleDays(index, 'N', 5); k++) {
+    const key = new Date(Date.parse('2026-10-01T00:00:00Z') + k * 864e5).toISOString().slice(0, 10);
+    for (const id of dailyPicks(index, 'N', key, 5)) got.set(eraOf(id), (got.get(eraOf(id)) || 0) + 1);
+  }
+  for (const [era, count] of want) assert.ok(Math.abs((got.get(era) || 0) - count) <= 4, 'era ' + era);
+});
+
+test('practice picks skip maps already seen', () => {
+  const index = read(path.join(site, 'borderline/data/index.json'));
+  const all = allIds(index, 'H');
+  const avoid = new Set(all.slice(5));
+  assert.deepEqual(new Set(pick(index, 'H', rng(7), 5, avoid)), new Set(all.slice(0, 5)));
+});
+
+// ---------- fairness checks
+
+test('tells name the countries a player must find, and none for an absence', () => {
+  const A = { unit: 'gA', label: 'A' }, B = { unit: 'gB', label: 'B' }, blank = { unit: 'blank' };
+  assert.deepEqual(tellNeeds({ kind: 'border', a: A, b: B }, 'start'), ['gB', 'gA']);
+  assert.deepEqual(tellNeeds({ kind: 'border', a: A, b: B, born: true }, 'start'), ['gB']);
+  assert.deepEqual(tellNeeds({ kind: 'border', a: A, b: B, born: true }, 'end'), []);
+  assert.deepEqual(tellNeeds({ kind: 'border', a: A, b: B, gone: true }, 'start'), []);
+  assert.deepEqual(tellNeeds({ kind: 'border', a: A, b: B, gone: true }, 'end'), ['gA']);
+  assert.deepEqual(tellNeeds({ kind: 'border', a: blank, b: B }, 'start'), ['gB']);
+  assert.deepEqual(tellNeeds({ kind: 'name', a: A, b: B }, 'end'), ['gA']);
+  assert.deepEqual(tellNeeds({ kind: 'transfer', a: A, b: B }, 'start'), ['gB']);
+});
+
+test('a label in the corner or over the frame rule is not readable', () => {
+  assert.equal(readableSize({ lines: ['UPPER VOLTA'], x: 180, y: 200, size: 13, w: 80 }), 13);
+  assert.equal(readableSize({ lines: ['UPPER VOLTA'], x: 42, y: 8, size: 13, w: 80 }), 0);
+  assert.equal(readableSize({ lines: ['UPPER VOLTA'], x: 44, y: 14, size: 13, w: 80 }), 0);
+});
+
+test('Crimea after 18 March 2014 is never in a window', () => {
+  const p = { c: [34, 46], s: scaleForWidth(1500) };
+  assert.equal(contestedIn(p, '2014-03-18', 'present'), 'Crimea');
+  assert.equal(contestedIn(p, '1992-01-01', '2014-03-17'), null);
+  assert.equal(contestedIn({ c: [10, 50], s: scaleForWidth(1500) }, '2014-03-18', 'present'), null);
+});
+
 // ---------- names
 
 test('renames from the brief carry their verified dates', () => {
@@ -131,6 +199,7 @@ for (const c of read(path.join(here, 'borderline/cases.json'))) {
   test('judge: ' + c.name, () => {
     const crop = new Crop(world, names, { c: c.center, s: scaleForWidth(c.km) });
     crop.maxYears = Infinity;
+    crop.checkFairness = false;
     const r = crop.judge(c.shown, 'N', crop.view(c.shown, 'N', { maxSea: 1, maxBlank: 1 }));
     assert.equal(r.reject, undefined, 'rejected: ' + r.reject);
     if (c.start) assert.equal(r.start, c.start);
@@ -150,6 +219,7 @@ test('a map with Russian Alaska ends in 1867', () => {
   assert.equal(w.end, '1867-10-17');
   assert.equal(w.endTell.unit, 'Russian Empire');
   const built = read(path.join(site, 'borderline/data/bank/C-00.json')).find((p) => p.id === 'C01');
+  assert.equal(built.d, 'N');
   assert.equal(built.win.ey, 1867);
   for (const q of cur.puzzles) for (const f of q.facts) assert.match(f.source, /^https:\/\//, q.id + ' fact without a source');
 });
@@ -170,6 +240,42 @@ test('bank: every window fits the rules', () => {
     assert.ok(p.labels.length >= 3, p.id + ' has fewer than 3 labels');
     assert.ok(p.win.start <= p.shown && (p.win.end === 'present' || p.shown <= p.win.end), p.id + ' shown date outside its window');
     assert.ok(p.tells.start && p.tells.start.text, p.id + ' has no start tell');
+  }
+});
+
+test('bank: every tell label is readable and inside the frame', () => {
+  for (const p of bank) {
+    for (const l of p.labels) {
+      const h = boxH(l.s, l.t.length);
+      assert.ok(l.x - l.w / 2 >= LABEL_INSET && l.x + l.w / 2 <= 360 - LABEL_INSET && l.y - h / 2 >= LABEL_INSET && l.y + h / 2 <= 400 - LABEL_INSET,
+        p.id + ' ' + l.t.join(' ') + ' touches the frame');
+    }
+    for (const side of ['start', 'end']) {
+      const t = p.tells[side];
+      if (!t) continue;
+      assert.ok(Array.isArray(t.needs), p.id + ' ' + side + ' tell has no needs');
+      for (const need of t.needs) {
+        const l = p.labels.find((x) => x.t.join(' ') === need);
+        assert.ok(l, p.id + ' ' + side + ' tell needs ' + need + ', which has no label');
+        assert.ok(l.s >= LABEL_READABLE, p.id + ' ' + need + ' is only ' + l.s);
+      }
+    }
+  }
+});
+
+test('bank: no map shows Crimea on or after 18 March 2014, and curated maps are Normal only', () => {
+  for (const p of bank) {
+    if (p.src === 'hb') { assert.equal(p.d, 'N', p.id); continue; }
+    assert.equal(contestedIn(p.p, p.win.start, p.win.end), null, p.id);
+  }
+});
+
+test('bank: every puzzle has its map file, holding every record it draws', () => {
+  const files = new Map();
+  for (const p of bank) {
+    assert.match(p.geo, /^geo\/g-[\w-]+\.json$/, p.id);
+    if (!files.has(p.geo)) files.set(p.geo, new Set(read(path.join(site, 'borderline/data', p.geo)).objects.r.geometries.map((g) => g.properties.rid)));
+    for (const [rid] of p.draw) assert.ok(files.get(p.geo).has(rid), p.id + ' ' + rid);
   }
 });
 
