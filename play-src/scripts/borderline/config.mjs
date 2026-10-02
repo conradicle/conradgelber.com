@@ -101,7 +101,7 @@ export const LABEL_INSET = 6;
 // falls inside the frame and the puzzle's window reaches `from` or later
 // (or, with `endsOn`, ends the day before `from`, so the change itself is a
 // tell). Contested ones would have the map take a side most of the world
-// does not; the land ones are missing from CShapes and would draw as sea,
+// does not; missing land would draw as sea and blank land as unclaimed,
 // which only matters where they would be visible: `km2` is their area, and
 // they count once they would cover MISSING_LAND_MIN_PX of the frame.
 export const CONTESTED_REJECT = [
@@ -121,6 +121,29 @@ export const CONTESTED_REJECT = [
   { name: 'Southern Kurils (missing land)', from: '1816-01-01', km2: 5036, points: [[145.9, 44.0], [148.0, 45.0], [146.75, 43.8]] },
   { name: 'Gibraltar (missing land)', from: '1816-01-01', km2: 6.8, points: [[-5.35, 36.14]] },
   { name: 'Macau (missing land)', from: '1816-01-01', km2: 33, points: [[113.55, 22.17]] },
+  // Land CShapes leaves unclaimed between two records for months or years
+  // (see cs-dates.json for the gaps that were closed instead). `to` is the
+  // last blank day.
+  {
+    name: 'Thrace 1913 (blank land)', from: '1913-05-30', to: '1913-08-09', km2: 22149,
+    points: [[23.4, 41.8], [24, 41.8], [24.5, 41.8], [25, 41.3], [25.6, 41.3], [26.1, 40.8], [26.1, 41.3], [26.1, 41.8]],
+  },
+  {
+    name: 'Togoland 1919-1922 (blank land)', from: '1919-06-28', to: '1922-07-19', km2: 57023,
+    points: [[-0.1, 10.7], [0.4, 10], [0.6, 9.8], [0.7, 9.4], [0.8, 7.8], [0.9, 6.8], [1, 6.9], [1.1, 6.7], [1.2, 6.7], [1.3, 6.7], [1.4, 6.9], [1.5, 6.2]],
+  },
+  {
+    name: 'Eastern Arabia 1914-1932 (blank land)', from: '1914-11-03', to: '1932-09-22', km2: 53971,
+    points: [[47.9, 27.2], [47.9, 28.2], [48.4, 27.2], [48.4, 28.2], [48.8, 26.7], [48.8, 27.7], [49.2, 26.2], [49.2, 27.2], [49.6, 25.8], [49.6, 26.7], [50, 25.3], [50, 26.2]],
+  },
+  {
+    name: 'Western Arabia 1920-1932 (blank land)', from: '1920-04-26', to: '1932-09-22', km2: 302164,
+    points: [[34.6, 28.2], [36.2, 28.2], [36.9, 27.7], [37.7, 24.7], [38.1, 26.9], [38.8, 25.6], [39.6, 20.9], [40, 21.7], [40.4, 23.5], [41.5, 19.2], [42.3, 18.3], [42.6, 20.5]],
+  },
+  {
+    name: 'Bougainville and Buka 1899-1920 (blank land)', from: '1899-11-14', to: '1920-06-27', km2: 9380,
+    points: [[154.6, -5.3], [154.8, -5.9], [154.8, -5.7], [154.9, -5.6], [155, -5.6], [155.1, -5.6], [155.3, -6.5], [155.4, -6.6], [155.5, -6.8], [155.7, -6.6]],
+  },
 ];
 // Two by two units: the smallest speck a player could see as land.
 export const MISSING_LAND_MIN_PX = 4;
