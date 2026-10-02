@@ -2,7 +2,7 @@
 // font (between LABEL_MIN and LABEL_MAX) whose text box sits at least 90%
 // inside the region and clear of labels already placed. Bigger regions go
 // first. Long multi-word names may break onto two lines.
-import { LABEL_ADVANCE, LABEL_MIN } from '../config.mjs';
+import { LABEL_ADVANCE, LABEL_INSET, LABEL_MIN } from '../config.mjs';
 
 const NARROW = new Set([...' .,\'-()I']);
 const WIDE = new Set([...'MW']);
@@ -15,7 +15,7 @@ export function textEm(s) {
 }
 
 // Line boxes: cap height is about 0.72 em; lines are 1.05 em apart.
-const boxH = (size, lines) => size * (0.72 + (lines - 1) * 1.05);
+export const boxH = (size, lines) => size * (0.72 + (lines - 1) * 1.05);
 
 function splits(text) {
   const out = [[text]];
@@ -72,7 +72,9 @@ export function placeLabels(buf, W, H, regions, maxSize) {
         const fits = (size) => {
           const w = em * size, h = boxH(size, lines.length);
           const x0 = x - w / 2 - 2, x1 = x + w / 2 + 2, y0 = y - h / 2 - 2, y1 = y + h / 2 + 2;
-          if (x0 < 2 || y0 < 2 || x1 > W - 2 || y1 > H - 2) return false;
+          // The text (box less its 2-unit pad) stays inside the inner frame rule.
+          const e = LABEL_INSET - 2;
+          if (x0 < e || y0 < e || x1 > W - e || y1 > H - e) return false;
           if (inside(x0, y0, x1, y1) < 0.9) return false;
           for (const b of boxes) if (x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]) return false;
           return true;
