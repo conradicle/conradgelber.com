@@ -223,7 +223,10 @@ async function main() {
   // fresh crops (another seed, so none repeat) to fill the quotas again.
   const resume = process.argv.includes('--resume');
   const quick = process.argv.includes('--quick');
-  const rand = rng(resume ? SEED + 1 : SEED);
+  // A resumed build can run in short chunks; give each its own --seed= so
+  // no chunk samples the crops another already judged.
+  const seedArg = process.argv.find((a) => a.startsWith('--seed='));
+  const rand = rng(seedArg ? Number(seedArg.slice(7)) : resume ? SEED + 1 : SEED);
   const { kept, seen } = resume ? await rejudge() : { kept: { N: ERAS.map(() => []), H: ERAS.map(() => []) }, seen: new Set() };
   const stats = {};
   const unverified = new Map();
