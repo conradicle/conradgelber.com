@@ -18,3 +18,7 @@ node_modules/
 .dev.vars
 .env
 .env.*
+
+# Borderline pipeline inputs and scratch (rebuilt by play-src/scripts/borderline/)
+play-src/data/borderline/raw/
+play-src/data/borderline/build/
