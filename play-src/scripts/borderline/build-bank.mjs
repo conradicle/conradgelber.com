@@ -200,7 +200,7 @@ async function rejudge() {
     if (r.reject === 'error') console.error(r.error);
     if (r.reject === 'illegible' || !r.reject) sizes.push([spec.diff, r.tellLabel]);
     if (r.reject) return;
-    if (r.start !== spec.was.win.start || r.end !== spec.was.win.end) moved.push(spec.was.id + ' ' + spec.was.win.start + '..' + spec.was.win.end + ' -> ' + r.start + '..' + r.end);
+    if (r.start !== spec.was.win.start || r.end !== spec.was.win.end) moved.push(spec.was.id + ' ' + spec.was.win.start + '..' + spec.was.win.end + ' -> ' + r.start + '..' + r.end + '  shown ' + spec.shown + ' at ' + spec.p.c.join(','));
     const dedup = spec.diff + '|' + r.start + '|' + r.end + '|' + r.labels.map((l) => l.lines.join(' ')).sort().join(',');
     if (seen.has(dedup)) { stats[spec.diff + ':dup'] = (stats[spec.diff + ':dup'] || 0) + 1; return; }
     seen.add(dedup);
@@ -212,7 +212,7 @@ async function rejudge() {
     const of = sizes.filter(([dd]) => dd === d).map(([, s]) => s);
     console.log(d + ' tell labels under 11: ' + of.filter((s) => s < 11).length + ', under 12: ' + of.filter((s) => s < 12).length + ', under 13: ' + of.filter((s) => s < 13).length + ' (of ' + specs.filter((s) => s.diff === d).length + ')');
   }
-  if (moved.length) console.log('windows that moved (' + moved.length + '):\n' + moved.slice(0, 30).join('\n'));
+  if (moved.length) console.log('windows that moved (' + moved.length + '):\n' + moved.join('\n'));
   return { kept, seen };
 }
 
