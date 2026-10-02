@@ -58,12 +58,9 @@ async function puzzle(id) {
   return shard.find((p) => p.id === id);
 }
 
-const geoFile = (p) => p.geo || 'geo/era-' + p.era + '.json';
-
-async function prepare(p) {
-  const [topo, land] = await Promise.all([getJSON(geoFile(p)), getJSON('geo/land.json')]);
-  return { topo, land };
-}
+// Each puzzle names the one small map file (records and coastline for its
+// part of the world) that it draws from.
+const prepare = (p) => getJSON(p.geo);
 
 // ---------- start screen
 
@@ -139,9 +136,9 @@ async function playRound() {
   svg.innerHTML = '';
   svg.setAttribute('aria-busy', 'true');
   const p = await puzzle(id);
-  const { topo, land } = await prepare(p);
+  const topo = await prepare(p);
   game.current = { id, p, hinted: false };
-  svg.innerHTML = mapMarkup(p, topo, land, { idPrefix: 'm' + game.round });
+  svg.innerHTML = mapMarkup(p, topo, { idPrefix: 'm' + game.round });
   svg.removeAttribute('aria-busy');
   const names = p.labels.map((l) => titleCase(l.t.join(' ')));
   svg.setAttribute('aria-label', 'Political map with no date. Countries labeled: ' + names.join(', ') + '.');
