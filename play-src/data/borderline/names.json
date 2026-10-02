@@ -314,6 +314,9 @@
     "g680": [
       { "from": "1967-11-30", "to": "1990-05-21", "label": "South Yemen" }
     ],
+    "g690": [
+      { "from": "1922-12-02", "to": "present", "label": "Kuwait", "source": "https://en.wikipedia.org/wiki/Uqair_Protocol_of_1922" }
+    ],
     "g696": [
       { "from": "1892-03-08", "to": "1971-12-01", "label": "Trucial States", "source": "https://en.wikipedia.org/wiki/Trucial_States" },
       { "from": "1971-12-02", "to": "present", "label": "United Arab Emirates" }

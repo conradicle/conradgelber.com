@@ -2,6 +2,7 @@
   "_about": [
     "CShapes-Europe records hold the borders as of 1 January of each year (mostly), so a change between two records happened some time before the new record's first year.",
     "Each entry gives the real date of one record boundary that the bank may use as a tell, with a source. 'from' moves the start of the unit's record that begins on 1 January of that year (and ends its previous record the day before); 'to' moves the end of the unit's record that ends on 31 December of that year. 'date' is the first day of the new state.",
+    "An entry with 'fill' instead adds a record for that unit from 'from' to 'to', drawn with the shape of another record ('shape': its unit and 1 January start), to cover land that would otherwise be unclaimed between two records.",
     "Only boundaries that match one well-documented event are listed. Boundaries that bundle events from different years (Lombardy 1859 with Tuscany and Nice 1860, coded at 1861) or that could not be matched to a source (several Russo-Ottoman shifts in the Caucasus) are left out, and build-bank.mjs rejects any 1816-1885 puzzle whose tell falls on them."
   ],
   "changes": [
@@ -51,6 +52,8 @@
     { "unit": "g350", "from": 1865, "date": "1864-05-28", "precision": "year", "event": "The Ionian Islands join Greece", "source": "https://en.wikipedia.org/wiki/United_States_of_the_Ionian_Islands" },
     { "unit": "g365", "from": 1830, "date": "1829-09-14", "event": "Treaty of Adrianople: Russia gains the Danube delta and the eastern Black Sea coast", "source": "https://en.wikipedia.org/wiki/Treaty_of_Adrianople_(1829)" },
     { "unit": "g640", "from": 1830, "date": "1829-09-14", "event": "Treaty of Adrianople", "source": "https://en.wikipedia.org/wiki/Treaty_of_Adrianople_(1829)" },
+    { "unit": "g350", "from": 1831, "date": "1830-02-03", "event": "London Protocol: Britain, France and Russia declare Greece an independent state", "source": "https://en.wikipedia.org/wiki/London_Protocol_(1830)" },
+    { "fill": "g640", "from": "1829-09-14", "to": "1830-02-02", "shape": { "unit": "g350", "start": "1831-01-01" }, "event": "Greece's land stays Ottoman from the Treaty of Adrianople until the London Protocol, instead of unclaimed", "source": "https://en.wikipedia.org/wiki/London_Protocol_(1830)" },
     { "unit": "g350", "from": 1833, "date": "1832-07-21", "event": "Treaty of Constantinople fixes Greece's northern border", "source": "https://en.wikipedia.org/wiki/Treaty_of_Constantinople_(1832)" },
     { "unit": "g640", "from": 1833, "date": "1832-07-21", "event": "Treaty of Constantinople fixes Greece's northern border", "source": "https://en.wikipedia.org/wiki/Treaty_of_Constantinople_(1832)" },
     { "unit": "g350", "from": 1882, "date": "1881-07-02", "precision": "year", "event": "Convention of Constantinople: the Ottomans cede Thessaly to Greece", "source": "https://en.wikipedia.org/wiki/Convention_of_Constantinople_(1881)" },
