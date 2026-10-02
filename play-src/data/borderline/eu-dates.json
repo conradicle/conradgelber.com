@@ -1,0 +1,73 @@
+{
+  "_about": [
+    "CShapes-Europe records hold the borders as of 1 January of each year (mostly), so a change between two records happened some time before the new record's first year.",
+    "Each entry gives the real date of one record boundary that the bank may use as a tell, with a source. 'from' moves the start of the unit's record that begins on 1 January of that year (and ends its previous record the day before); 'to' moves the end of the unit's record that ends on 31 December of that year. 'date' is the first day of the new state.",
+    "An entry with 'fill' instead adds a record for that unit from 'from' to 'to', drawn with the shape of another record ('shape': its unit and 1 January start), to cover land that would otherwise be unclaimed between two records.",
+    "Only boundaries that match one well-documented event are listed. Boundaries that bundle events from different years (Lombardy 1859 with Tuscany and Nice 1860, coded at 1861) or that could not be matched to a source (several Russo-Ottoman shifts in the Caucasus) are left out, and build-bank.mjs rejects any 1816-1885 puzzle whose tell falls on them."
+  ],
+  "changes": [
+    { "unit": "g200", "from": 1838, "date": "1837-06-20", "precision": "year", "event": "Personal union of Britain and Hanover ends with Victoria's accession", "source": "https://en.wikipedia.org/wiki/Personal_union_of_Great_Britain_and_Hanover" },
+    { "unit": "g240", "from": 1838, "date": "1837-06-20", "precision": "year", "event": "Hanover separates from the British crown", "source": "https://en.wikipedia.org/wiki/Personal_union_of_Great_Britain_and_Hanover" },
+
+    { "unit": "g210", "from": 1831, "date": "1830-10-04", "event": "Belgium declares independence from the Netherlands", "source": "https://en.wikipedia.org/wiki/Belgian_Revolution" },
+    { "unit": "g211", "from": 1831, "date": "1830-10-04", "event": "Belgium declares independence from the Netherlands", "source": "https://en.wikipedia.org/wiki/Belgian_Revolution" },
+    { "unit": "g210", "from": 1840, "date": "1839-04-19", "event": "Treaty of London splits Limburg and Luxembourg", "source": "https://en.wikipedia.org/wiki/Treaty_of_London_(1839)" },
+    { "unit": "g211", "from": 1840, "date": "1839-04-19", "event": "Treaty of London splits Limburg and Luxembourg", "source": "https://en.wikipedia.org/wiki/Treaty_of_London_(1839)" },
+    { "unit": "g210", "from": 1868, "date": "1867-05-11", "event": "Treaty of London guarantees Luxembourg's independence", "source": "https://en.wikipedia.org/wiki/Treaty_of_London_(1867)" },
+    { "unit": "g212", "from": 1868, "date": "1867-05-11", "event": "Treaty of London guarantees Luxembourg's independence", "source": "https://en.wikipedia.org/wiki/Treaty_of_London_(1867)" },
+
+    { "unit": "g10009", "to": 1846, "date": "1846-11-16", "event": "Austria annexes the Free City of Cracow", "source": "https://en.wikipedia.org/wiki/Free_City_of_Cracow" },
+    { "unit": "g300", "from": 1847, "date": "1846-11-16", "event": "Austria annexes the Free City of Cracow", "source": "https://en.wikipedia.org/wiki/Free_City_of_Cracow" },
+
+    { "unit": "g390", "from": 1865, "date": "1864-10-30", "event": "Treaty of Vienna: Denmark cedes Schleswig, Holstein and Lauenburg", "source": "https://en.wikipedia.org/wiki/Treaty_of_Vienna_(1864)" },
+    { "unit": "g255", "from": 1865, "date": "1864-10-30", "event": "Treaty of Vienna: Denmark cedes Schleswig, Holstein and Lauenburg", "source": "https://en.wikipedia.org/wiki/Treaty_of_Vienna_(1864)" },
+    { "unit": "g300", "from": 1865, "date": "1864-10-30", "event": "Treaty of Vienna: Denmark cedes Schleswig, Holstein and Lauenburg", "source": "https://en.wikipedia.org/wiki/Treaty_of_Vienna_(1864)" },
+
+    { "unit": "g255", "from": 1867, "date": "1866-09-20", "precision": "year", "event": "Prussia annexes Hanover, Hesse-Kassel, Nassau and Frankfurt", "source": "https://en.wikipedia.org/wiki/Kingdom_of_Hanover" },
+    { "unit": "g240", "to": 1866, "date": "1866-09-20", "precision": "year", "event": "Prussia annexes Hanover", "source": "https://en.wikipedia.org/wiki/Kingdom_of_Hanover" },
+    { "unit": "g273", "to": 1866, "date": "1866-09-20", "precision": "year", "event": "Prussia annexes Hesse-Kassel", "source": "https://en.wikipedia.org/wiki/Electorate_of_Hesse" },
+    { "unit": "g10021", "to": 1866, "date": "1866-09-20", "precision": "year", "event": "Prussia annexes Nassau", "source": "https://en.wikipedia.org/wiki/Duchy_of_Nassau" },
+    { "unit": "g10010", "to": 1866, "date": "1866-09-20", "precision": "year", "event": "Prussia annexes Frankfurt", "source": "https://en.wikipedia.org/wiki/Free_City_of_Frankfurt" },
+    { "unit": "g10012", "to": 1866, "date": "1866-09-20", "precision": "year", "event": "Hesse-Homburg passes to Prussia", "source": "https://en.wikipedia.org/wiki/Hesse-Homburg" },
+    { "unit": "g300", "from": 1867, "date": "1866-10-03", "precision": "year", "event": "Treaty of Vienna: Austria cedes Venetia (and loses Holstein in the same war)", "source": "https://en.wikipedia.org/wiki/Treaty_of_Vienna_(1866)" },
+    { "unit": "g325", "from": 1867, "date": "1866-10-03", "precision": "year", "event": "Treaty of Vienna: Venetia passes to Italy", "source": "https://en.wikipedia.org/wiki/Treaty_of_Vienna_(1866)" },
+
+    { "unit": "g325", "from": 1862, "date": "1861-03-17", "event": "Kingdom of Italy proclaimed", "source": "https://en.wikipedia.org/wiki/Proclamation_of_the_Kingdom_of_Italy" },
+    { "unit": "g10023", "to": 1861, "date": "1861-03-17", "event": "Kingdom of Sardinia becomes the Kingdom of Italy", "source": "https://en.wikipedia.org/wiki/Proclamation_of_the_Kingdom_of_Italy" },
+    { "unit": "g10016", "to": 1861, "date": "1861-03-17", "event": "The Two Sicilies, annexed in 1860, become part of the Kingdom of Italy", "source": "https://en.wikipedia.org/wiki/Proclamation_of_the_Kingdom_of_Italy" },
+    { "unit": "g327", "from": 1862, "date": "1861-03-17", "event": "The Marche and Umbria, annexed in 1860, become part of the Kingdom of Italy", "source": "https://en.wikipedia.org/wiki/Proclamation_of_the_Kingdom_of_Italy" },
+    { "unit": "g327", "to": 1870, "date": "1870-09-20", "precision": "year", "event": "Italian troops take Rome; the Papal States end", "source": "https://en.wikipedia.org/wiki/Capture_of_Rome" },
+    { "unit": "g325", "from": 1871, "date": "1870-09-20", "precision": "year", "event": "Italy takes Rome", "source": "https://en.wikipedia.org/wiki/Capture_of_Rome" },
+
+    { "unit": "g255", "from": 1871, "date": "1871-01-01", "event": "The southern German states join the German Empire", "source": "https://en.wikipedia.org/wiki/Constitution_of_the_German_Confederation_(1871)" },
+    { "unit": "g245", "to": 1870, "date": "1871-01-01", "event": "Bavaria joins the German Empire", "source": "https://en.wikipedia.org/wiki/Constitution_of_the_German_Confederation_(1871)" },
+    { "unit": "g271", "to": 1870, "date": "1871-01-01", "event": "Wurttemberg joins the German Empire", "source": "https://en.wikipedia.org/wiki/Constitution_of_the_German_Confederation_(1871)" },
+    { "unit": "g267", "to": 1870, "date": "1871-01-01", "event": "Baden joins the German Empire", "source": "https://en.wikipedia.org/wiki/Constitution_of_the_German_Confederation_(1871)" },
+    { "unit": "g275", "to": 1870, "date": "1871-01-01", "event": "Hesse-Darmstadt joins the German Empire", "source": "https://en.wikipedia.org/wiki/Constitution_of_the_German_Confederation_(1871)" },
+    { "unit": "g269", "to": 1870, "date": "1871-01-01", "event": "Saxony becomes part of the German Empire", "source": "https://en.wikipedia.org/wiki/Constitution_of_the_German_Confederation_(1871)" },
+    { "unit": "g280", "to": 1870, "date": "1871-01-01", "event": "Mecklenburg-Schwerin becomes part of the German Empire", "source": "https://en.wikipedia.org/wiki/Constitution_of_the_German_Confederation_(1871)" },
+    { "unit": "g220", "from": 1871, "date": "1871-05-10", "event": "Treaty of Frankfurt: France cedes Alsace-Lorraine", "source": "https://en.wikipedia.org/wiki/Treaty_of_Frankfurt_(1871)" },
+
+    { "unit": "g200", "from": 1865, "date": "1864-05-28", "precision": "year", "event": "Britain hands the Ionian Islands to Greece", "source": "https://en.wikipedia.org/wiki/United_States_of_the_Ionian_Islands" },
+    { "unit": "g350", "from": 1865, "date": "1864-05-28", "precision": "year", "event": "The Ionian Islands join Greece", "source": "https://en.wikipedia.org/wiki/United_States_of_the_Ionian_Islands" },
+    { "unit": "g365", "from": 1830, "date": "1829-09-14", "event": "Treaty of Adrianople: Russia gains the Danube delta and the eastern Black Sea coast", "source": "https://en.wikipedia.org/wiki/Treaty_of_Adrianople_(1829)" },
+    { "unit": "g640", "from": 1830, "date": "1829-09-14", "event": "Treaty of Adrianople", "source": "https://en.wikipedia.org/wiki/Treaty_of_Adrianople_(1829)" },
+    { "unit": "g350", "from": 1831, "date": "1830-02-03", "event": "London Protocol: Britain, France and Russia declare Greece an independent state", "source": "https://en.wikipedia.org/wiki/London_Protocol_(1830)" },
+    { "fill": "g640", "from": "1829-09-14", "to": "1830-02-02", "shape": { "unit": "g350", "start": "1831-01-01" }, "event": "Greece's land stays Ottoman from the Treaty of Adrianople until the London Protocol, instead of unclaimed", "source": "https://en.wikipedia.org/wiki/London_Protocol_(1830)" },
+    { "fill": "g350", "from": "1830-02-03", "to": "1830-12-31", "shape": { "unit": "g350", "start": "1829-01-01" }, "event": "Land of the 1829 Greek record outside the London Protocol borders stays Greek until the Ottoman record of 1831 takes it, instead of unclaimed", "source": "https://en.wikipedia.org/wiki/London_Protocol_(1830)" },
+    { "unit": "g350", "from": 1833, "date": "1832-07-21", "event": "Treaty of Constantinople fixes Greece's northern border", "source": "https://en.wikipedia.org/wiki/Treaty_of_Constantinople_(1832)" },
+    { "unit": "g640", "from": 1833, "date": "1832-07-21", "event": "Treaty of Constantinople fixes Greece's northern border", "source": "https://en.wikipedia.org/wiki/Treaty_of_Constantinople_(1832)" },
+    { "unit": "g350", "from": 1882, "date": "1881-07-02", "precision": "year", "event": "Convention of Constantinople: the Ottomans cede Thessaly to Greece", "source": "https://en.wikipedia.org/wiki/Convention_of_Constantinople_(1881)" },
+    { "unit": "g640", "from": 1882, "date": "1881-07-02", "precision": "year", "event": "Convention of Constantinople: the Ottomans cede Thessaly to Greece", "source": "https://en.wikipedia.org/wiki/Convention_of_Constantinople_(1881)" },
+
+    { "unit": "g640", "from": 1879, "date": "1878-07-13", "event": "Treaty of Berlin", "source": "https://en.wikipedia.org/wiki/Treaty_of_Berlin_(1878)" },
+    { "unit": "g365", "from": 1879, "date": "1878-07-13", "event": "Treaty of Berlin: Russia takes southern Bessarabia, Kars and Batumi", "source": "https://en.wikipedia.org/wiki/Treaty_of_Berlin_(1878)" },
+    { "unit": "g300", "from": 1879, "date": "1878-07-13", "event": "Treaty of Berlin", "source": "https://en.wikipedia.org/wiki/Treaty_of_Berlin_(1878)" },
+    { "unit": "g360", "from": 1879, "date": "1878-07-13", "event": "Treaty of Berlin recognizes Romania's independence", "source": "https://en.wikipedia.org/wiki/Treaty_of_Berlin_(1878)" },
+    { "unit": "g340", "from": 1879, "date": "1878-07-13", "event": "Treaty of Berlin recognizes Serbia's independence", "source": "https://en.wikipedia.org/wiki/Treaty_of_Berlin_(1878)" },
+    { "unit": "g341", "from": 1879, "date": "1878-07-13", "event": "Treaty of Berlin recognizes Montenegro's independence", "source": "https://en.wikipedia.org/wiki/Treaty_of_Berlin_(1878)" },
+    { "unit": "g355", "from": 1879, "date": "1878-07-13", "event": "Treaty of Berlin creates the Principality of Bulgaria", "source": "https://en.wikipedia.org/wiki/Treaty_of_Berlin_(1878)" },
+    { "unit": "g3461", "from": 1879, "date": "1878-07-13", "event": "Treaty of Berlin: Austria-Hungary occupies Bosnia", "source": "https://en.wikipedia.org/wiki/Treaty_of_Berlin_(1878)" },
+    { "unit": "g3462", "from": 1879, "date": "1878-07-13", "event": "Treaty of Berlin: Austria-Hungary occupies Herzegovina", "source": "https://en.wikipedia.org/wiki/Treaty_of_Berlin_(1878)" }
+  ]
+}

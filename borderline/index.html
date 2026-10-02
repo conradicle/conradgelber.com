@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borderline &middot; Conrad Gelber</title>
+<meta name="description" content="An old political map with no date: only borders and country names. Guess the year from the tells, like Russian Alaska or a Persia that has not yet become Iran.">
+<link rel="canonical" href="https://conradgelber.com/borderline/">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=8">
+<link rel="stylesheet" href="/play/play.css?v=4">
+<link rel="stylesheet" href="/borderline/borderline.css?v=1">
+<script src="/borderline/borderline.js?v=3" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="wrap">
+
+  <header class="playhead">
+    <a href="/">Conrad Gelber</a>
+    <a class="back" href="/games/">&larr; Games</a>
+  </header>
+
+  <main id="main" class="game">
+
+    <section class="screen" id="screen-start">
+      <h1 class="game-title" id="title" tabindex="-1">Borderline</h1>
+      <p class="game-intro">Five old political maps with the date torn off. Each
+        shows only borders and country names. Work out when it was printed:
+        a Russian Alaska, a Persia not yet called Iran, an Austria-Hungary
+        still in one piece. Every map fits a window of years. A guess inside
+        it scores 5,000; the further outside, the fewer points.</p>
+      <div class="tiers">
+        <button type="button" class="tier" data-mode="daily" data-diff="N" disabled>
+          <span class="tier-name">Today's maps</span>
+          <span class="tier-desc">The same five wide maps for everyone, new each day.</span>
+          <span class="tier-best" data-best="daily-N"></span>
+        </button>
+        <button type="button" class="tier" data-mode="daily" data-diff="H" disabled>
+          <span class="tier-name">Today's maps, Hard</span>
+          <span class="tier-desc">Tight crops of two or three countries, and less forgiving scoring.</span>
+          <span class="tier-best" data-best="daily-H"></span>
+        </button>
+        <button type="button" class="tier" data-mode="practice" data-diff="N" disabled>
+          <span class="tier-name">Practice</span>
+          <span class="tier-desc">Five random wide maps, as many games as you like.</span>
+        </button>
+        <button type="button" class="tier" data-mode="practice" data-diff="H" disabled>
+          <span class="tier-name">Practice, Hard</span>
+          <span class="tier-desc">Five random tight maps.</span>
+        </button>
+      </div>
+      <p class="game-status" id="today"></p>
+      <p class="game-status" id="load-status" role="status"></p>
+    </section>
+
+    <section class="screen" id="screen-round" hidden aria-labelledby="round-heading">
+      <div class="round-meta">
+        <span id="round-count"></span>
+        <span id="round-total"></span>
+      </div>
+      <h1 class="place" id="round-heading" tabindex="-1">When is this map from?</h1>
+
+      <div class="atlas-frame">
+        <svg class="atlas" id="map" viewBox="0 0 360 400" role="img" aria-label="Political map with no date"></svg>
+      </div>
+
+      <div class="guess-panel" id="guess-area">
+        <label class="guess-label" for="year-input">Your guess</label>
+        <div class="year-row">
+          <input class="year-range" id="year-range" type="range" step="1" aria-label="Year slider" aria-controls="year-input">
+          <input class="year-input" id="year-input" type="number" inputmode="numeric" step="1" placeholder="Year" aria-describedby="year-help">
+        </div>
+        <p class="hint" id="year-help">Drag the slider or type a year, then lock it in.</p>
+        <div class="guess-actions">
+          <button type="button" class="btn btn-felt" id="lock" disabled>Lock in a year</button>
+          <button type="button" class="btn btn-quiet" id="hint">Show me one tell (&minus;1,000)</button>
+        </div>
+        <p class="hint-text" id="hint-text" aria-live="polite"></p>
+      </div>
+
+      <section class="reveal" id="reveal" hidden aria-labelledby="reveal-title">
+        <h2 class="reveal-title" id="reveal-title" tabindex="-1"></h2>
+        <p class="reveal-points" id="reveal-points"></p>
+        <p class="reveal-window" id="reveal-window"></p>
+        <svg class="timeline" id="timeline" viewBox="0 0 600 84" role="img" aria-label="Timeline"></svg>
+        <h3 class="reveal-sub">The tells</h3>
+        <ul class="tells" id="tells"></ul>
+        <div class="end-actions">
+          <button type="button" class="btn btn-felt" id="next">Next map</button>
+        </div>
+      </section>
+    </section>
+
+    <section class="screen" id="screen-end" hidden aria-labelledby="end-title">
+      <h1 class="game-title" id="end-title" tabindex="-1">Your score</h1>
+      <p class="end-total" id="end-total"></p>
+      <p class="game-status" id="end-note"></p>
+      <table class="rounds">
+        <thead><tr><th scope="col">Map</th><th scope="col">Window</th><th scope="col" class="num">Guess</th><th scope="col" class="num">Points</th></tr></thead>
+        <tbody id="end-rounds"></tbody>
+      </table>
+      <h2 class="reveal-sub">Share</h2>
+      <pre class="share" id="share"></pre>
+      <div class="end-actions">
+        <button type="button" class="btn btn-felt" id="copy">Copy</button>
+        <button type="button" class="btn btn-quiet" id="again">Back to the start</button>
+      </div>
+      <p class="game-status" id="copy-status" role="status"></p>
+    </section>
+
+    <p class="visually-hidden" id="announce" aria-live="polite"></p>
+
+    <section class="about" aria-labelledby="about-title">
+      <h2 class="about-title" id="about-title">About Borderline</h2>
+      <p>The idea came from a map in an IB Theory of Knowledge classroom that
+        still shows Russian Alaska. We tried to date it from its borders and
+        names alone.</p>
+      <p>Every map is drawn in the same old-atlas style whatever its year,
+        so the style never gives the date away. A map fits a window of
+        years: from the latest change among the things on it to the day
+        before the next change. A border change counts only if it would be
+        visible on a phone, a patch of at least 120 square pixels that is
+        more than two pixels thick; a rename counts if the country is
+        labeled. The two changes that set the window are the tells.</p>
+      <p>Borders follow the CShapes 2.0 dataset. Where territory is disputed,
+        the map shows that dataset's coding, which is not a position on
+        sovereignty.</p>
+      <h3 class="about-sub">Data</h3>
+      <ul class="credits">
+        <li><a href="https://icr.ethz.ch/data/cshapes/">CShapes 2.0</a> (1886 to 2019),
+          by Guy Schvitz, Seraina R&uuml;egger, Luc Girardin, Lars-Erik Cederman,
+          Nils Weidmann and Kristian Skrede Gleditsch, ETH Z&uuml;rich, from the
+          <a href="https://cran.r-project.org/package=cshapes">cshapes R package</a>.
+          Licensed <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>;
+          the map files made from it here are shared under the same license.</li>
+        <li><a href="https://icr.ethz.ch/data/cshapes/">CShapes-Europe</a> (1816 to 1885),
+          by Lars-Erik Cederman, Luc Girardin, Carl M&uuml;ller-Crepon and Yannick Pengl,
+          from <cite>Nationalism and the Transformation of the State</cite> (Cambridge
+          University Press, 2025). Licensed
+          <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.
+          Its records are the borders of 1 January each year, so each change
+          used as a tell here carries its real date from a cited source.</li>
+        <li><a href="https://github.com/aourednik/historical-basemaps">historical-basemaps</a>
+          by Andr&eacute; Ourednik, for the hand-picked maps before 1886 outside Europe.
+          Licensed <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL-3.0</a>;
+          the map files made from it here are shared under the same license.
+          Its snapshots mix borders from different years, so each crop was
+          checked by hand and dated from the cited facts it shows.</li>
+        <li>Country names, renames, the dates CShapes-Europe leaves out, and the
+          hand-picked maps are in the
+          <a href="https://github.com/conradicle/conradgelber.com/tree/main/play-src/data/borderline">data folder</a>,
+          each date with its source.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>
+    <p class="colophon">Borders from CShapes and historical-basemaps; see
+      About above. <a href="/accessibility/">Accessibility</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
