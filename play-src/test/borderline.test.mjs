@@ -172,6 +172,13 @@ test('the West Bank, Gaza and Golan after 10 June 1967 and Western Sahara after 
   assert.equal(contestedIn(sahara, '1960-01-01', '1975-11-13'), null);
 });
 
+test('land CShapes leaves unclaimed for years is rejected while it is blank', () => {
+  const arabia = { c: [40, 24], s: scaleForWidth(2500) };
+  assert.match(contestedIn(arabia, '1925-01-01', '1930-01-01'), /Arabia 19\d\d-1932 \(blank land\)/);
+  assert.equal(contestedIn(arabia, '1932-09-23', '1945-01-01'), null);
+  assert.equal(contestedIn({ c: [1, 8], s: scaleForWidth(1500) }, '1920-01-01', '1921-01-01'), 'Togoland 1919-1922 (blank land)');
+});
+
 test('missing land is rejected only where it would be visible', () => {
   assert.equal(contestedIn({ c: [-60, -50], s: scaleForWidth(3000) }, '1950-01-01', '1960-01-01'), 'Falklands (missing land)');
   // Gibraltar is under a speck even on a tight crop; Macau shows on one.
