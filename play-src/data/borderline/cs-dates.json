@@ -1,0 +1,14 @@
+{
+ "_about": [
+  "Corrections to CShapes 2.0 record dates, each with a source. 'from' is the record start as CShapes has it; 'date' is the corrected start.",
+  "Kosovo: CShapes follows Gleditsch and Ward and starts Kosovo on 20 February 2008, while Serbia's record without Kosovo starts on 17 February, leaving Kosovo as unclaimed land for three days. Kosovo declared independence on 17 February 2008."
+ ],
+ "changes": [
+  {
+   "unit": "g347",
+   "from": "2008-02-20",
+   "date": "2008-02-17",
+   "source": "https://en.wikipedia.org/wiki/2008_Kosovo_declaration_of_independence"
+  }
+ ]
+}
