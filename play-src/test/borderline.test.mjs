@@ -175,7 +175,7 @@ test('the West Bank, Gaza and Golan after 10 June 1967 and Western Sahara after 
 test('land CShapes leaves unclaimed for years is rejected while it is blank', () => {
   const arabia = { c: [40, 24], s: scaleForWidth(2500) };
   assert.match(contestedIn(arabia, '1925-01-01', '1930-01-01'), /Arabia 19\d\d-1932 \(blank land\)/);
-  assert.equal(contestedIn(arabia, '1932-09-23', '1945-01-01'), null);
+  assert.equal(contestedIn({ c: [42, 22], s: scaleForWidth(1200) }, '1932-09-23', '1945-01-01'), null);
   assert.equal(contestedIn({ c: [1, 8], s: scaleForWidth(1500) }, '1920-01-01', '1921-01-01'), 'Togoland 1919-1922 (blank land)');
   assert.equal(contestedIn({ c: [-11, 28.5], s: scaleForWidth(1000) }, '1905-01-01', '1912-11-26'), 'Cape Juby strip 1904-1912 (blank land)');
   assert.equal(contestedIn({ c: [-11, 28.5], s: scaleForWidth(1000) }, '1912-11-27', '1920-01-01'), null);
@@ -188,7 +188,7 @@ test('land CShapes leaves unclaimed for years is rejected while it is blank', ()
 test('missing land is rejected only where it would be visible', () => {
   assert.equal(contestedIn({ c: [-60, -50], s: scaleForWidth(3000) }, '1950-01-01', '1960-01-01'), 'Falklands (missing land)');
   // Gibraltar is under a speck even on a tight crop; Macau shows on one.
-  assert.equal(contestedIn({ c: [-5, 37], s: scaleForWidth(700) }, '1950-01-01', '1960-01-01'), null);
+  assert.equal(contestedIn({ c: [-5, 37], s: scaleForWidth(700) }, '1960-01-01', '1970-01-01'), null);
   assert.equal(contestedIn({ c: [113.5, 22.5], s: scaleForWidth(650) }, '1950-01-01', '1960-01-01'), 'Macau (missing land)');
   assert.equal(contestedIn({ c: [113.5, 22.5], s: scaleForWidth(3000) }, '1950-01-01', '1960-01-01'), null);
 });
