@@ -1,94 +1,192 @@
 {
  "_about": [
-  "Corrections to CShapes 2.0 record dates, each with a source. An entry with 'start' moves the start of the unit's record that begins on that day to 'newStart'; one with 'end' moves the end of every record of the unit that ends on that day to 'newEnd'.",
-  "Most close gaps where CShapes ends a record days before the record that next covers the same land begins, so the land would draw as unclaimed paper in between. Where two records then overlap, the older one is drawn on top, so the change shows the day after the older record ends.",
+  "Corrections to CShapes 2.0 records, each with a source. An entry with 'start' moves the start of the unit's record that begins on that day to 'newStart' (or with 'drop' removes that record); one with 'end' moves the end of every record of the unit that ends on that day to 'newEnd'. An entry with 'fill' adds a record for that unit from 'from' to 'to', drawn with the shape of another record ('shape': its unit and start).",
+  "Most close gaps where CShapes ends a record days before the record that next covers the same land begins, so the land would draw as unclaimed paper in between. A gap inside a larger change is filled with only the gap's shape, so nothing else moves. Where two records overlap, the older one is drawn on top, so the change shows the day after the older record ends.",
   "Found by a scan for every such gap (play-src/data/borderline/build/gaps.mjs, not committed). Long gaps where CShapes codes no recognized state (Arabia 1914 to 1932 and others) are not filled; crops that would show them are rejected instead (CONTESTED_REJECT in config.mjs)."
  ],
  "changes": [
   {
-   "unit": "g347", "start": "2008-02-20", "newStart": "2008-02-17",
+   "unit": "g347",
+   "start": "2008-02-20",
+   "newStart": "2008-02-17",
    "why": "Kosovo declared independence on 17 February 2008; CShapes starts it on the 20th while Serbia's record without Kosovo starts on the 17th.",
    "source": "https://en.wikipedia.org/wiki/2008_Kosovo_declaration_of_independence"
   },
   {
-   "unit": "g561", "end": "1910-05-29", "newEnd": "1910-05-30",
+   "unit": "g561",
+   "end": "1910-05-29",
+   "newEnd": "1910-05-30",
    "why": "Cape Colony lasted until the Union of South Africa was formed on 31 May 1910.",
    "source": "https://en.wikipedia.org/wiki/Union_of_South_Africa"
   },
   {
-   "unit": "g562", "end": "1910-05-29", "newEnd": "1910-05-30",
+   "unit": "g562",
+   "end": "1910-05-29",
+   "newEnd": "1910-05-30",
    "why": "Natal lasted until the Union of South Africa was formed on 31 May 1910.",
    "source": "https://en.wikipedia.org/wiki/Union_of_South_Africa"
   },
   {
-   "unit": "g563", "end": "1910-05-29", "newEnd": "1910-05-30",
+   "unit": "g563",
+   "end": "1910-05-29",
+   "newEnd": "1910-05-30",
    "why": "The Transvaal Colony lasted until the Union of South Africa was formed on 31 May 1910.",
    "source": "https://en.wikipedia.org/wiki/Union_of_South_Africa"
   },
   {
-   "unit": "g564", "end": "1910-05-29", "newEnd": "1910-05-30",
+   "unit": "g564",
+   "end": "1910-05-29",
+   "newEnd": "1910-05-30",
    "why": "The Orange River Colony lasted until the Union of South Africa was formed on 31 May 1910.",
    "source": "https://en.wikipedia.org/wiki/Union_of_South_Africa"
   },
   {
-   "unit": "g432", "end": "1960-06-19", "newEnd": "1960-06-20",
+   "unit": "g432",
+   "end": "1960-06-19",
+   "newEnd": "1960-06-20",
    "why": "CShapes draws Senegal inside the Mali Federation record to 19 June 1960 and starts Senegal on 21 June; the federation's record now covers 20 June, its independence day.",
    "source": "https://en.wikipedia.org/wiki/Mali_Federation"
   },
   {
-   "unit": "g345", "end": "2006-06-02", "newEnd": "2006-06-05",
+   "unit": "g345",
+   "end": "2006-06-02",
+   "newEnd": "2006-06-05",
    "why": "Serbia and Montenegro lasted until Serbia declared itself its successor on 5 June 2006; Serbia's record starts on the 6th.",
    "source": "https://en.wikipedia.org/wiki/Dissolution_of_Serbia_and_Montenegro"
   },
   {
-   "unit": "g341", "start": "2006-06-12", "newStart": "2006-06-03",
+   "unit": "g341",
+   "start": "2006-06-12",
+   "newStart": "2006-06-03",
    "why": "Montenegro declared independence on 3 June 2006. Serbia and Montenegro is drawn on top through 5 June, so Montenegro shows from the 6th, with Serbia.",
    "source": "https://en.wikipedia.org/wiki/Dissolution_of_Serbia_and_Montenegro"
   },
   {
-   "unit": "g365", "end": "1991-11-30", "newEnd": "1991-12-25",
+   "unit": "g365",
+   "end": "1991-11-30",
+   "newEnd": "1991-12-25",
    "why": "The Soviet Union was dissolved on 26 December 1991; CShapes drops Ukraine from it on 1 December but starts Ukraine on the 26th.",
    "source": "https://en.wikipedia.org/wiki/Dissolution_of_the_Soviet_Union"
   },
   {
-   "unit": "g365", "end": "1991-12-20", "newEnd": "1991-12-25",
+   "unit": "g365",
+   "end": "1991-12-20",
+   "newEnd": "1991-12-25",
    "why": "The Soviet Union was dissolved on 26 December 1991; CShapes drops the other republics on 21 December but starts them on the 26th.",
    "source": "https://en.wikipedia.org/wiki/Dissolution_of_the_Soviet_Union"
   },
   {
-   "unit": "g315", "start": "1918-11-11", "newStart": "1918-10-28",
+   "unit": "g315",
+   "start": "1918-11-11",
+   "newStart": "1918-10-28",
    "why": "Czechoslovakia declared independence on 28 October 1918. Austria-Hungary is drawn on top through 2 November, so Czechoslovakia shows from the 3rd, with Austria and Hungary.",
    "source": "https://en.wikipedia.org/wiki/Czechoslovak_declaration_of_independence"
   },
   {
-   "unit": "g291", "end": "1938-08-31", "newEnd": "1939-08-31",
+   "unit": "g291",
+   "end": "1938-08-31",
+   "newEnd": "1939-08-31",
    "why": "The Free City of Danzig lasted until Germany annexed it on 1 September 1939; CShapes ends it a year early. Danzig is drawn on top of Germany's 1938 record, so Germany shows there from 1 September 1939.",
    "source": "https://en.wikipedia.org/wiki/Free_City_of_Danzig"
   },
   {
-   "unit": "g830", "end": "1962-12-31", "newEnd": "1963-09-15",
+   "unit": "g830",
+   "end": "1962-12-31",
+   "newEnd": "1963-09-15",
    "why": "Singapore was a British colony until it joined Malaysia on 16 September 1963.",
    "source": "https://en.wikipedia.org/wiki/History_of_the_State_of_Singapore_(Malaysia)"
   },
   {
-   "unit": "g430", "end": "1904-04-07", "newEnd": "1904-12-31",
-   "why": "CShapes ends this French West Africa record on 7 April 1904 but starts Upper Senegal and Niger and Niger on 1 January 1905; the land stays French West Africa until then. The reorganizing decree itself is dated 18 October 1904.",
-   "source": "https://en.wikipedia.org/wiki/Upper_Senegal_and_Niger"
+   "unit": "g430",
+   "end": "1904-04-07",
+   "newEnd": "1904-10-17",
+   "why": "The decree of 18 October 1904 reorganized French West Africa; CShapes spreads it over 8 April 1904 and 1 January 1905, with land unclaimed in between. French West Africa keeps its old shape until the decree.",
+   "source": "https://mjp.univ-perp.fr/constit/ml1920.htm"
   },
   {
-   "unit": "g4784", "end": "1904-04-07", "newEnd": "1904-12-31",
-   "why": "The strip Britain ceded to France in the convention of 8 April 1904 is unclaimed in CShapes until Niger starts on 1 January 1905; it stays with Northern Nigeria until then.",
-   "source": "https://en.wikipedia.org/wiki/Upper_Senegal_and_Niger"
+   "unit": "g4784",
+   "end": "1904-04-07",
+   "newEnd": "1904-10-17",
+   "why": "The decree of 18 October 1904 reorganized French West Africa; CShapes spreads it over 8 April 1904 and 1 January 1905, with land unclaimed in between. The strip Britain ceded to France on 8 April 1904 stays with Northern Nigeria until it joins Niger with the decree.",
+   "source": "https://mjp.univ-perp.fr/constit/ml1920.htm"
   },
   {
-   "unit": "g462", "end": "1955-12-31", "newEnd": "1957-03-05",
+   "unit": "g462",
+   "end": "1955-12-31",
+   "newEnd": "1957-03-05",
    "why": "British Togoland joined the Gold Coast when it became independent as Ghana on 6 March 1957; the UN approved the union on 13 December 1956. CShapes ends it on 31 December 1955 and adds it to the Gold Coast a year early.",
    "source": "https://en.wikipedia.org/wiki/British_Togoland"
   },
   {
-   "unit": "g600", "end": "1904-10-02", "newEnd": "1912-11-26",
+   "unit": "g600",
+   "end": "1904-10-02",
+   "newEnd": "1912-11-26",
    "why": "Northern Morocco stayed part of the recognized Sultanate of Morocco until the Franco-Spanish treaty of 27 November 1912 made it the Spanish protectorate; CShapes leaves it unclaimed from 1904.",
    "source": "https://en.wikipedia.org/wiki/Spanish_protectorate_in_Morocco"
+  },
+  {
+   "unit": "g435",
+   "start": "1904-04-08",
+   "drop": true,
+   "why": "The decree of 18 October 1904 reorganized French West Africa; CShapes spreads it over 8 April 1904 and 1 January 1905, with land unclaimed in between. Mauritania's April 1904 record is dropped; Mauritania starts with the decree.",
+   "source": "https://mjp.univ-perp.fr/constit/ml1920.htm"
+  },
+  {
+   "unit": "g435",
+   "start": "1904-10-03",
+   "newStart": "1904-10-18",
+   "why": "The decree of 18 October 1904 reorganized French West Africa; CShapes spreads it over 8 April 1904 and 1 January 1905, with land unclaimed in between. Mauritania starts with the decree.",
+   "source": "https://mjp.univ-perp.fr/constit/ml1920.htm"
+  },
+  {
+   "unit": "g432",
+   "start": "1905-01-01",
+   "newStart": "1904-10-18",
+   "why": "The decree of 18 October 1904 reorganized French West Africa; CShapes spreads it over 8 April 1904 and 1 January 1905, with land unclaimed in between. Upper Senegal and Niger starts with the decree.",
+   "source": "https://mjp.univ-perp.fr/constit/ml1920.htm"
+  },
+  {
+   "unit": "g436",
+   "start": "1905-01-01",
+   "newStart": "1904-10-18",
+   "why": "The decree of 18 October 1904 reorganized French West Africa; CShapes spreads it over 8 April 1904 and 1 January 1905, with land unclaimed in between. Niger starts with the decree.",
+   "source": "https://mjp.univ-perp.fr/constit/ml1920.htm"
+  },
+  {
+   "fill": "g640",
+   "from": "1914-11-03",
+   "to": "1914-11-04",
+   "shape": {
+    "unit": "g352",
+    "start": "1914-11-05"
+   },
+   "why": "Cyprus stays Ottoman in name until Britain annexed it on 5 November 1914; CShapes leaves it unclaimed for two days.",
+   "source": "https://en.wikipedia.org/wiki/British_Cyprus"
+  },
+  {
+   "fill": "g365",
+   "from": "1918-11-11",
+   "to": "1918-11-17",
+   "shape": {
+    "unit": "g367",
+    "start": "1918-11-18"
+   },
+   "why": "Latvia's land stays with Russia until Latvia proclaimed independence on 18 November 1918; CShapes leaves it unclaimed for a week. Only Latvia's shape is filled, so Estonia and Poland still appear on 11 November.",
+   "source": "https://en.wikipedia.org/wiki/Latvian_Declaration_of_Independence"
+  },
+  {
+   "fill": "g690",
+   "from": "1922-12-02",
+   "to": "1961-06-18",
+   "shape": {
+    "unit": "g690",
+    "start": "1961-06-19"
+   },
+   "name": "Kuwait",
+   "status": "protectorate",
+   "owner": "200",
+   "why": "Kuwait was a British protectorate with borders set by the Uqair Protocol of 2 December 1922 until independence on 19 June 1961; CShapes leaves it unclaimed. Drawn with its 1961 shape. Before the protocol, crops that show it are rejected (config.mjs).",
+   "source": "https://en.wikipedia.org/wiki/Uqair_Protocol_of_1922"
   }
  ]
 }

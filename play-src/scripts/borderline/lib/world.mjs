@@ -47,8 +47,26 @@ export function loadWorld(file = path.join(BUILD_DIR, 'geo.json'), { strict = tr
 function applyCsDates(records, strict, file = path.join(HAND_DIR, 'cs-dates.json')) {
   if (!existsSync(file)) return;
   for (const ch of JSON.parse(readFileSync(file, 'utf8')).changes) {
-    if (!ch.source) throw new Error('cs-dates: no source for ' + ch.unit);
+    if (!ch.source) throw new Error('cs-dates: no source for ' + (ch.unit || ch.fill));
+    if (ch.fill) {
+      // A new record for unit `fill` from `from` to `to`, drawn with the
+      // shape of another record (`shape`: its unit and start).
+      const shape = records.find((r) => r.src === 'cs' && r.unit === ch.shape.unit && r.start === ch.shape.start);
+      if (!shape) { if (strict) throw new Error('cs-dates: no ' + ch.shape.unit + ' record from ' + ch.shape.start); continue; }
+      const like = records.find((r) => r.src === 'cs' && r.unit === ch.fill) || shape;
+      records.push({
+        ...shape, rid: shape.rid + '-' + ch.fill + '-' + ch.from, unit: ch.fill, start: ch.from, end: ch.to,
+        name: ch.name || like.name, status: ch.status || like.status, owner: ch.owner || like.owner,
+      });
+      continue;
+    }
     const side = 'start' in ch ? 'start' : 'end';
+    if (ch.drop) {
+      const i = records.findIndex((r) => r.src === 'cs' && r.unit === ch.unit && r.start === ch.start);
+      if (i < 0) { if (strict) throw new Error('cs-dates: no ' + ch.unit + ' record from ' + ch.start); continue; }
+      records.splice(i, 1);
+      continue;
+    }
     const mine = records.filter((r) => r.src === 'cs' && r.unit === ch.unit && r[side] === ch[side]);
     if (!mine.length) { if (strict) throw new Error('cs-dates: no ' + ch.unit + ' record with ' + side + ' ' + ch[side]); continue; }
     for (const r of mine) r[side] = side === 'start' ? ch.newStart : ch.newEnd;
@@ -69,7 +87,17 @@ function applyEuDates(records, strict, file = path.join(HAND_DIR, 'eu-dates.json
   if (!existsSync(file)) return verified;
   const { changes } = JSON.parse(readFileSync(file, 'utf8'));
   const eu = records.filter((r) => r.src === 'eu');
+  // Fills first, while every record still has its 1 January dates: a new
+  // record for unit `fill` from `from` to `to` with another record's shape.
+  for (const ch of changes.filter((c) => c.fill)) {
+    if (!ch.source) throw new Error('eu-dates: no source for the ' + ch.fill + ' fill');
+    const shape = eu.find((r) => r.unit === ch.shape.unit && r.start === ch.shape.start);
+    if (!shape) { if (strict) throw new Error('eu-dates: no ' + ch.shape.unit + ' record from ' + ch.shape.start); continue; }
+    const like = eu.find((r) => r.unit === ch.fill) || shape;
+    records.push({ ...shape, rid: shape.rid + '-' + ch.fill + '-' + ch.from, unit: ch.fill, start: ch.from, end: ch.to, name: like.name, status: like.status, owner: like.owner });
+  }
   for (const ch of changes) {
+    if (ch.fill) continue;
     const mine = eu.filter((r) => r.unit === ch.unit);
     if ('from' in ch) {
       const rec = mine.find((r) => r.start === ch.from + '-01-01');
