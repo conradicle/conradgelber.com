@@ -117,8 +117,14 @@ export function parseAnswerline(answerline) {
     else notes += ch;
   }
   const options = [];
-  // A main answer can itself hold alternatives: "Scotland or Alba".
-  for (const opt of splitOptions(main, false)) {
+  // A main answer can itself hold alternatives: "Scotland or Alba", or
+  // "Arthur <u>Wellesley</u>, 1st Duke of <u>Wellington</u>", where each
+  // comma-separated piece has its own underlined name.
+  const mainOptions = splitOptions(main, false).flatMap((opt) => {
+    const pieces = opt.split(/,\s+/);
+    return pieces.length > 1 && pieces.every((p) => /<[ub]>/i.test(p)) ? pieces : [opt];
+  });
+  for (const opt of mainOptions) {
     const text = stripTags(opt);
     if (text) options.push({ kind: 'accept', text, required: requiredOf(opt), plain: !/<[ub]>/i.test(opt) });
   }
