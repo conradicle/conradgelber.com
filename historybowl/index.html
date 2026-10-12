@@ -17,8 +17,8 @@
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css?v=8">
 <link rel="stylesheet" href="/play/play.css?v=4">
-<link rel="stylesheet" href="/historybowl/historybowl.css?v=1">
-<script src="/historybowl/historybowl.js?v=1" defer></script>
+<link rel="stylesheet" href="/historybowl/historybowl.css?v=2">
+<script src="/historybowl/historybowl.js?v=2" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -42,7 +42,7 @@
         <div class="board-cell"><span class="board-label">Heard</span><span class="board-num" id="home-heard">0</span></div>
         <div class="board-cell"><span class="board-label">Right</span><span class="board-num" id="home-acc">-</span></div>
         <div class="board-cell"><span class="board-label">Buzz</span><span class="board-num" id="home-buzz">-</span></div>
-        <div class="board-cell"><span class="board-label">Cards</span><span class="board-num" id="home-cards">0</span></div>
+        <div class="board-cell"><span class="board-label">Due</span><span class="board-num" id="home-due">0</span></div>
       </div>
 
       <div class="tiers">
@@ -50,11 +50,23 @@
           <span class="tier-name">Read tossups</span>
           <span class="tier-desc">Solo, one at a time, with a buzzer. Space bar or the big button.</span>
         </button>
+        <button type="button" class="tier" id="go-review">
+          <span class="tier-name">Review cards</span>
+          <span class="tier-desc" id="review-desc">Flashcards from the clues you missed, spaced so the hard ones come back sooner.</span>
+          <span class="tier-best" id="review-due"></span>
+        </button>
         <button type="button" class="tier" id="go-stats">
           <span class="tier-name">Stats</span>
           <span class="tier-desc">Accuracy and buzz point by category, era and region. Export or import your progress.</span>
         </button>
       </div>
+
+      <section class="weak" id="weak-panel" aria-labelledby="weak-title">
+        <h2 class="weak-title" id="weak-title">Your weakest areas</h2>
+        <ol class="weak-list" id="weak-list"></ol>
+        <p class="weak-note" id="weak-note"></p>
+        <button type="button" class="btn btn-lamp" id="weak-go" hidden>Practice these</button>
+      </section>
 
       <details class="settings" id="settings">
         <summary>Question settings</summary>
@@ -107,6 +119,7 @@
         <div class="board-cell board-clock"><span class="board-label" id="b-clock-label">Clock</span><span class="board-num" id="b-clock">-</span></div>
       </div>
 
+      <p class="focus-note" id="focus-note" hidden><span id="focus-text"></span> <button type="button" class="btn btn-quiet btn-small" id="focus-clear">Clear focus</button></p>
       <p class="q-meta" id="q-meta"></p>
       <div class="q-card" id="q-card">
         <p class="q-text" id="q-text"></p>
@@ -162,6 +175,23 @@
       <p class="game-status" id="card-status" role="status"></p>
 
       <p class="q-source" id="q-source"></p>
+      <div class="fix">
+        <button type="button" class="btn btn-quiet btn-small" id="fix-open" aria-expanded="false" aria-controls="fix-form">Fix the tags</button>
+        <form class="fix-form" id="fix-form" hidden>
+          <p class="fix-help">Your tags replace the guessed ones for this question in stats and in the weakest-areas filter, on this device and in exports.</p>
+          <div class="fix-grid">
+            <label for="fix-cat">Category</label><select id="fix-cat"></select>
+            <label for="fix-sub">Subcategory</label><select id="fix-sub"></select>
+            <label for="fix-era">Era</label><select id="fix-era"></select>
+            <label for="fix-region">Region</label><select id="fix-region"></select>
+          </div>
+          <div class="end-actions">
+            <button type="submit" class="btn btn-lamp btn-small">Save tags</button>
+            <button type="button" class="btn btn-quiet btn-small" id="fix-cancel">Cancel</button>
+          </div>
+        </form>
+        <p class="game-status" id="fix-status" role="status"></p>
+      </div>
       <div class="report">
         <button type="button" class="btn btn-quiet btn-small" id="report-open" aria-expanded="false" aria-controls="report-form">Report an error</button>
         <form class="report-form" id="report-form" hidden>
@@ -178,6 +208,55 @@
       </div>
     </section>
 
+    <section class="screen" id="screen-review" hidden aria-labelledby="review-title">
+      <h1 class="game-title" id="review-title" tabindex="-1">Review</h1>
+      <div class="board" aria-label="Review progress">
+        <div class="board-cell"><span class="board-label">Left</span><span class="board-num" id="r-left">0</span></div>
+        <div class="board-cell"><span class="board-label">Done</span><span class="board-num" id="r-done">0</span></div>
+        <div class="board-cell"><span class="board-label">Again</span><span class="board-num" id="r-again">0</span></div>
+        <div class="board-cell"><span class="board-label">Cards</span><span class="board-num" id="r-total">0</span></div>
+      </div>
+
+      <div id="review-card" hidden>
+        <p class="q-meta" id="r-meta"></p>
+        <div class="q-card flash">
+          <p class="q-text" id="r-front"></p>
+        </div>
+        <form class="answer-form" id="r-form" autocomplete="off">
+          <label class="answer-label" for="r-input">Your answer (say it or type it, then reveal)</label>
+          <div class="answer-row">
+            <input class="answer-input" id="r-input" type="text" maxlength="120" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+            <button type="submit" class="btn btn-lamp" id="r-reveal">Show answer</button>
+          </div>
+        </form>
+        <div class="flash-back" id="r-back-box" hidden>
+          <p class="answer-main"><span class="answer-main-label">Answer</span> <span id="r-back"></span></p>
+          <p class="r-hint" id="r-hint"></p>
+          <p class="rate-help" id="rate-help">How well did you know it?</p>
+          <div class="rate-row" role="group" aria-labelledby="rate-help" id="rate-row"></div>
+        </div>
+        <div class="card-tools">
+          <button type="button" class="btn btn-quiet btn-small" id="r-delete">Delete this card</button>
+          <button type="button" class="btn btn-quiet btn-small" id="r-report" hidden>Report an error</button>
+        </div>
+        <p class="game-status" id="r-status" role="status"></p>
+      </div>
+
+      <div id="review-empty" hidden>
+        <p class="review-empty-text" id="review-empty-text"></p>
+      </div>
+
+      <div class="deck-offer" id="deck-offer" hidden>
+        <h2 class="reveal-sub">Starter deck</h2>
+        <p class="game-intro" id="deck-text">66 cards of core History Bowl facts, AI-written and marked as such on each card. Adds them to your review.</p>
+        <button type="button" class="btn btn-quiet" id="deck-add">Add the starter deck</button>
+      </div>
+
+      <div class="end-actions next-row">
+        <button type="button" class="btn btn-quiet" id="review-home">Done</button>
+      </div>
+    </section>
+
     <section class="screen" id="screen-stats" hidden aria-labelledby="stats-title">
       <h1 class="game-title" id="stats-title" tabindex="-1">Stats</h1>
       <p class="game-intro">Kept in this browser only. Buzz point is how much of
@@ -187,11 +266,12 @@
       <div class="stats-filter">
         <label for="stats-source">Source</label>
         <select id="stats-source">
-          <option value="">All sources</option>
-          <option value="iac-bee-qbreader">IAC History Bee Nationals</option>
-          <option value="qbreader">QB Reader</option>
+          <option value="regional">Regional level (all but the Bee)</option>
+          <option value="iac-bee-qbreader">IAC History Bee nationals</option>
+          <option value="all">Everything</option>
         </select>
       </div>
+      <div id="stats-weak"></div>
       <div id="stats-tables"></div>
       <h2 class="reveal-sub">Move your progress</h2>
       <p class="game-intro">Export a file here, then import it on your other device.

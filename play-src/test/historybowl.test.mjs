@@ -146,7 +146,7 @@ test('export then import into another device merges without duplicates', () => {
   saveRecords(phone, [rec('2', { ok: false, buzz: null }), rec('9')]);
   saveCards(phone, [{ id: 'c1', front: 'Clue', back: 'Answer', created: 1, fsrs: { lastReview: 50 } }]);
   const res = importData(phone, file);
-  assert.deepEqual(res, { ok: true, records: 1, cards: 0 });
+  assert.deepEqual(res, { ok: true, records: 1, cards: 0, fixes: 0 });
   assert.deepEqual(loadRecords(phone).map((r) => r.id), ['1', '2', '9']);
   // The phone's card was reviewed more recently, so it stays.
   assert.equal(loadCards(phone)[0].fsrs.lastReview, 50);
