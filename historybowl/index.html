@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>History Bowl Study &middot; Conrad Gelber</title>
+<meta name="description" content="Practice for the National History Bowl: pyramidal tossups read one word at a time, a buzzer, answer checking, buzz-point stats, and flashcards made from the clues you missed.">
+<link rel="canonical" href="https://conradgelber.com/historybowl/">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=8">
+<link rel="stylesheet" href="/play/play.css?v=4">
+<link rel="stylesheet" href="/historybowl/historybowl.css?v=1">
+<script src="/historybowl/historybowl.js?v=1" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="wrap">
+
+  <header class="playhead">
+    <a href="/">Conrad Gelber</a>
+    <a class="back" href="/games/">&larr; Games</a>
+  </header>
+
+  <main id="main" class="game hb">
+
+    <section class="screen" id="screen-home" aria-labelledby="home-title">
+      <h1 class="game-title" id="home-title" tabindex="-1">History Bowl Study</h1>
+      <p class="game-intro">Practice for the National History Bowl. Tossups are
+        read one word at a time, hardest clue first. Buzz as soon as you know
+        it, type the answer, then turn any clue you missed into a flashcard.
+        The earlier you buzz right, the better.</p>
+
+      <div class="board board-home" aria-label="Your record on this device">
+        <div class="board-cell"><span class="board-label">Heard</span><span class="board-num" id="home-heard">0</span></div>
+        <div class="board-cell"><span class="board-label">Right</span><span class="board-num" id="home-acc">-</span></div>
+        <div class="board-cell"><span class="board-label">Buzz</span><span class="board-num" id="home-buzz">-</span></div>
+        <div class="board-cell"><span class="board-label">Cards</span><span class="board-num" id="home-cards">0</span></div>
+      </div>
+
+      <div class="tiers">
+        <button type="button" class="tier" id="go-read">
+          <span class="tier-name">Read tossups</span>
+          <span class="tier-desc">Solo, one at a time, with a buzzer. Space bar or the big button.</span>
+        </button>
+        <button type="button" class="tier" id="go-stats">
+          <span class="tier-name">Stats</span>
+          <span class="tier-desc">Accuracy and buzz point by category, era and region. Export or import your progress.</span>
+        </button>
+      </div>
+
+      <details class="settings" id="settings">
+        <summary>Question settings</summary>
+        <form class="settings-form" id="settings-form">
+          <fieldset>
+            <legend>Sources</legend>
+            <label class="check"><input type="checkbox" name="src" value="bee"> IAC History Bee Nationals (2015 to 2022), via QB Reader</label>
+            <label class="check"><input type="checkbox" name="src" value="qb"> High school quizbowl sets on QB Reader</label>
+          </fieldset>
+          <fieldset>
+            <legend>Categories</legend>
+            <div class="check-grid" id="cat-boxes"></div>
+          </fieldset>
+          <fieldset>
+            <legend>History subcategories <span class="legend-note">(none ticked means all)</span></legend>
+            <div class="check-grid" id="sub-boxes"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Level for QB Reader sets</legend>
+            <label class="check"><input type="radio" name="level" value="regional"> Regionals (easy and regular high school)</label>
+            <label class="check"><input type="radio" name="level" value="harder"> Harder (regular and hard high school)</label>
+            <label class="check"><input type="radio" name="level" value="all"> Any high school level</label>
+          </fieldset>
+          <div class="slider-row">
+            <label for="wpm">Reading speed</label>
+            <input type="range" id="wpm" name="wpm" min="120" max="450" step="10" aria-describedby="wpm-out">
+            <output id="wpm-out" for="wpm"></output>
+          </div>
+          <div class="slider-row">
+            <label for="answer-secs">Time to answer</label>
+            <input type="range" id="answer-secs" name="answerSecs" min="3" max="30" step="1" aria-describedby="answer-out">
+            <output id="answer-out" for="answer-secs"></output>
+          </div>
+          <div class="slider-row">
+            <label for="buzz-secs">Time to buzz after the last word</label>
+            <input type="range" id="buzz-secs" name="buzzSecs" min="2" max="15" step="1" aria-describedby="buzz-out">
+            <output id="buzz-out" for="buzz-secs"></output>
+          </div>
+          <p class="game-status" id="settings-status" role="status"></p>
+        </form>
+      </details>
+    </section>
+
+    <section class="screen" id="screen-read" hidden aria-labelledby="read-title">
+      <h1 class="visually-hidden" id="read-title" tabindex="-1">Tossup</h1>
+      <div class="board" aria-label="Scoreboard">
+        <div class="board-cell"><span class="board-label">Tossup</span><span class="board-num" id="b-num">1</span></div>
+        <div class="board-cell"><span class="board-label">Right</span><span class="board-num" id="b-right">0</span></div>
+        <div class="board-cell"><span class="board-label">Buzz</span><span class="board-num" id="b-buzz">-</span></div>
+        <div class="board-cell board-clock"><span class="board-label" id="b-clock-label">Clock</span><span class="board-num" id="b-clock">-</span></div>
+      </div>
+
+      <p class="q-meta" id="q-meta"></p>
+      <div class="q-card" id="q-card">
+        <p class="q-text" id="q-text"></p>
+        <p class="game-status" id="read-status" role="status"></p>
+      </div>
+
+      <form class="answer-form" id="answer-form" hidden autocomplete="off">
+        <label class="answer-label" for="answer-input" id="answer-label">Your answer</label>
+        <div class="answer-row">
+          <input class="answer-input" id="answer-input" type="text" maxlength="120" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send">
+          <button type="submit" class="btn btn-lamp">Answer</button>
+        </div>
+        <div class="timebar" aria-hidden="true"><span class="timebar-fill" id="answer-bar"></span></div>
+      </form>
+
+      <div class="buzz-dock" id="buzz-dock">
+        <button type="button" class="buzz" id="buzz" aria-keyshortcuts="Space">Buzz</button>
+      </div>
+
+      <div class="read-controls">
+        <button type="button" class="btn btn-quiet" id="pause">Pause</button>
+        <button type="button" class="btn btn-quiet" id="skip">Skip</button>
+        <button type="button" class="btn btn-quiet" id="read-home">Done</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-result" hidden aria-labelledby="result-title">
+      <h1 class="result-title" id="result-title" tabindex="-1"></h1>
+      <p class="result-sub" id="result-sub"></p>
+      <div class="result-actions">
+        <button type="button" class="btn btn-quiet" id="override"></button>
+        <button type="button" class="btn btn-quiet" id="show-lines" aria-expanded="false" aria-controls="answer-lines">Show the accept and prompt lines</button>
+      </div>
+      <div class="answer-lines" id="answer-lines" hidden>
+        <p class="answerline" id="answerline"></p>
+      </div>
+      <p class="answer-main"><span class="answer-main-label">Answer</span> <span id="answer-main"></span></p>
+
+      <h2 class="clue-title">Card a clue</h2>
+      <p class="clue-help" id="clue-help">Tap any sentence to make it a flashcard. The marker shows where you buzzed.</p>
+      <div class="clues" id="clues"></div>
+
+      <form class="card-editor" id="card-editor" hidden>
+        <label for="card-front">Front (trim it to the clue that matters)</label>
+        <textarea id="card-front" rows="4" maxlength="1000"></textarea>
+        <label for="card-back">Back</label>
+        <input type="text" id="card-back" maxlength="300">
+        <div class="end-actions">
+          <button type="submit" class="btn btn-lamp">Save card</button>
+          <button type="button" class="btn btn-quiet" id="card-cancel">Cancel</button>
+        </div>
+      </form>
+      <p class="game-status" id="card-status" role="status"></p>
+
+      <p class="q-source" id="q-source"></p>
+      <div class="report">
+        <button type="button" class="btn btn-quiet btn-small" id="report-open" aria-expanded="false" aria-controls="report-form">Report an error</button>
+        <form class="report-form" id="report-form" hidden>
+          <label for="report-note">What is wrong with this question?</label>
+          <textarea id="report-note" rows="2" maxlength="500"></textarea>
+          <button type="submit" class="btn btn-quiet btn-small">Send report</button>
+        </form>
+        <p class="game-status" id="report-status" role="status"></p>
+      </div>
+
+      <div class="end-actions next-row">
+        <button type="button" class="btn btn-lamp btn-next" id="next" aria-keyshortcuts="N">Next tossup</button>
+        <button type="button" class="btn btn-quiet" id="result-home">Done</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-stats" hidden aria-labelledby="stats-title">
+      <h1 class="game-title" id="stats-title" tabindex="-1">Stats</h1>
+      <p class="game-intro">Kept in this browser only. Buzz point is how much of
+        the question you had heard when you buzzed and got it right: lower
+        is earlier. Era and region are estimated from the dates and places
+        in each question.</p>
+      <div class="stats-filter">
+        <label for="stats-source">Source</label>
+        <select id="stats-source">
+          <option value="">All sources</option>
+          <option value="iac-bee-qbreader">IAC History Bee Nationals</option>
+          <option value="qbreader">QB Reader</option>
+        </select>
+      </div>
+      <div id="stats-tables"></div>
+      <h2 class="reveal-sub">Move your progress</h2>
+      <p class="game-intro">Export a file here, then import it on your other device.
+        Importing adds to what is there; nothing is lost.</p>
+      <div class="end-actions">
+        <button type="button" class="btn btn-lamp" id="export">Export</button>
+        <label class="btn btn-quiet file-btn" for="import">Import a file</label>
+        <input type="file" id="import" class="visually-hidden" accept="application/json,.json">
+        <button type="button" class="btn btn-quiet" id="stats-home">Back</button>
+      </div>
+      <p class="game-status" id="stats-status" role="status"></p>
+    </section>
+
+    <p class="visually-hidden" id="announce" aria-live="polite"></p>
+
+    <section class="about" aria-labelledby="about-title">
+      <h2 class="about-title" id="about-title">About</h2>
+      <p>Built for my Rho Kappa team's practice. The National
+        History Bowl is run by International Academic Competitions; this page
+        is not affiliated with them.</p>
+      <p>Questions come live from <a href="https://www.qbreader.org/">QB Reader</a>,
+        a free quizbowl database, including the IAC History Bee national
+        finals it hosts. Each question shows its source. Answers are checked
+        with QB Reader's checker, or a simpler one built in here when that
+        is out of reach, and you can always overrule it.</p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p class="colophon">Questions from QB Reader. <a href="/accessibility/">Accessibility</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
