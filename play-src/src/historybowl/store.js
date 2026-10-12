@@ -1,5 +1,6 @@
 // History Bowl Study's memory on this device: every tossup heard, the
-// flashcards made from missed clues, and settings. All in localStorage;
+// flashcards made from missed clues, the player's own corrections to a
+// question's tags, and settings. All in localStorage;
 // every read and write is wrapped so the page still works when storage is
 // empty, full or blocked. Export and import move it between devices.
 
@@ -9,7 +10,10 @@ export const KEYS = {
   settings: 'historybowl:settings',
   seen: 'historybowl:seen',
   queue: 'historybowl:queue',
+  fixes: 'historybowl:fixes',
 };
+/** The tags a player can correct on a question. */
+export const FIX_FIELDS = ['cat', 'sub', 'era', 'region'];
 export const EXPORT_KIND = 'conradgelber-historybowl';
 export const EXPORT_VERSION = 1;
 const SEEN_MAX = 1500;
@@ -55,6 +59,10 @@ export function cleanRecord(r) {
     buzz,
     ovr: r.ovr === true,
     ts: r.ts,
+    // QB Reader difficulty (0 for the unrated Bee sets), when known.
+    diff: isNum(r.diff) ? r.diff : null,
+    // Which tags the player corrected by hand.
+    fx: Array.isArray(r.fx) ? r.fx.filter((k) => FIX_FIELDS.includes(k)) : [],
   };
 }
 
@@ -73,6 +81,8 @@ export function cleanCard(c) {
     era: isStr(c.era) ? c.era : 'unknown',
     created: c.created,
     fsrs: c.fsrs && typeof c.fsrs === 'object' ? c.fsrs : null,
+    deck: isStr(c.deck) ? c.deck : null,
+    fx: Array.isArray(c.fx) ? c.fx.filter((k) => FIX_FIELDS.includes(k)) : [],
   };
 }
 
@@ -84,6 +94,54 @@ export function loadRecords(storage) {
 export function saveRecords(storage, records) {
   return writeJSON(storage, KEYS.records, records);
 }
+/** Corrections, by question id: { [qid]: { cat?, sub?, era?, region? } }. */
+export function cleanFixes(v) {
+  const out = {};
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return out;
+  for (const [qid, fix] of Object.entries(v)) {
+    if (!fix || typeof fix !== 'object') continue;
+    const clean = {};
+    for (const k of FIX_FIELDS) if (isStr(fix[k]) && fix[k].trim()) clean[k] = fix[k].trim().slice(0, 60);
+    if (Object.keys(clean).length) out[qid] = clean;
+  }
+  return out;
+}
+export function loadFixes(storage) {
+  return cleanFixes(readJSON(storage, KEYS.fixes, {}));
+}
+
+/** A question or record with the player's corrections laid over it. */
+export function withFix(item, fixes) {
+  const fix = fixes[item.qid || item.id];
+  if (!fix) return item;
+  const out = { ...item };
+  const fx = new Set(item.fx || []);
+  for (const k of FIX_FIELDS) {
+    if (!fix[k]) continue;
+    // Questions name these fields in full; records and cards use short names.
+    const long = { cat: 'category', sub: 'subcategory' }[k];
+    if (long && long in item) out[long] = fix[k];
+    else out[k] = fix[k];
+    fx.add(k);
+  }
+  out.fx = [...fx];
+  return out;
+}
+
+/**
+ * Save a correction for one question and apply it to every record and card
+ * from that question. Returns the new { fixes, records, cards }.
+ */
+export function saveFix(storage, state, qid, fix) {
+  const fixes = { ...state.fixes, [qid]: { ...(state.fixes[qid] || {}), ...cleanFixes({ [qid]: fix })[qid] } };
+  const records = state.records.map((r) => (r.qid === qid ? withFix(r, fixes) : r));
+  const cards = state.cards.map((c) => (c.qid === qid ? withFix(c, fixes) : c));
+  writeJSON(storage, KEYS.fixes, fixes);
+  saveRecords(storage, records);
+  saveCards(storage, cards);
+  return { fixes, records, cards };
+}
+
 export function loadCards(storage) {
   return cleanList(readJSON(storage, KEYS.cards, []), cleanCard);
 }
@@ -139,6 +197,7 @@ export function exportData(storage, now = Date.now()) {
     exportedAt: new Date(now).toISOString(),
     records: loadRecords(storage),
     cards: loadCards(storage),
+    fixes: loadFixes(storage),
     settings: loadSettings(storage),
   };
 }
@@ -175,9 +234,20 @@ export function importData(storage, data) {
       cards[byId.get(c.id)] = c;
     }
   }
-  const saved = saveRecords(storage, records) && saveCards(storage, cards);
+  // Corrections made on this device win over imported ones for the same field.
+  const fixes = loadFixes(storage);
+  let addedF = 0;
+  for (const [qid, fix] of Object.entries(cleanFixes(data.fixes))) {
+    const mine = fixes[qid] || {};
+    const merged = { ...fix, ...mine };
+    if (JSON.stringify(merged) !== JSON.stringify(mine)) addedF++;
+    fixes[qid] = merged;
+  }
+  for (let i = 0; i < records.length; i++) if (fixes[records[i].qid]) records[i] = withFix(records[i], fixes);
+  for (let i = 0; i < cards.length; i++) if (cards[i].qid && fixes[cards[i].qid]) cards[i] = withFix(cards[i], fixes);
+  const saved = saveRecords(storage, records) && saveCards(storage, cards) && writeJSON(storage, KEYS.fixes, fixes);
   if (!saved) return { ok: false, error: 'This browser would not save the data (storage is full or blocked).' };
-  return { ok: true, records: addedR, cards: addedC };
+  return { ok: true, records: addedR, cards: addedC, fixes: addedF };
 }
 
 /**
