@@ -437,7 +437,9 @@ Source, in `play-src/src/historybowl/`: `main.js` (the page), `text.js`
 (words, sentences, the reading schedule), `answer.js` (the answerline parser
 and the local answer checker), `tags.js` (estimated era and region),
 `question.js` (the one question shape every source is turned into; shared
-with the Worker), `store.js` (localStorage, export and import), `api.js`.
+with the Worker), `store.js` (localStorage, tag corrections, export and
+import), `areas.js` (the weakest-areas ranking), `srs.js` (flashcard
+scheduling with the `ts-fsrs` package, pinned at 5.4.2), `api.js`.
 Rebuild and commit the bundle after any change:
 
 ```bash
@@ -454,8 +456,22 @@ Storage, per browser: `historybowl:records` (one entry per tossup heard:
 question id, source, category, era, region, right or wrong, buzz point,
 override), `historybowl:cards`, `historybowl:settings`, `historybowl:seen`
 (recent question ids, so a session does not repeat) and `historybowl:queue`
-(the next few questions, so the page still works on bad wifi). The Stats
-screen exports and imports records and cards as one JSON file.
+(the next few questions, so the page still works on bad wifi) and
+`historybowl:fixes` (the player's own category, subcategory, era and region
+for a question, which replace the guessed tags in stats and the
+weakest-areas filter). Each card carries its FSRS schedule. The Stats screen
+exports and imports records, cards and corrections as one JSON file.
+
+Weakest areas rank subcategories first (at least 8 tossups each); the
+estimated era and region tags only fill the list when fewer than three
+subcategories qualify. IAC History Bee nationals tossups count half there,
+and the Stats screen shows them apart from the regional-level sources.
+
+`historybowl/data/decks/starter.json` is the optional starter deck: AI-written
+cards, marked as such in the page, each with a "Report an error" button.
+Add a card by adding a row; never change an existing card's `id`, since
+schedules on players' devices are keyed by it. Bump `?v=` on `STARTER_URL`
+in `main.js` after a change.
 
 ### The historybowl Worker
 
