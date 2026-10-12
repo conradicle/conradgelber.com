@@ -1,15 +1,19 @@
 // History Bowl Study: the page. Solo tossup reader with a buzzer, answer
-// checking, buzz-point stats and card-the-clue flashcards.
+// checking, buzz-point stats, card-the-clue flashcards reviewed with FSRS,
+// tag corrections and the weakest-areas filter.
 // Built to /historybowl/historybowl.js by `npm run build:historybowl`.
 
 import { checkAnswer as checkLocal, mainAnswer } from './answer.js';
 import { words as splitWords, sentences, schedule, shownAt, buzzFraction } from './text.js';
 import { CATEGORIES, SUBCATEGORIES, SOURCE_LABEL } from './question.js';
-import { ERA_LABEL } from './tags.js';
+import { ERA_LABEL, ERAS, REGIONS } from './tags.js';
 import {
   KEYS, readJSON, writeJSON, loadRecords, saveRecords, loadCards, saveCards,
   loadSeen, addSeen, loadSettings, saveSettings, exportData, importData, aggregate,
+  loadFixes, saveFix, withFix,
 } from './store.js';
+import { weakestAreas, inAreas, MIN_IN_AREA, BEE_SOURCE } from './areas.js';
+import { RATINGS, rate, preview, dueToday, dueNow, interleave } from './srs.js';
 import { fetchTossups, checkRemote, sendReport } from './api.js';
 
 const $ = (id) => document.getElementById(id);
@@ -29,8 +33,11 @@ let settings = loadSettings(storage);
 let records = loadRecords(storage);
 let cards = loadCards(storage);
 let seen = loadSeen(storage);
+let fixes = loadFixes(storage);
 let queue = [];
 let fetching = null;
+// The weakest-areas filter, while it is on: { areas, misses }.
+let focus = null;
 
 // The tossup in play.
 let cur = null;
@@ -88,7 +95,66 @@ function refreshHome() {
   $('home-heard').textContent = String(records.length);
   $('home-acc').textContent = records.length ? pct(ok.length / records.length) : '-';
   $('home-buzz').textContent = buzzes.length ? pct(buzzes.reduce((a, b) => a + b, 0) / buzzes.length) : '-';
-  $('home-cards').textContent = String(cards.length);
+  const due = dueToday(cards).length;
+  $('home-due').textContent = String(due);
+  $('review-due').textContent = due ? plural(due, 'card') + ' due today' : cards.length ? 'Nothing due today' : '';
+  $('review-desc').textContent = cards.length
+    ? `${plural(cards.length, 'card')} in your deck. Cards you miss come back sooner.`
+    : 'Flashcards from the clues you missed, spaced so the hard ones come back sooner.';
+  renderWeak($('weak-list'), $('weak-note'), $('weak-go'));
+}
+
+// ---------- weakest areas ----------
+
+function renderWeak(list, note, go) {
+  const areas = weakestAreas(records);
+  list.textContent = '';
+  for (const a of areas) {
+    const li = el('li');
+    li.append(el('span', 'weak-name', a.label), el('span', 'weak-detail', `${pct(a.accuracy)} right, buzz ${pct(a.avgBuzz)}, ${plural(a.n, 'tossup')}`));
+    list.append(li);
+  }
+  list.hidden = !areas.length;
+  if (go) go.hidden = !areas.length;
+  if (!areas.length) {
+    note.textContent = `An area is ranked once you have heard ${MIN_IN_AREA} tossups in it. Read a few more.`;
+  } else {
+    note.textContent = areas.some((a) => a.estimated)
+      ? 'Ranked by subcategory first; estimated era or region areas fill in until three subcategories qualify. IAC Bee nationals tossups count half.'
+      : 'Ranked by subcategory (your own tags where you fixed them). IAC Bee nationals tossups count half.';
+  }
+  return areas;
+}
+
+function startFocus() {
+  const areas = weakestAreas(records);
+  if (!areas.length) return;
+  focus = { areas, misses: 0 };
+  queue = [];
+  startSession();
+}
+
+function clearFocus() {
+  focus = null;
+  queue = [];
+  writeJSON(storage, KEYS.queue, []);
+  $('focus-note').hidden = true;
+}
+
+/** The fetch settings: the player's own, or narrowed to the weak areas. */
+function fetchSettings() {
+  if (!focus) return settings;
+  const subs = new Set();
+  const cats = new Set();
+  for (const a of focus.areas) {
+    if (a.kind === 'sub') {
+      if ((SUBCATEGORIES[a.category] || []).includes(a.key)) subs.add(a.key);
+      if (CATEGORIES.includes(a.category)) cats.add(a.category);
+    } else {
+      for (const c of settings.cats) cats.add(c);
+    }
+  }
+  return { ...settings, cats: [...cats].length ? [...cats] : settings.cats, subs: [...subs] };
 }
 
 function buildSettings() {
@@ -172,8 +238,15 @@ function storeQueue() {
 
 function refill() {
   if (fetching || queue.length >= LOW_WATER) return fetching;
-  fetching = fetchTossups(settings, BATCH)
-    .then((list) => {
+  fetching = fetchTossups(fetchSettings(), BATCH)
+    .then((raw) => {
+      let list = raw.map((q) => withFix(q, fixes));
+      if (focus) {
+        // Era and region areas, and corrected tags, are matched here.
+        const hits = list.filter((q) => inAreas(q, focus.areas));
+        if (hits.length) list = hits;
+        else if (++focus.misses < 3) list = [];
+      }
       const have = new Set(queue.map((q) => q.id));
       const recent = new Set(seen);
       const fresh = list.filter((q) => !have.has(q.id) && !recent.has(q.id));
@@ -188,20 +261,21 @@ function refill() {
 }
 
 async function nextQuestion() {
-  if (!queue.length) {
+  if (!queue.length && !focus) {
     // Offline: questions fetched last time are kept on the device.
     const saved = readJSON(storage, KEYS.queue, []);
     if (Array.isArray(saved) && saved.length) queue = saved.filter((q) => q && q.id && q.text && q.answerHtml);
   }
-  if (!queue.length) {
+  for (let i = 0; i < 4 && !queue.length; i++) {
     try {
       await refill();
     } catch (e) {
-      // handled below
+      break;
     }
   }
   if (!queue.length) return null;
-  const q = queue.shift();
+  // A correction made since the question was fetched still applies.
+  const q = withFix(queue.shift(), fixes);
   storeQueue();
   refill()?.catch(() => {});
   return q;
@@ -420,6 +494,8 @@ function finish({ ok, buzz, reason }) {
     buzz: cur.buzzShown === null ? null : buzz,
     ovr: false,
     ts: Date.now(),
+    diff: Number.isFinite(q.difficulty) ? q.difficulty : null,
+    fx: q.fx || [],
   };
   cur.recordId = rec.id;
   records.push(rec);
@@ -458,12 +534,80 @@ function showResult() {
   $('card-editor').hidden = true;
   $('card-status').textContent = '';
   const where = [q.set, q.packet ? `packet ${q.packet}` : '', q.number ? `question ${q.number}` : ''].filter(Boolean).join(', ');
-  $('q-source').textContent = `Source: ${SOURCE_LABEL[q.source] || q.source}${where ? ` (${where})` : ''}. Era: ${ERA_LABEL[q.era] || q.era} (estimated). Region: ${q.region} (estimated).`;
+  $('q-source').textContent = sourceLine(q, where);
+  $('fix-form').hidden = true;
+  $('fix-open').setAttribute('aria-expanded', 'false');
+  $('fix-status').textContent = '';
   $('report-form').hidden = true;
   $('report-open').setAttribute('aria-expanded', 'false');
   $('report-status').textContent = '';
   title.focus({ preventScroll: true });
   announce(`${title.textContent}. The answer was ${$('answer-main').textContent}.`);
+  refreshHome();
+}
+
+function sourceLine(q, where) {
+  const tag = (field, text) => `${text} (${(q.fx || []).includes(field) ? 'your tag' : 'estimated'})`;
+  const cat = (q.fx || []).some((k) => k === 'cat' || k === 'sub') ? ` Category: ${q.category} / ${q.subcategory} (your tag).` : '';
+  return `Source: ${SOURCE_LABEL[q.source] || q.source}${where ? ` (${where})` : ''}.${cat} Era: ${tag('era', ERA_LABEL[q.era] || q.era)}. Region: ${tag('region', q.region)}.`;
+}
+
+// ---------- fixing a question's tags ----------
+
+function fillSelect(select, options, value) {
+  select.textContent = '';
+  for (const [v, label] of options) {
+    const o = el('option', null, label);
+    o.value = v;
+    select.append(o);
+  }
+  if (!options.some(([v]) => v === value)) {
+    const o = el('option', null, value);
+    o.value = value;
+    select.prepend(o);
+  }
+  select.value = value;
+}
+
+const subOptions = (cat) => (SUBCATEGORIES[cat] || [cat]).map((s) => [s, s]);
+
+function openFix() {
+  const q = cur.q;
+  const form = $('fix-form');
+  form.hidden = !form.hidden;
+  $('fix-open').setAttribute('aria-expanded', String(!form.hidden));
+  if (form.hidden) return;
+  fillSelect($('fix-cat'), CATEGORIES.map((c) => [c, c]), q.category);
+  fillSelect($('fix-sub'), subOptions(q.category), q.subcategory);
+  fillSelect($('fix-era'), [...ERAS.map((e) => [e.key, e.label]), ['unknown', 'Era unclear']], q.era);
+  fillSelect($('fix-region'), [...REGIONS, 'Ancient world', 'Geography', 'Region unclear'].map((r) => [r, r]), q.region);
+  $('fix-status').textContent = '';
+  $('fix-cat').focus();
+}
+
+function saveFixForm(e) {
+  e.preventDefault();
+  const q = cur.q;
+  const next = { cat: $('fix-cat').value, sub: $('fix-sub').value, era: $('fix-era').value, region: $('fix-region').value };
+  // Only what changed is stored as a correction.
+  const was = { cat: q.category, sub: q.subcategory, era: q.era, region: q.region };
+  const fix = {};
+  for (const k of Object.keys(next)) if (next[k] !== was[k]) fix[k] = next[k];
+  if (!Object.keys(fix).length) {
+    $('fix-status').textContent = 'Nothing changed.';
+    return;
+  }
+  const st = saveFix(storage, { fixes, records, cards }, q.id, fix);
+  fixes = st.fixes;
+  records = st.records;
+  cards = st.cards;
+  cur.q = withFix(q, fixes);
+  $('fix-form').hidden = true;
+  $('fix-open').setAttribute('aria-expanded', 'false');
+  const where = [cur.q.set, cur.q.packet ? `packet ${cur.q.packet}` : '', cur.q.number ? `question ${cur.q.number}` : ''].filter(Boolean).join(', ');
+  $('q-source').textContent = sourceLine(cur.q, where);
+  $('fix-status').textContent = 'Saved. Stats and the weakest-areas filter now use your tags for this question.';
+  $('fix-open').focus();
   refreshHome();
 }
 
@@ -605,6 +749,16 @@ function skip() {
   $('override').hidden = true;
 }
 
+function startSession() {
+  session = { heard: 0, right: 0, buzzes: [] };
+  $('b-right').textContent = '0';
+  $('b-buzz').textContent = '-';
+  const note = $('focus-note');
+  note.hidden = !focus;
+  if (focus) $('focus-text').textContent = `Focus: ${focus.areas.map((a) => a.label).join(', ')}.`;
+  startTossup();
+}
+
 function leaveReader() {
   stopClocks();
   cur = null;
@@ -622,19 +776,42 @@ const DIMENSIONS = [
   ['region', 'By region (estimated)', (k) => k],
 ];
 
+const SOURCE_FILTERS = {
+  regional: (r) => r.src !== BEE_SOURCE,
+  [BEE_SOURCE]: (r) => r.src === BEE_SOURCE,
+  all: () => true,
+};
+
+function summary(list) {
+  const ok = list.filter((r) => r.ok);
+  const buzzes = ok.map((r) => r.buzz).filter((b) => b !== null);
+  if (!list.length) return 'none yet';
+  return `${plural(list.length, 'tossup')}, ${pct(ok.length / list.length)} right, average correct buzz at ${buzzes.length ? pct(buzzes.reduce((a, b) => a + b, 0) / buzzes.length) : '-'}`;
+}
+
 function renderStats() {
-  const src = $('stats-source').value;
-  const filter = (r) => !src || r.src === src;
+  const filter = SOURCE_FILTERS[$('stats-source').value] || SOURCE_FILTERS.regional;
   const box = $('stats-tables');
   box.textContent = '';
+  const weakBox = $('stats-weak');
+  weakBox.textContent = '';
+  if (records.length) {
+    // The Bee nationals run harder than a regional set, so they are kept apart.
+    const totals = el('dl', 'stats-split');
+    totals.append(el('dt', null, 'Regional level'), el('dd', null, summary(records.filter(SOURCE_FILTERS.regional))));
+    totals.append(el('dt', null, 'IAC Bee nationals (harder)'), el('dd', null, summary(records.filter(SOURCE_FILTERS[BEE_SOURCE]))));
+    weakBox.append(totals);
+    const h = el('h2', 'weak-title', 'Your weakest areas');
+    const list = el('ol', 'weak-list');
+    const note = el('p', 'weak-note');
+    weakBox.append(h, list, note);
+    renderWeak(list, note, null);
+  }
   const mine = records.filter(filter);
   if (!mine.length) {
-    box.append(el('p', 'game-status', 'Nothing yet. Read a few tossups first.'));
+    box.append(el('p', 'game-status', records.length ? 'No tossups from this source yet.' : 'Nothing yet. Read a few tossups first.'));
     return;
   }
-  const ok = mine.filter((r) => r.ok);
-  const buzzes = ok.map((r) => r.buzz).filter((b) => b !== null);
-  box.append(el('p', 'stats-total', `${plural(mine.length, 'tossup')} heard, ${pct(ok.length / mine.length)} right, average correct buzz at ${buzzes.length ? pct(buzzes.reduce((a, b) => a + b, 0) / buzzes.length) : '-'}.`));
   for (const [field, title, label] of DIMENSIONS) {
     const rows = aggregate(records, field, filter);
     const block = el('section', 'stats-block');
@@ -708,7 +885,8 @@ function doImport(e) {
     }
     records = loadRecords(storage);
     cards = loadCards(storage);
-    status.textContent = `Imported ${plural(res.records, 'new tossup')} and ${plural(res.cards, 'new card')}.`;
+    fixes = loadFixes(storage);
+    status.textContent = `Imported ${plural(res.records, 'new tossup')}, ${plural(res.cards, 'new card')} and ${plural(res.fixes, 'tag correction')}.`;
     renderStats();
     refreshHome();
   };
@@ -716,6 +894,176 @@ function doImport(e) {
     status.textContent = 'Could not read that file.';
   };
   reader.readAsText(file);
+}
+
+// ---------- flashcard review ----------
+
+const STARTER_URL = '/historybowl/data/decks/starter.json?v=1';
+let review = null;
+
+function startReview() {
+  const list = interleave(dueToday(cards));
+  // Cards due now first; ones waiting out a short step today go last.
+  const now = Date.now();
+  const ready = list.filter((c) => dueNow([c], now).length);
+  const later = list.filter((c) => !dueNow([c], now).length);
+  review = { order: [...ready, ...later].map((c) => c.id), done: 0, again: 0, cur: null, revealed: false };
+  show('screen-review');
+  $('review-title').focus({ preventScroll: true });
+  $('deck-offer').hidden = cards.some((c) => c.deck === 'starter');
+  nextCard();
+}
+
+function cardById(id) {
+  return cards.find((c) => c.id === id);
+}
+
+function reviewBoard() {
+  $('r-left').textContent = String(review.order.length);
+  $('r-done').textContent = String(review.done);
+  $('r-again').textContent = String(review.again);
+  $('r-total').textContent = String(cards.length);
+}
+
+function nextCard() {
+  let card = null;
+  while (review.order.length && !card) card = cardById(review.order.shift());
+  review.cur = card;
+  review.revealed = false;
+  reviewBoard();
+  const has = Boolean(card);
+  $('review-card').hidden = !has;
+  $('review-empty').hidden = has;
+  if (!has) {
+    const upcoming = cards.filter((c) => c.fsrs).map((c) => c.fsrs.due).sort((a, b) => a - b)[0];
+    const msg = !cards.length
+      ? 'No cards yet. Miss a tossup, tap the clue that would have told you the answer, and it lands here. Or add the starter deck below.'
+      : review.done
+        ? `Done for now: ${plural(review.done, 'card')} reviewed.${upcoming ? ` The next card is due ${whenText(upcoming)}.` : ''}`
+        : `Nothing due.${upcoming ? ` The next card is due ${whenText(upcoming)}.` : ''}`;
+    $('review-empty-text').textContent = msg;
+    announce(msg);
+    refreshHome();
+    return;
+  }
+  const meta = $('r-meta');
+  meta.textContent = '';
+  const ai = card.src === 'ai';
+  meta.append(el('span', 'badge' + (ai ? ' badge-ai' : ''), ai ? 'AI-written' : card.src === BEE_SOURCE ? 'IAC Bee clue' : 'Your card'), ` ${card.cat}${card.sub && card.sub !== card.cat ? ' / ' + card.sub.replace(' History', '') : ''}`);
+  $('r-front').textContent = card.front;
+  $('r-input').value = '';
+  $('r-form').hidden = false;
+  $('r-back-box').hidden = true;
+  $('r-status').textContent = '';
+  $('r-report').hidden = !ai;
+  $('r-input').focus({ preventScroll: true });
+}
+
+function whenText(ms) {
+  const d = new Date(ms);
+  const sameDay = d.toDateString() === new Date().toDateString();
+  const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return sameDay ? `at ${time} today` : `on ${d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}`;
+}
+
+function revealCard(e) {
+  if (e) e.preventDefault();
+  if (!review || !review.cur || review.revealed) return;
+  review.revealed = true;
+  const card = review.cur;
+  const typed = $('r-input').value.trim();
+  $('r-form').hidden = true;
+  $('r-back-box').hidden = false;
+  $('r-back').textContent = card.back;
+  $('r-hint').textContent = typed
+    ? `You said "${typed}". ${checkLocal(card.back, typed).directive === 'accept' ? 'That looks right.' : 'Compare it with the answer.'}`
+    : '';
+  const row = $('rate-row');
+  row.textContent = '';
+  const gaps = preview(card.fsrs);
+  for (const r of RATINGS) {
+    const b = el('button', 'btn rate rate-' + r.key);
+    b.type = 'button';
+    b.dataset.rating = String(r.rating);
+    b.append(el('span', 'rate-name', r.label), el('span', 'rate-gap', gaps[r.key]));
+    b.setAttribute('aria-label', `${r.label}, back in ${gaps[r.key]} (key ${r.keyHint})`);
+    b.addEventListener('click', () => rateCard(r.rating));
+    row.append(b);
+  }
+  const good = row.querySelector('.rate-good');
+  if (good) good.focus({ preventScroll: true });
+  announce(`Answer: ${card.back}`);
+}
+
+function rateCard(rating) {
+  if (!review || !review.cur || !review.revealed) return;
+  const card = review.cur;
+  const now = Date.now();
+  card.fsrs = rate(card.fsrs, rating, now);
+  saveCards(storage, cards);
+  review.done++;
+  if (rating === RATINGS[0].rating) {
+    review.again++;
+    // Missed: it comes back at the end of this session.
+    review.order.push(card.id);
+  }
+  nextCard();
+}
+
+function deleteCard() {
+  if (!review || !review.cur) return;
+  const b = $('r-delete');
+  // Two taps, so a stray one does not lose a card.
+  if (b.dataset.armed !== review.cur.id) {
+    b.dataset.armed = review.cur.id;
+    b.textContent = 'Tap again to delete';
+    return;
+  }
+  delete b.dataset.armed;
+  b.textContent = 'Delete this card';
+  cards = cards.filter((c) => c.id !== review.cur.id);
+  saveCards(storage, cards);
+  $('r-status').textContent = 'Card deleted.';
+  nextCard();
+}
+
+async function reportCard() {
+  if (!review || !review.cur) return;
+  const status = $('r-status');
+  status.textContent = 'Sending...';
+  try {
+    await sendReport({ qid: `deck:${review.cur.id}`, source: 'ai', note: `Card: ${review.cur.front.slice(0, 200)} => ${review.cur.back}` });
+    status.textContent = "Thanks. The report was logged with this card's id.";
+  } catch (err) {
+    status.textContent = 'The report did not go through. Try again in a moment.';
+  }
+}
+
+async function addStarterDeck() {
+  const status = $('r-status');
+  const btn = $('deck-add');
+  btn.disabled = true;
+  try {
+    const res = await fetch(STARTER_URL);
+    if (!res.ok) throw new Error(String(res.status));
+    const deck = await res.json();
+    const have = new Set(cards.map((c) => c.id));
+    const now = Date.now();
+    let added = 0;
+    for (const c of deck.cards || []) {
+      if (have.has(c.id)) continue;
+      cards.push({ id: c.id, front: c.front, back: c.back, qid: null, src: 'ai', cat: c.cat, sub: c.sub, era: c.era, created: now, fsrs: null, deck: deck.id, fx: [] });
+      added++;
+    }
+    saveCards(storage, cards);
+    $('deck-offer').hidden = true;
+    $('review-empty-text').textContent = '';
+    announce(`Added ${plural(added, 'card')} from the starter deck.`);
+    startReview();
+  } catch (e) {
+    btn.disabled = false;
+    $('review-empty-text').textContent = 'Could not load the starter deck. Check your connection and try again.';
+  }
 }
 
 // ---------- wiring ----------
@@ -726,6 +1074,13 @@ function isTyping(t) {
 
 function onKey(e) {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (!$('screen-review').hidden && review && review.cur) {
+    if (review.revealed && /^[1-4]$/.test(e.key) && !isTyping(document.activeElement)) {
+      e.preventDefault();
+      rateCard(RATINGS[Number(e.key) - 1].rating);
+    }
+    return;
+  }
   const reading = !$('screen-read').hidden;
   const result = !$('screen-result').hidden;
   if (reading && (e.code === 'Space' || e.key === ' ')) {
@@ -745,11 +1100,31 @@ function init() {
   buildSettings();
   refreshHome();
   $('go-read').addEventListener('click', () => {
-    session = { heard: 0, right: 0, buzzes: [] };
-    $('b-right').textContent = '0';
-    $('b-buzz').textContent = '-';
+    if (focus) clearFocus();
+    startSession();
+  });
+  $('weak-go').addEventListener('click', startFocus);
+  $('focus-clear').addEventListener('click', () => {
+    clearFocus();
     startTossup();
   });
+  $('go-review').addEventListener('click', startReview);
+  $('r-form').addEventListener('submit', revealCard);
+  $('r-delete').addEventListener('click', deleteCard);
+  $('r-report').addEventListener('click', reportCard);
+  $('deck-add').addEventListener('click', addStarterDeck);
+  $('review-home').addEventListener('click', () => {
+    review = null;
+    leaveReader();
+  });
+  $('fix-open').addEventListener('click', openFix);
+  $('fix-cancel').addEventListener('click', () => {
+    $('fix-form').hidden = true;
+    $('fix-open').setAttribute('aria-expanded', 'false');
+    $('fix-open').focus();
+  });
+  $('fix-cat').addEventListener('change', () => fillSelect($('fix-sub'), subOptions($('fix-cat').value), subOptions($('fix-cat').value)[0][0]));
+  $('fix-form').addEventListener('submit', saveFixForm);
   $('go-stats').addEventListener('click', () => {
     renderStats();
     show('screen-stats');
