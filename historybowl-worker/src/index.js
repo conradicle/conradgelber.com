@@ -95,6 +95,8 @@ export default {
       try {
         return await handleApi(request, env, url);
       } catch (e) {
+        // Seen only with `wrangler tail`; carries no player data.
+        console.error('historybowl api error', url.pathname, String(e && e.stack || e));
         if (e instanceof UpstreamError) return fail(502, 'The question database did not answer. Try again in a moment.');
         return fail(500, 'Something went wrong.');
       }
