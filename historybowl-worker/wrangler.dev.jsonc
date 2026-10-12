@@ -1,0 +1,16 @@
+// Local development only: the same Worker, plus a copy of the site's files
+// (made by scripts/dev-assets.mjs, with the site's _headers) on the same
+// origin, so the page, its CSP and the API behave as on conradgelber.com.
+{
+  "name": "historybowl-dev",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": { "directory": "./.wrangler/dev-assets", "binding": "ASSETS", "html_handling": "auto-trailing-slash", "not_found_handling": "404-page", "run_worker_first": ["/historybowl/api/*"] },
+  "durable_objects": {
+    "bindings": [{ "name": "LIMITER", "class_name": "Limiter" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Limiter"] }],
+  "kv_namespaces": [{ "binding": "REPORTS", "id": "local-reports" }],
+  "workers_dev": false,
+  "observability": { "enabled": false }
+}
