@@ -1,0 +1,26 @@
+// History Bowl Study's Worker: the QB Reader proxy, answer checks and error
+// reports. The page is the Pages site; this Worker only answers
+// conradgelber.com/historybowl/api*.
+// Free plan only: SQLite-backed Durable Objects and Workers KV, no paid features.
+// Pages serves this folder publicly, like the rest of the repo: never put a
+// secret, key or token in it. Use `wrangler secret put` if one is ever needed.
+{
+  "name": "historybowl",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "durable_objects": {
+    "bindings": [
+      // Per-IP counters in memory only (see src/limiter.js).
+      { "name": "LIMITER", "class_name": "Limiter" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Limiter"] }],
+  // Error reports from the page's "Report an error" button: question id and note only.
+  "kv_namespaces": [{ "binding": "REPORTS", "id": "339321cfca604ac883e03d573b11c321" }],
+  // Only reachable at conradgelber.com/historybowl/api: no separate workers.dev address.
+  "workers_dev": false,
+  // No Workers Logs: nothing about players is kept beyond Cloudflare defaults.
+  "observability": { "enabled": false },
+  // The trailing * matches every path and query string under /historybowl/api.
+  "routes": [{ "pattern": "conradgelber.com/historybowl/api*", "zone_name": "conradgelber.com" }]
+}
