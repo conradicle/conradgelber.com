@@ -91,3 +91,33 @@ export function fromQbTossup(t, sourceKey) {
     answerPlain: cleanText(joinAccents(t.answer_sanitized || '')),
   };
 }
+
+/** A QB Reader bonus: a leadin and its parts, each part usable on its own. */
+export function fromQbBonus(b) {
+  const category = String(b.category || 'Unknown');
+  const subcategory = String(b.subcategory || category);
+  const parts = (b.parts_sanitized || []).map((p, i) => ({
+    id: `qbb:${b._id}:${i}`,
+    text: cleanText(joinAccents(p)).replace(/^\[\d+[ehm]?\]\s*/i, ''),
+    answerHtml: safeAnswerHtml(joinAccents((b.answers || [])[i] || (b.answers_sanitized || [])[i] || '')),
+    answerPlain: cleanText(joinAccents((b.answers_sanitized || [])[i] || '')),
+    level: (b.difficultyModifiers || [])[i] || null,
+  }));
+  return {
+    id: `qbb:${b._id}`,
+    source: SOURCES.qb.key,
+    sourceLabel: SOURCES.qb.label,
+    set: b.set && b.set.name ? String(b.set.name) : '',
+    year: b.set && Number.isFinite(b.set.year) ? b.set.year : null,
+    difficulty: Number.isFinite(b.difficulty) ? b.difficulty : null,
+    category,
+    subcategory,
+    // "For 10 points each" belongs to the full bonus; a single part stands without it.
+    leadin: cleanText(joinAccents(b.leadin_sanitized || ''))
+      .replace(/^For (?:10|ten) points each[,:.]?\s*/i, '')
+      .replace(/\s*For (?:10|ten) points each[,:.]?\s*(?:answer the following[^.]*\.?)?\s*$/i, '')
+      .replace(/^./, (c) => c.toUpperCase())
+      .trim(),
+    parts: parts.filter((p) => p.text && p.answerPlain),
+  };
+}

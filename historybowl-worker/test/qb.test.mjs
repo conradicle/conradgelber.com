@@ -2,7 +2,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseTossupQuery, splitByWeight } from '../src/qb.js';
+import { parseBonusQuery, parseTossupQuery, splitByWeight } from '../src/qb.js';
 import { fromQbTossup, safeAnswerHtml } from '../../play-src/src/historybowl/question.js';
 
 const q = (s) => parseTossupQuery(new URLSearchParams(s));
@@ -54,4 +54,13 @@ test('QB Reader tossups map to the shared shape', () => {
   assert.equal(t.era, 'early-modern');
   assert.equal(t.region, 'Europe');
   assert.equal(t.packet, 3);
+});
+
+test('bonus queries: one known category, a subcategory that belongs to it', () => {
+  const b = (s) => parseBonusQuery(new URLSearchParams(s));
+  assert.deepEqual(b('cat=History&sub=World%20History&n=10'), { cat: 'History', sub: 'World History', level: 'regional', n: 10 });
+  assert.equal(b('cat=Geography').sub, '');
+  assert.equal(b('cat=Geography&sub=World%20History'), null);
+  assert.equal(b('cat=Bogus'), null);
+  assert.equal(b('cat=History&n=50'), null);
 });

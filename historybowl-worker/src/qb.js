@@ -3,7 +3,7 @@
 // allows connections to conradgelber.com only. Only whitelisted parameters
 // are passed on, and whole packets are kept in Cloudflare's edge cache.
 
-import { BEE_SETS, CATEGORIES, LEVELS, SUBCATEGORIES, fromQbTossup } from '../../play-src/src/historybowl/question.js';
+import { BEE_SETS, CATEGORIES, LEVELS, SUBCATEGORIES, fromQbBonus, fromQbTossup } from '../../play-src/src/historybowl/question.js';
 
 const QB = 'https://www.qbreader.org/api';
 const UA = 'conradgelber.com History Bowl Study (conrad@conradgelber.com)';
@@ -138,6 +138,27 @@ export async function tossups(q) {
   // QB Reader proper fills whatever the Bee packets did not.
   const fromQb = q.src.includes('qb') ? await qbTossups(q, q.n - fromBee.length) : [];
   return shuffle([...fromBee, ...fromQb]).filter((t) => t.text && t.answerPlain);
+}
+
+/** Read and check the query string of /api/bonuses: one category, optional subcategory. */
+export function parseBonusQuery(sp) {
+  const cat = sp.get('cat') || '';
+  const sub = sp.get('sub') || '';
+  const level = sp.get('level') || 'regional';
+  const n = Number(sp.get('n') || 3);
+  if (!CATEGORIES.includes(cat)) return null;
+  if (sub && !(SUBCATEGORIES[cat] || []).includes(sub)) return null;
+  if (!(level in LEVELS)) return null;
+  if (!Number.isInteger(n) || n < 1 || n > 10) return null;
+  return { cat, sub, level, n };
+}
+
+/** Random bonuses in one category, for second-quarter bonuses and lightning rounds. */
+export async function bonuses(q) {
+  const params = { categories: q.cat, difficulties: LEVELS[q.level].join(','), number: String(q.n), standardOnly: 'true' };
+  if (q.sub) params.subcategories = q.sub;
+  const data = await qbGet('random-bonus', params);
+  return (data.bonuses || []).map(fromQbBonus).filter((b) => b.parts.length);
 }
 
 /** QB Reader's answer checker. */

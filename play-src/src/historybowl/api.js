@@ -36,3 +36,10 @@ export async function checkRemote(answerline, given, timeoutMs) {
 export async function sendReport(report) {
   return call('/report', { method: 'POST', body: JSON.stringify(report) });
 }
+
+/** Random bonuses in one category (and optional subcategory). */
+export async function fetchBonuses({ cat, sub = '', level = 'regional', n = 3 }) {
+  const params = new URLSearchParams({ cat, sub: sub || '', level, n: String(n) });
+  const data = await call(`/bonuses?${params}`, {}, 15000);
+  return Array.isArray(data.bonuses) ? data.bonuses : [];
+}

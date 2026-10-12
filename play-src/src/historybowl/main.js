@@ -14,9 +14,10 @@ import {
 } from './store.js';
 import { weakestAreas, inAreas, MIN_IN_AREA, BEE_SOURCE } from './areas.js';
 import { RATINGS, rate, preview, dueToday, dueNow, interleave } from './srs.js';
-import { fetchTossups, checkRemote, sendReport } from './api.js';
+import { fetchTossups, sendReport } from './api.js';
+import { $, show, announce, pct, el, plural, uid, renderAnswerline, judge as judgeAnswer, isTyping } from './ui.js';
+import { initSim } from './sim.js';
 
-const $ = (id) => document.getElementById(id);
 let storage = null;
 try {
   storage = window.localStorage;
@@ -42,50 +43,6 @@ let focus = null;
 // The tossup in play.
 let cur = null;
 let session = { heard: 0, right: 0, buzzes: [] };
-
-// ---------- small helpers ----------
-
-function show(id) {
-  for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  window.scrollTo(0, 0);
-}
-function announce(text) {
-  const el = $('announce');
-  el.textContent = '';
-  setTimeout(() => {
-    el.textContent = text;
-  }, 30);
-}
-const pct = (f) => (f === null || f === undefined ? '-' : `${Math.round(f * 100)}%`);
-function el(tag, cls, text) {
-  const e = document.createElement(tag);
-  if (cls) e.className = cls;
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
-const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-
-/** Build an answerline from its safe HTML using only the emphasis tags. */
-function renderAnswerline(target, html) {
-  target.textContent = '';
-  const stack = [target];
-  for (const part of String(html).split(/(<\/?(?:b|u|i|em|strong)>)/i)) {
-    const open = part.match(/^<(b|u|i|em|strong)>$/i);
-    const close = part.match(/^<\/(b|u|i|em|strong)>$/i);
-    if (open) {
-      const e = document.createElement(open[1].toLowerCase());
-      stack[stack.length - 1].appendChild(e);
-      stack.push(e);
-    } else if (close) {
-      if (stack.length > 1) stack.pop();
-    } else if (part) {
-      const t = document.createElement('textarea');
-      t.innerHTML = part; // decodes entities only; a textarea never parses tags
-      stack[stack.length - 1].appendChild(document.createTextNode(t.value));
-    }
-  }
-}
 
 // ---------- home ----------
 
@@ -450,7 +407,7 @@ async function submitAnswer() {
   cur.phase = 'judging';
   $('answer-form').hidden = true;
   $('read-status').textContent = 'Checking...';
-  const { directive, by } = await judge(cur.q, given);
+  const { directive, by } = await judgeAnswer(cur.q.answerHtml, given);
   cur.judgedBy = by;
   $('read-status').textContent = '';
   if (directive === 'prompt' && !cur.prompted) {
@@ -463,17 +420,6 @@ async function submitAnswer() {
   }
   cur.given = cur.prompted ? `${cur.given}, then ${given || '(nothing)'}` : given;
   finish({ ok: directive === 'accept', buzz: buzzFraction(cur.buzzShown, cur.words.length), reason: given ? 'answered' : 'blank' });
-}
-
-/** QB Reader's checker first; the local one if it is slow or out of reach. */
-async function judge(q, given) {
-  if (!given) return { directive: 'reject', by: 'none' };
-  try {
-    const r = await checkRemote(q.answerHtml, given, 2500);
-    return { directive: r.directive, by: 'QB Reader' };
-  } catch (e) {
-    return { directive: checkLocal(q.answerHtml, given).directive, by: 'this page (QB Reader was out of reach)' };
-  }
 }
 
 function finish({ ok, buzz, reason }) {
@@ -1068,10 +1014,6 @@ async function addStarterDeck() {
 
 // ---------- wiring ----------
 
-function isTyping(t) {
-  return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
-}
-
 function onKey(e) {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!$('screen-review').hidden && review && review.cur) {
@@ -1099,6 +1041,30 @@ function onKey(e) {
 function init() {
   buildSettings();
   refreshHome();
+  const sim = initSim({
+    settings: () => settings,
+    fixes: () => fixes,
+    seen: () => seen,
+    addRecord(rec) {
+      records.push(rec);
+      saveRecords(storage, records);
+      seen = addSeen(storage, seen, rec.qid);
+    },
+    updateRecord(id, patch) {
+      const r = records.find((x) => x.id === id);
+      if (!r) return;
+      Object.assign(r, patch);
+      saveRecords(storage, records);
+    },
+    addCard(card) {
+      cards.push({ ...card, deck: null, fx: [] });
+      return saveCards(storage, cards);
+    },
+    hasCard: (qid, front) => cards.some((c) => c.qid === qid && c.front === front),
+    refreshHome,
+    home: leaveReader,
+  });
+  $('go-sim').addEventListener('click', () => sim.open());
   $('go-read').addEventListener('click', () => {
     if (focus) clearFocus();
     startSession();
