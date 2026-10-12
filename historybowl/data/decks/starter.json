@@ -1,0 +1,602 @@
+{
+ "id": "starter",
+ "title": "Starter deck",
+ "source": "ai",
+ "note": "AI-written (Claude) for History Bowl Study, October 2026. Standard textbook facts; report any error with the button on the card.",
+ "cards": [
+  {
+   "id": "starter-01",
+   "front": "This 1648 set of treaties ended the Thirty Years' War.",
+   "back": "Peace of Westphalia",
+   "cat": "History",
+   "sub": "European History",
+   "era": "early-modern",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-02",
+   "front": "This 1215 charter was forced on King John of England at Runnymede.",
+   "back": "Magna Carta",
+   "cat": "History",
+   "sub": "European History",
+   "era": "medieval",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-03",
+   "front": "This emperor of Mali made a 1324 pilgrimage to Mecca so lavish that it lowered the price of gold in Cairo.",
+   "back": "Mansa Musa",
+   "cat": "History",
+   "sub": "World History",
+   "era": "medieval",
+   "region": "Africa"
+  },
+  {
+   "id": "starter-04",
+   "front": "This German chancellor hosted the 1884-85 Berlin Conference on European claims in Africa.",
+   "back": "Otto von Bismarck",
+   "cat": "History",
+   "sub": "European History",
+   "era": "revolutions",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-05",
+   "front": "This leader of the Haitian Revolution was seized by the French in 1802 and died in a fortress in the Jura Mountains.",
+   "back": "Toussaint Louverture",
+   "cat": "History",
+   "sub": "World History",
+   "era": "revolutions",
+   "region": "Latin America"
+  },
+  {
+   "id": "starter-06",
+   "front": "This 1868 event ended the Tokugawa shogunate and returned power to Japan's emperor.",
+   "back": "Meiji Restoration",
+   "cat": "History",
+   "sub": "World History",
+   "era": "revolutions",
+   "region": "East Asia"
+  },
+  {
+   "id": "starter-07",
+   "front": "This admiral led seven Ming \"treasure voyages\" across the Indian Ocean between 1405 and 1433.",
+   "back": "Zheng He",
+   "cat": "History",
+   "sub": "World History",
+   "era": "medieval",
+   "region": "East Asia"
+  },
+  {
+   "id": "starter-08",
+   "front": "This 1857 uprising against the East India Company began among sepoys at Meerut.",
+   "back": "Indian Rebellion of 1857 (Sepoy Mutiny)",
+   "cat": "History",
+   "sub": "World History",
+   "era": "revolutions",
+   "region": "South Asia"
+  },
+  {
+   "id": "starter-09",
+   "front": "This 1803 purchase from France roughly doubled the size of the United States.",
+   "back": "Louisiana Purchase",
+   "cat": "History",
+   "sub": "American History",
+   "era": "revolutions",
+   "region": "United States"
+  },
+  {
+   "id": "starter-10",
+   "front": "This 1954 Supreme Court case ruled segregated public schools unconstitutional.",
+   "back": "Brown v. Board of Education",
+   "cat": "History",
+   "sub": "American History",
+   "era": "cold-war",
+   "region": "United States"
+  },
+  {
+   "id": "starter-11",
+   "front": "This Byzantine emperor ordered the compilation of the Corpus Juris Civilis in the 530s.",
+   "back": "Justinian I",
+   "cat": "History",
+   "sub": "European History",
+   "era": "medieval",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-12",
+   "front": "This Mughal emperor built the Taj Mahal in memory of his wife Mumtaz Mahal.",
+   "back": "Shah Jahan",
+   "cat": "History",
+   "sub": "World History",
+   "era": "early-modern",
+   "region": "South Asia"
+  },
+  {
+   "id": "starter-13",
+   "front": "This 1521 imperial assembly declared Martin Luther an outlaw.",
+   "back": "Diet of Worms",
+   "cat": "History",
+   "sub": "European History",
+   "era": "early-modern",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-14",
+   "front": "This Inca ruler was captured by Francisco Pizarro at Cajamarca in 1532.",
+   "back": "Atahualpa",
+   "cat": "History",
+   "sub": "World History",
+   "era": "early-modern",
+   "region": "Latin America"
+  },
+  {
+   "id": "starter-15",
+   "front": "Article 231 of this 1919 treaty, the \"war guilt clause,\" blamed Germany for World War I.",
+   "back": "Treaty of Versailles",
+   "cat": "History",
+   "sub": "European History",
+   "era": "world-wars",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-16",
+   "front": "This Carthaginian general crossed the Alps with war elephants in 218 BC.",
+   "back": "Hannibal",
+   "cat": "History",
+   "sub": "Ancient History",
+   "era": "ancient",
+   "region": "Ancient world"
+  },
+  {
+   "id": "starter-17",
+   "front": "This 1494 treaty divided newly claimed lands outside Europe between Spain and Portugal.",
+   "back": "Treaty of Tordesillas",
+   "cat": "History",
+   "sub": "European History",
+   "era": "early-modern",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-18",
+   "front": "This Zulu king built his army around the \"horns of the buffalo\" formation in the early 1800s.",
+   "back": "Shaka",
+   "cat": "History",
+   "sub": "World History",
+   "era": "revolutions",
+   "region": "Africa"
+  },
+  {
+   "id": "starter-19",
+   "front": "This 1962 standoff began after U-2 photographs showed Soviet missile sites in Cuba.",
+   "back": "Cuban Missile Crisis",
+   "cat": "History",
+   "sub": "American History",
+   "era": "cold-war",
+   "region": "United States"
+  },
+  {
+   "id": "starter-20",
+   "front": "This Ottoman sultan conquered Constantinople in 1453.",
+   "back": "Mehmed II (the Conqueror)",
+   "cat": "History",
+   "sub": "World History",
+   "era": "early-modern",
+   "region": "Middle East"
+  },
+  {
+   "id": "starter-21",
+   "front": "France's National Constituent Assembly adopted this declaration of rights in August 1789.",
+   "back": "Declaration of the Rights of Man and of the Citizen",
+   "cat": "History",
+   "sub": "European History",
+   "era": "revolutions",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-22",
+   "front": "This leader marched to Dandi in the 1930 Salt March.",
+   "back": "Mohandas (Mahatma) Gandhi",
+   "cat": "History",
+   "sub": "World History",
+   "era": "world-wars",
+   "region": "South Asia"
+  },
+  {
+   "id": "starter-23",
+   "front": "This U.S. Secretary of State gave his name to the 1948 program of aid to rebuild Western Europe.",
+   "back": "George C. Marshall (the Marshall Plan)",
+   "cat": "History",
+   "sub": "American History",
+   "era": "cold-war",
+   "region": "United States"
+  },
+  {
+   "id": "starter-24",
+   "front": "This Persian king began building Persepolis and sent the army defeated at Marathon in 490 BC.",
+   "back": "Darius I (the Great)",
+   "cat": "History",
+   "sub": "Ancient History",
+   "era": "ancient",
+   "region": "Middle East"
+  },
+  {
+   "id": "starter-25",
+   "front": "This 1066 battle made William of Normandy king of England.",
+   "back": "Battle of Hastings",
+   "cat": "History",
+   "sub": "European History",
+   "era": "medieval",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-26",
+   "front": "This \"Liberator,\" born in Caracas in 1783, was the first president of Gran Colombia.",
+   "back": "Simon Bolivar",
+   "cat": "History",
+   "sub": "World History",
+   "era": "revolutions",
+   "region": "Latin America"
+  },
+  {
+   "id": "starter-27",
+   "front": "The German Empire was proclaimed at Versailles in January 1871, near the end of this war.",
+   "back": "Franco-Prussian War",
+   "cat": "History",
+   "sub": "European History",
+   "era": "revolutions",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-28",
+   "front": "This grandson of Genghis Khan founded China's Yuan dynasty.",
+   "back": "Kublai Khan",
+   "cat": "History",
+   "sub": "World History",
+   "era": "medieval",
+   "region": "East Asia"
+  },
+  {
+   "id": "starter-29",
+   "front": "This 1965 law followed the marches from Selma to Montgomery.",
+   "back": "Voting Rights Act of 1965",
+   "cat": "History",
+   "sub": "American History",
+   "era": "cold-war",
+   "region": "United States"
+  },
+  {
+   "id": "starter-30",
+   "front": "This Soviet leader introduced the policies of glasnost and perestroika.",
+   "back": "Mikhail Gorbachev",
+   "cat": "History",
+   "sub": "European History",
+   "era": "cold-war",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-31",
+   "front": "This last active ruler of Ptolemaic Egypt allied with Mark Antony and died in 30 BC.",
+   "back": "Cleopatra VII",
+   "cat": "History",
+   "sub": "Ancient History",
+   "era": "ancient",
+   "region": "Africa"
+  },
+  {
+   "id": "starter-32",
+   "front": "By tradition, this 1517 list of arguments was posted on a church door in Wittenberg.",
+   "back": "Ninety-five Theses",
+   "cat": "History",
+   "sub": "European History",
+   "era": "early-modern",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-33",
+   "front": "This conflict between England and France ended in 1453 after more than a century.",
+   "back": "Hundred Years' War",
+   "cat": "History",
+   "sub": "European History",
+   "era": "medieval",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-34",
+   "front": "This Ethiopian emperor defeated an Italian army at the Battle of Adwa in 1896.",
+   "back": "Menelik II",
+   "cat": "History",
+   "sub": "World History",
+   "era": "revolutions",
+   "region": "Africa"
+  },
+  {
+   "id": "starter-35",
+   "front": "South Africa's National Party introduced this system of racial segregation after winning the 1948 election.",
+   "back": "apartheid",
+   "cat": "History",
+   "sub": "World History",
+   "era": "cold-war",
+   "region": "Africa"
+  },
+  {
+   "id": "starter-36",
+   "front": "This 1979 revolution brought Ayatollah Ruhollah Khomeini to power.",
+   "back": "Iranian Revolution",
+   "cat": "History",
+   "sub": "World History",
+   "era": "cold-war",
+   "region": "Middle East"
+  },
+  {
+   "id": "starter-37",
+   "front": "This Khmer Rouge leader ruled Cambodia from 1975 to 1979.",
+   "back": "Pol Pot",
+   "cat": "History",
+   "sub": "World History",
+   "era": "cold-war",
+   "region": "Southeast Asia and Oceania"
+  },
+  {
+   "id": "starter-38",
+   "front": "This 1898 war gave the United States Puerto Rico, Guam and the Philippines.",
+   "back": "Spanish-American War",
+   "cat": "History",
+   "sub": "American History",
+   "era": "revolutions",
+   "region": "United States"
+  },
+  {
+   "id": "starter-39",
+   "front": "This leader read Vietnam's declaration of independence in Hanoi in 1945.",
+   "back": "Ho Chi Minh",
+   "cat": "History",
+   "sub": "World History",
+   "era": "world-wars",
+   "region": "Southeast Asia and Oceania"
+  },
+  {
+   "id": "starter-40",
+   "front": "This Roman emperor and his co-emperor Licinius agreed to tolerate Christianity in the Edict of Milan in 313.",
+   "back": "Constantine the Great",
+   "cat": "History",
+   "sub": "Ancient History",
+   "era": "ancient",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-41",
+   "front": "This Frankish king was crowned emperor by Pope Leo III on Christmas Day, 800.",
+   "back": "Charlemagne",
+   "cat": "History",
+   "sub": "European History",
+   "era": "medieval",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-42",
+   "front": "This 1688 event replaced James II with William III and Mary II.",
+   "back": "Glorious Revolution",
+   "cat": "History",
+   "sub": "European History",
+   "era": "early-modern",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-43",
+   "front": "This dynasty, which ruled China from 1368 to 1644, built most of the Great Wall that stands today.",
+   "back": "Ming dynasty",
+   "cat": "History",
+   "sub": "World History",
+   "era": "early-modern",
+   "region": "East Asia"
+  },
+  {
+   "id": "starter-44",
+   "front": "This party was founded by Sun Yat-sen and later led by Chiang Kai-shek.",
+   "back": "Kuomintang (Chinese Nationalist Party)",
+   "cat": "History",
+   "sub": "World History",
+   "era": "world-wars",
+   "region": "East Asia"
+  },
+  {
+   "id": "starter-45",
+   "front": "Marx and Engels published this pamphlet in 1848.",
+   "back": "The Communist Manifesto",
+   "cat": "History",
+   "sub": "European History",
+   "era": "revolutions",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-46",
+   "front": "This archduke's assassination in Sarajevo in June 1914 led to World War I.",
+   "back": "Franz Ferdinand",
+   "cat": "History",
+   "sub": "European History",
+   "era": "world-wars",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-47",
+   "front": "Churchill, Roosevelt and Stalin met at this February 1945 conference in Crimea.",
+   "back": "Yalta Conference",
+   "cat": "History",
+   "sub": "European History",
+   "era": "world-wars",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-48",
+   "front": "This Aztec capital was built on an island in Lake Texcoco.",
+   "back": "Tenochtitlan",
+   "cat": "History",
+   "sub": "World History",
+   "era": "medieval",
+   "region": "Latin America"
+  },
+  {
+   "id": "starter-49",
+   "front": "Wat Tyler led this 1381 English uprising.",
+   "back": "Peasants' Revolt",
+   "cat": "History",
+   "sub": "European History",
+   "era": "medieval",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-50",
+   "front": "This Akkadian ruler built what is often called the first empire, around 2300 BC.",
+   "back": "Sargon of Akkad",
+   "cat": "History",
+   "sub": "Ancient History",
+   "era": "ancient",
+   "region": "Middle East"
+  },
+  {
+   "id": "starter-51",
+   "front": "This Babylonian king's law code is carved on a basalt stele now in the Louvre.",
+   "back": "Hammurabi",
+   "cat": "History",
+   "sub": "Ancient History",
+   "era": "ancient",
+   "region": "Middle East"
+  },
+  {
+   "id": "starter-52",
+   "front": "This 1956 crisis began when Gamal Abdel Nasser nationalized a canal.",
+   "back": "Suez Crisis",
+   "cat": "History",
+   "sub": "World History",
+   "era": "cold-war",
+   "region": "Middle East"
+  },
+  {
+   "id": "starter-53",
+   "front": "This 1857 Supreme Court decision held that Black Americans could not be U.S. citizens.",
+   "back": "Dred Scott v. Sandford",
+   "cat": "History",
+   "sub": "American History",
+   "era": "revolutions",
+   "region": "United States"
+  },
+  {
+   "id": "starter-54",
+   "front": "This tsar founded Saint Petersburg in 1703.",
+   "back": "Peter the Great (Peter I)",
+   "cat": "History",
+   "sub": "European History",
+   "era": "early-modern",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-55",
+   "front": "This 2010-2012 wave of uprisings began in Tunisia.",
+   "back": "Arab Spring",
+   "cat": "History",
+   "sub": "World History",
+   "era": "recent",
+   "region": "Middle East"
+  },
+  {
+   "id": "starter-56",
+   "front": "This famine began in 1845 when blight destroyed the potato crop.",
+   "back": "Great Famine (Irish Potato Famine)",
+   "cat": "History",
+   "sub": "European History",
+   "era": "revolutions",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-57",
+   "front": "Lincoln delivered a famous address at the site of this July 1863 battle in Pennsylvania.",
+   "back": "Battle of Gettysburg",
+   "cat": "History",
+   "sub": "American History",
+   "era": "revolutions",
+   "region": "United States"
+  },
+  {
+   "id": "starter-58",
+   "front": "This Korean admiral used \"turtle ships\" against Japanese invasions in the 1590s.",
+   "back": "Yi Sun-sin",
+   "cat": "History",
+   "sub": "World History",
+   "era": "early-modern",
+   "region": "East Asia"
+  },
+  {
+   "id": "starter-59",
+   "front": "The 1947 partition of British India created India and this country.",
+   "back": "Pakistan",
+   "cat": "History",
+   "sub": "World History",
+   "era": "cold-war",
+   "region": "South Asia"
+  },
+  {
+   "id": "starter-60",
+   "front": "This Florentine wrote The Prince, published in 1532 after his death.",
+   "back": "Niccolo Machiavelli",
+   "cat": "History",
+   "sub": "European History",
+   "era": "early-modern",
+   "region": "Europe"
+  },
+  {
+   "id": "starter-61",
+   "front": "This South African leader was released in 1990 after 27 years in prison.",
+   "back": "Nelson Mandela",
+   "cat": "History",
+   "sub": "World History",
+   "era": "cold-war",
+   "region": "Africa"
+  },
+  {
+   "id": "starter-62",
+   "front": "The Battle of Tsushima in 1905 was the decisive naval battle of this war.",
+   "back": "Russo-Japanese War",
+   "cat": "History",
+   "sub": "World History",
+   "era": "world-wars",
+   "region": "East Asia"
+  },
+  {
+   "id": "starter-63",
+   "front": "This strait separates Spain from Morocco at the western end of the Mediterranean.",
+   "back": "Strait of Gibraltar",
+   "cat": "Geography",
+   "sub": "Geography",
+   "era": "unknown",
+   "region": "Geography"
+  },
+  {
+   "id": "starter-64",
+   "front": "This river flows through Baghdad.",
+   "back": "Tigris",
+   "cat": "Geography",
+   "sub": "Geography",
+   "era": "unknown",
+   "region": "Geography"
+  },
+  {
+   "id": "starter-65",
+   "front": "This canal opened in 1914 and links the Atlantic and Pacific.",
+   "back": "Panama Canal",
+   "cat": "Geography",
+   "sub": "Geography",
+   "era": "world-wars",
+   "region": "Geography"
+  },
+  {
+   "id": "starter-66",
+   "front": "This African lake, the largest on the continent, is shared by Uganda, Kenya and Tanzania.",
+   "back": "Lake Victoria",
+   "cat": "Geography",
+   "sub": "Geography",
+   "era": "unknown",
+   "region": "Geography"
+  }
+ ]
+}
