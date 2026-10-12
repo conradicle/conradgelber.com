@@ -58,10 +58,19 @@ export function safeAnswerHtml(html) {
     .trim();
 }
 
+// Some packets were converted from PDFs with the accent split off before
+// its letter: "Gust\u00b4av Hus\u00b4ak". Put each accent back on its letter.
+const SPACING_ACCENTS = { '\u00b4': '\u0301', '\u02ca': '\u0301', '\u00a8': '\u0308', '\u02c7': '\u030c', '\u02c6': '\u0302' };
+export function joinAccents(s) {
+  return String(s || '')
+    .replace(/[\u00b4\u02ca\u00a8\u02c7\u02c6]([A-Za-z])/g, (m, letter) => (letter + SPACING_ACCENTS[m[0]]).normalize('NFC'))
+    .replace(/[\u00b4\u02ca\u00a8\u02c7\u02c6]/g, '');
+}
+
 /** A QB Reader tossup, in the shared shape. */
 export function fromQbTossup(t, sourceKey) {
   const src = sourceKey === 'bee' ? SOURCES.bee : SOURCES.qb;
-  const text = cleanText(t.question_sanitized || '');
+  const text = cleanText(joinAccents(t.question_sanitized || ''));
   const category = String(t.category || 'Unknown');
   const subcategory = String(t.subcategory || category);
   return {
@@ -78,7 +87,7 @@ export function fromQbTossup(t, sourceKey) {
     era: estimateEra(text, subcategory),
     region: estimateRegion(text, category, subcategory),
     text,
-    answerHtml: safeAnswerHtml(t.answer || t.answer_sanitized || ''),
-    answerPlain: cleanText(t.answer_sanitized || ''),
+    answerHtml: safeAnswerHtml(joinAccents(t.answer || t.answer_sanitized || '')),
+    answerPlain: cleanText(joinAccents(t.answer_sanitized || '')),
   };
 }
