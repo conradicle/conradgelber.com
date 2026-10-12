@@ -1,0 +1,17 @@
+{
+  "name": "conradgelber-historybowl-worker",
+  "private": true,
+  "type": "module",
+  "description": "History Bowl Study's Worker: the QB Reader proxy and answer checks, routed at conradgelber.com/historybowl/api.",
+  "scripts": {
+    "dev": "node scripts/dev-assets.mjs && wrangler dev -c wrangler.dev.jsonc --port 8801",
+    "deploy": "wrangler deploy",
+    "test": "node --test \"test/*.test.mjs\"",
+    "api-check": "node test/api-check.mjs",
+    "reports": "node scripts/reports.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.137.0",
+    "ws": "8.21.3"
+  }
+}

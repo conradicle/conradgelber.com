@@ -2,13 +2,16 @@
 
 Static site, no build step on deploy. Cloudflare Pages serves the repo root
 as-is. The generated files (`play/play.js`, `flight-path/flight-path.js`,
-`flight-path/routes.json`, `pool/pool.js`, `borderline/borderline.js` and
-`borderline/data/`) are built locally and committed; see
+`flight-path/routes.json`, `pool/pool.js`, `borderline/borderline.js`,
+`borderline/data/` and `historybowl/historybowl.js`) are built locally and
+committed; see
 [The /play/ game](#the-play-game),
 [The /flight-path/ game](#the-flight-path-game),
-[The /borderline/ game](#the-borderline-game) and
-[The /pool/ game](#the-pool-game) below. Pool's online rooms are a separate
-Worker, deployed by hand from `pool-worker/`.
+[The /borderline/ game](#the-borderline-game),
+[The /pool/ game](#the-pool-game) and
+[The /historybowl/ page](#the-historybowl-page) below. Pool's online rooms
+and History Bowl Study's question API are separate Workers, deployed by
+hand from `pool-worker/` and `historybowl-worker/`.
 
 ## 1. Push the repo
 
@@ -150,7 +153,7 @@ Every line should show a count of 9. The same goes for the head (font
 preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
 `/play/`, `/flight-path/`, `/pool/`, `/cambio/` and `/poker/` do not get the tab bar.
-`/play/`, `/flight-path/` and `/pool/` have a single "← Games" link in
+`/play/`, `/flight-path/`, `/pool/`, `/borderline/` and `/historybowl/` have a single "← Games" link in
 their header instead. During a game on a screen narrower than 600 px,
 `/pool/` hides that header and shows a round back button in its players bar,
 so the table can fill the screen; the skip link and the footer stay.
@@ -422,6 +425,79 @@ Settings are kept per browser in `localStorage` under `pool-settings` (name,
 game, guide, level). An online seat's token is in `sessionStorage` (a refresh
 takes the seat back) and `localStorage` (`pool-session`, so a reopened tab
 can offer to rejoin within five minutes).
+
+## The /historybowl/ page
+
+History Bowl Study: National History Bowl practice. `historybowl/` is what
+Pages serves (`index.html`, `historybowl.css`, the bundled
+`historybowl.js`); the page also loads `/play/play.css`. Bump `?v=` on the
+`historybowl.js` or `historybowl.css` link whenever either changes.
+
+Source, in `play-src/src/historybowl/`: `main.js` (the page), `text.js`
+(words, sentences, the reading schedule), `answer.js` (the answerline parser
+and the local answer checker), `tags.js` (estimated era and region),
+`question.js` (the one question shape every source is turned into; shared
+with the Worker), `store.js` (localStorage, export and import), `api.js`.
+Rebuild and commit the bundle after any change:
+
+```bash
+npm --prefix play-src run build:historybowl
+```
+
+Tests: `historybowl.test.mjs` in `npm --prefix play-src test` (answer
+checking on real answerline shapes, era and region, the reading schedule,
+blocked and corrupt storage, export then import), and
+`npm --prefix historybowl-worker test` (query checks, the category mix,
+answerline cleaning).
+
+Storage, per browser: `historybowl:records` (one entry per tossup heard:
+question id, source, category, era, region, right or wrong, buzz point,
+override), `historybowl:cards`, `historybowl:settings`, `historybowl:seen`
+(recent question ids, so a session does not repeat) and `historybowl:queue`
+(the next few questions, so the page still works on bad wifi). The Stats
+screen exports and imports records and cards as one JSON file.
+
+### The historybowl Worker
+
+`historybowl-worker/` is a separate Worker, `historybowl`, routed only at
+`conradgelber.com/historybowl/api*`. The CSP allows connections to this site
+only, so the page cannot call QB Reader (qbreader.org) itself; the Worker does,
+passing on only whitelisted parameters:
+
+- `GET /historybowl/api/tossups?src=bee,qb&cats=History&subs=&level=regional&n=8`:
+  `bee` draws from the IAC History Bee Nationals sets (2015 to 2022) that QB
+  Reader hosts, by whole packet (kept in the edge cache for 30 days); `qb` is
+  QB Reader's random tossups at difficulty 2 to 3 (`regional`), 3 to 4
+  (`harder`) or 2 to 5 (`all`), weighted toward History.
+- `POST /historybowl/api/check` `{answerline, given}`: QB Reader's answer
+  checker. The page falls back on its own checker if this takes over 2.5 s.
+- `POST /historybowl/api/report` `{qid, source, note}`: the "Report an error"
+  button. Reports go into the Workers KV namespace `historybowl-reports`
+  (question id, note and time; no IP or name). List them, or clear them once
+  dealt with:
+
+  ```bash
+  npm --prefix historybowl-worker run reports
+  npm --prefix historybowl-worker run reports -- --clear
+  ```
+
+Rate limits per IP, per minute (the `Limiter` Durable Object from Pool and
+Cambio): 120 API calls, 10 reports. Nothing secret belongs in the folder;
+Pages serves it like the rest of the repo.
+
+Deploy (Wrangler must be logged in):
+
+```bash
+npm --prefix historybowl-worker ci
+npm --prefix historybowl-worker run deploy
+```
+
+Local development serves a copy of the site's files (with the production
+`_headers`) and the Worker on one origin, at http://localhost:8801/historybowl/:
+
+```bash
+npm --prefix historybowl-worker run dev
+```
 
 ## After the first deploy
 
