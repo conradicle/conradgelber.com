@@ -17,8 +17,8 @@
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css?v=8">
 <link rel="stylesheet" href="/play/play.css?v=4">
-<link rel="stylesheet" href="/historybowl/historybowl.css?v=2">
-<script src="/historybowl/historybowl.js?v=2" defer></script>
+<link rel="stylesheet" href="/historybowl/historybowl.css?v=3">
+<script src="/historybowl/historybowl.js?v=3" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -49,6 +49,10 @@
         <button type="button" class="tier" id="go-read">
           <span class="tier-name">Read tossups</span>
           <span class="tier-desc">Solo, one at a time, with a buzzer. Space bar or the big button.</span>
+        </button>
+        <button type="button" class="tier" id="go-sim">
+          <span class="tier-name">Match simulator</span>
+          <span class="tier-desc">A full four-quarter match against the computer, lightning round included.</span>
         </button>
         <button type="button" class="tier" id="go-review">
           <span class="tier-name">Review cards</span>
@@ -205,6 +209,113 @@
       <div class="end-actions next-row">
         <button type="button" class="btn btn-lamp btn-next" id="next" aria-keyshortcuts="N">Next tossup</button>
         <button type="button" class="btn btn-quiet" id="result-home">Done</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-sim-setup" hidden aria-labelledby="sim-setup-title">
+      <h1 class="game-title" id="sim-setup-title" tabindex="-1">Match simulator</h1>
+      <p class="game-intro">A full regional match against the computer: ten short
+        tossups, then eight longer ones with a 10-point bonus for each you get,
+        then the lightning round (the team behind at halftime picks the
+        category first; 60 seconds, 8 questions, 20 extra for all 8; misses
+        bounce to the other side), then eight long tossups worth 30, 20 or 10
+        by how early you buzz. No penalties for wrong answers. A tie goes to
+        sudden-death tossups.</p>
+      <fieldset class="strength">
+        <legend>How good is the computer?</legend>
+        <div class="preset-row">
+          <button type="button" class="btn btn-quiet sim-preset" data-mu="85" aria-pressed="false">Easy</button>
+          <button type="button" class="btn btn-quiet sim-preset" data-mu="60" aria-pressed="true">Medium</button>
+          <button type="button" class="btn btn-quiet sim-preset" data-mu="40" aria-pressed="false">Hard</button>
+        </div>
+        <div class="slider-row">
+          <label for="sim-strength">Usually buzzes right at</label>
+          <input type="range" id="sim-strength" min="25" max="95" step="5" value="60" aria-describedby="sim-strength-out">
+          <output id="sim-strength-out" for="sim-strength">60%</output>
+        </div>
+        <p class="hint">Lower is earlier, so stronger. A stronger computer also knows more of the questions.</p>
+      </fieldset>
+      <p class="hint">Questions follow your source and level settings. The first two quarters use the last sentences of longer tossups, marked "shortened". The fourth quarter uses the IAC Bee's full pyramids when that source is on, and counts in your stats.</p>
+      <div class="end-actions">
+        <button type="button" class="btn btn-lamp" id="sim-start">Start the match</button>
+        <button type="button" class="btn btn-quiet" id="sim-setup-back">Back</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-sim" hidden aria-labelledby="sim-title">
+      <h1 class="visually-hidden" id="sim-title" tabindex="-1">Match</h1>
+      <div class="board" aria-label="Scoreboard">
+        <div class="board-cell"><span class="board-label">You</span><span class="board-num" id="s-you">0</span></div>
+        <div class="board-cell"><span class="board-label">Computer</span><span class="board-num" id="s-bot">0</span></div>
+        <div class="board-cell"><span class="board-label">Quarter</span><span class="board-num board-small" id="s-quarter">Q1</span></div>
+        <div class="board-cell board-clock"><span class="board-label" id="s-clock-label">Clock</span><span class="board-num" id="s-clock">-</span></div>
+      </div>
+      <p class="q-meta" id="s-meta"></p>
+      <div class="q-card">
+        <p class="q-text" id="s-text"></p>
+        <p class="game-status" id="s-status" role="status"></p>
+      </div>
+      <div class="cat-row" id="s-cats" hidden></div>
+      <form class="answer-form" id="s-form" hidden autocomplete="off">
+        <label class="answer-label" for="s-input" id="s-label">Your answer</label>
+        <div class="answer-row">
+          <input class="answer-input" id="s-input" type="text" maxlength="120" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send">
+          <button type="submit" class="btn btn-lamp">Answer</button>
+          <button type="button" class="btn btn-quiet" id="s-pass" hidden>Pass</button>
+        </div>
+        <div class="timebar" aria-hidden="true"><span class="timebar-fill" id="s-bar"></span></div>
+      </form>
+      <div class="ruling" id="s-ruling" hidden>
+        <p class="ruling-text" id="s-ruling-text"></p>
+        <p class="answerline ruling-answer" id="s-answerline"></p>
+        <div class="end-actions">
+          <button type="button" class="btn btn-lamp" id="s-next" aria-keyshortcuts="N">Continue</button>
+          <button type="button" class="btn btn-quiet" id="s-overrule" hidden>I was right</button>
+        </div>
+      </div>
+      <div class="buzz-dock" id="s-buzz-dock" hidden>
+        <button type="button" class="buzz" id="s-buzz" aria-keyshortcuts="Space">Buzz</button>
+      </div>
+      <div class="read-controls">
+        <button type="button" class="btn btn-quiet" id="s-pause" hidden>Pause</button>
+        <button type="button" class="btn btn-quiet" id="s-fast" hidden>Speed up the computer</button>
+        <button type="button" class="btn btn-quiet" id="s-quit">Quit match</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-sim-break" hidden aria-labelledby="sb-title">
+      <h1 class="result-title" id="sb-title" tabindex="-1"></h1>
+      <p class="result-sub" id="sb-score"></p>
+      <h2 class="clue-title">Card a clue</h2>
+      <p class="clue-help">Open a question and tap any sentence to make it a flashcard. Markers show where you and the computer buzzed.</p>
+      <div class="review-list" id="sb-list"></div>
+      <form class="card-editor" id="sb-editor" hidden>
+        <label for="sb-front">Front (trim it to the clue that matters)</label>
+        <textarea id="sb-front" rows="4" maxlength="1000"></textarea>
+        <label for="sb-back">Back</label>
+        <input type="text" id="sb-back" maxlength="300">
+        <div class="end-actions">
+          <button type="submit" class="btn btn-lamp">Save card</button>
+          <button type="button" class="btn btn-quiet" id="sb-cancel">Cancel</button>
+        </div>
+      </form>
+      <p class="game-status" id="sb-status" role="status"></p>
+      <div class="end-actions next-row">
+        <button type="button" class="btn btn-lamp" id="sb-next">Continue</button>
+        <button type="button" class="btn btn-quiet" id="sb-quit">Quit match</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-sim-end" hidden aria-labelledby="se-title">
+      <h1 class="result-title" id="se-title" tabindex="-1"></h1>
+      <p class="result-sub" id="se-sub"></p>
+      <table class="rounds">
+        <thead><tr><th scope="col">Quarter</th><th scope="col" class="num">You</th><th scope="col" class="num">Computer</th></tr></thead>
+        <tbody id="se-rows"></tbody>
+      </table>
+      <div class="end-actions">
+        <button type="button" class="btn btn-lamp" id="se-again">Play again</button>
+        <button type="button" class="btn btn-quiet" id="se-home">Done</button>
       </div>
     </section>
 

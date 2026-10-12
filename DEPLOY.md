@@ -439,7 +439,10 @@ and the local answer checker), `tags.js` (estimated era and region),
 `question.js` (the one question shape every source is turned into; shared
 with the Worker), `store.js` (localStorage, tag corrections, export and
 import), `areas.js` (the weakest-areas ranking), `srs.js` (flashcard
-scheduling with the `ts-fsrs` package, pinned at 5.4.2), `api.js`.
+scheduling with the `ts-fsrs` package, pinned at 5.4.2), `match.js` (the
+four-quarter regional format, scoring and the computer opponent, with no DOM
+so multiplayer rooms can reuse it), `sim.js` (the match simulator screens),
+`ui.js` (small helpers shared by the screens), `api.js`.
 Rebuild and commit the bundle after any change:
 
 ```bash
@@ -485,6 +488,9 @@ passing on only whitelisted parameters:
   Reader hosts, by whole packet (kept in the edge cache for 30 days); `qb` is
   QB Reader's random tossups at difficulty 2 to 3 (`regional`), 3 to 4
   (`harder`) or 2 to 5 (`all`), weighted toward History.
+- `GET /historybowl/api/bonuses?cat=History&sub=World%20History&level=regional&n=10`:
+  random QB Reader bonuses in one category, for second-quarter bonuses and
+  lightning rounds (each bonus's first part, with its leadin, stands alone).
 - `POST /historybowl/api/check` `{answerline, given}`: QB Reader's answer
   checker. The page falls back on its own checker if this takes over 2.5 s.
 - `POST /historybowl/api/report` `{qid, source, note}`: the "Report an error"

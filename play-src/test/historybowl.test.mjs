@@ -50,6 +50,14 @@ test('pronunciation guides and plain-text answerlines', () => {
   assert.equal(judge('Battle of Isandlwana', 'Isandlwana'), 'accept');
 });
 
+test('separately underlined names in one answer are alternatives; a compound name needs both', () => {
+  const line = 'Arthur <b><u>Wellesley</u></b>, 1st Duke of <b><u>Wellington</u></b> [or the Iron Duke]';
+  assert.equal(judge(line, 'Duke of Wellington'), 'accept');
+  assert.equal(judge(line, 'Wellesley'), 'accept');
+  assert.equal(judge('<b><u>Mayor</u></b> of the <b><u>Palace</u></b>', 'Mayor'), 'reject');
+  assert.equal(judge('<b><u>Mayor</u></b> of the <b><u>Palace</u></b>', 'mayor of the palace'), 'accept');
+});
+
 test('numbers must match exactly', () => {
   assert.equal(close('1848', '1849'), false);
   assert.equal(judge('<b><u>Henry VIII</u></b>', 'Henry VII'), 'reject');
