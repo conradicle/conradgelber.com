@@ -1,4 +1,4 @@
-import { UpstreamError, checkAnswer, parseTossupQuery, tossups } from './qb.js';
+import { UpstreamError, bonuses, checkAnswer, parseBonusQuery, parseTossupQuery, tossups } from './qb.js';
 import { allow } from './limiter.js';
 
 export { Limiter } from './limiter.js';
@@ -8,6 +8,7 @@ export { Limiter } from './limiter.js';
  * The page itself is the Pages site.
  *
  *   GET  /historybowl/api/tossups?src=bee,qb&cats=History&subs=&level=regional&n=8
+ *   GET  /historybowl/api/bonuses?cat=History&sub=European%20History&level=regional&n=3
  *   POST /historybowl/api/check   {answerline, given}
  *   POST /historybowl/api/report  {qid, source, note}
  *
@@ -61,6 +62,12 @@ async function handleApi(request, env, url) {
     const q = parseTossupQuery(url.searchParams);
     if (!q) return fail(400, 'Bad query');
     return json(200, { tossups: await tossups(q) });
+  }
+
+  if (route === '/bonuses' && request.method === 'GET') {
+    const q = parseBonusQuery(url.searchParams);
+    if (!q) return fail(400, 'Bad query');
+    return json(200, { bonuses: await bonuses(q) });
   }
 
   if (route === '/check' && request.method === 'POST') {
