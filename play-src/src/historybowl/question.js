@@ -121,3 +121,76 @@ export function fromQbBonus(b) {
     parts: parts.filter((p) => p.text && p.answerPlain),
   };
 }
+
+// ---------- IAC regional packets ----------
+
+export const PACKET_SOURCE = 'iac-packet';
+export const PACKET_SHORT_SOURCE = 'iac-packet-short';
+Object.assign(SOURCE_LABEL, {
+  [PACKET_SOURCE]: 'IAC regional packet',
+  [PACKET_SHORT_SOURCE]: 'IAC regional packet, short tossup',
+});
+
+const SUB_FROM_REGION = { 'United States': 'American History', Europe: 'European History', 'Ancient world': 'Ancient History' };
+const plainOf = (html) => cleanText(String(html || '').replace(/<[^>]*>/g, ''));
+
+/** The packet's id: year, set and round, as in "2018-2019-A-r3". */
+export function packetId(meta) {
+  const parts = [meta.year, meta.set, meta.round !== null && meta.round !== undefined ? `r${meta.round}` : ''].filter(Boolean);
+  if (parts.length >= 2) return parts.join('-');
+  return String(meta.file || 'packet').replace(/\.[a-z]+$/i, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+}
+
+/**
+ * A packet question in the shared shape. Packets carry no categories, so the
+ * subcategory is a guess from the question's region, marked `subGuess`:
+ * the weakest-areas ranking treats it as an estimate until corrected.
+ */
+function fromPacketItem(it, pid, tag, label, short = false) {
+  const text = cleanText(joinAccents(it.text));
+  const region = estimateRegion(text, 'History', '');
+  const era = estimateEra(text, '');
+  // A question set before 500 is ancient history wherever it is set.
+  const subcategory = era === 'ancient' ? 'Ancient History' : SUB_FROM_REGION[region] || 'World History';
+  const answerHtml = safeAnswerHtml(joinAccents(it.answerHtml || it.answer || ''));
+  return {
+    id: `iac:${pid}:${tag}`,
+    source: short ? PACKET_SHORT_SOURCE : PACKET_SOURCE,
+    sourceLabel: SOURCE_LABEL[short ? PACKET_SHORT_SOURCE : PACKET_SOURCE],
+    set: label,
+    year: null,
+    packet: null,
+    number: it.n || null,
+    difficulty: null,
+    category: 'History',
+    subcategory,
+    subGuess: true,
+    era: era === 'unknown' && subcategory === 'Ancient History' ? 'ancient' : era,
+    region,
+    text,
+    answerHtml,
+    answerPlain: plainOf(answerHtml),
+  };
+}
+
+/** A parsed packet (see packet.js) as questions ready for the reader and the simulator. */
+export function fromPacket(p) {
+  const pid = packetId(p.meta);
+  const label = [p.meta.year, p.meta.set ? `${p.meta.set} Set` : '', p.meta.round !== null ? `Round ${p.meta.round}` : ''].filter(Boolean).join(' ') || pid;
+  const part = (it, tag, category) => {
+    const q = fromPacketItem(it, pid, tag, label);
+    return { id: q.id, text: q.text, answerHtml: q.answerHtml, answerPlain: q.answerPlain, leadin: '', level: null, category, subcategory: q.subcategory, source: PACKET_SOURCE, era: q.era, region: q.region };
+  };
+  return {
+    id: pid,
+    label,
+    q1: p.q1.map((it, i) => fromPacketItem(it, pid, `q1-${i + 1}`, label, true)),
+    q2: p.q2.map((it, i) => ({
+      tossup: fromPacketItem(it, pid, `q2-${i + 1}`, label),
+      bonus: it.bonus && it.bonus.answer ? part(it.bonus, `q2-${i + 1}-bonus`, 'History') : null,
+    })),
+    q3: p.q3.map((c, ci) => ({ label: c.category, questions: c.questions.map((it, i) => part(it, `q3-${ci + 1}-${i + 1}`, c.category)) })),
+    q4: p.q4.map((it, i) => fromPacketItem(it, pid, `q4-${i + 1}`, label)),
+    extra: p.extra.map((it, i) => fromPacketItem(it, pid, `x-${i + 1}`, label)),
+  };
+}
