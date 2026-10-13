@@ -10,7 +10,7 @@ import { estimateEra, estimateRegion } from './tags.js';
 import { $, show, announce, pct, el, plural, uid, renderAnswerline, judge, isTyping, sleep, badgeOf, catLine } from './ui.js';
 import {
   QUARTERS, LIGHTNING, BONUS_POINTS, TOSSUP_POINTS, tossupPoints, lightningPoints, firstPick, shorten,
-  botProfile, botTossup, botAfterMiss, botBonus, botLightning, botBounce, botBuzzWord, BOT_PRESETS,
+  botProfile, botTossup, botAfterMiss, botBonus, planBotLightning, planBotBounces, botBuzzWord, BOT_PRESETS,
   offerCategories, lightningFromBonuses, newMatch, award, unaward, scores, afterFourth, winner,
 } from './match.js';
 
@@ -501,9 +501,13 @@ export function initSim(ctx) {
       return item;
     };
     let used = 0;
+    // The computer's whole turn is decided up front (see planBotLightning), so
+    // the odds a match plays with are the ones the tests check.
+    const plan = team === BOT ? planBotLightning(profile, Math.min(LIGHTNING.questions, qs.length)) : null;
     try {
       for (const lq of qs.slice(0, LIGHTNING.questions)) {
-        if (left() <= 0) break;
+        if (team === YOU && left() <= 0) break;
+        if (team === BOT && !plan[used].reached) break;
         used++;
         const shown = mainAnswer(lq.answerHtml) || lq.answerPlain;
         meta({ ...lq, category: cat.label, subcategory: cat.label }, [`${used} of ${LIGHTNING.questions}`]);
@@ -523,24 +527,20 @@ export function initSim(ctx) {
           if (item.ok) status(`Right: ${shown}`);
           else if (online) {
             pause();
-            await botTakesBounce(item, shown, id);
+            await botTakesBounce(item, shown, id, planBotBounces(profile, 1)[0]);
             resume();
           } else status(`${given ? 'Wrong' : 'Passed'}. Answer: ${shown}.`);
         } else {
-          const plan = botLightning(profile);
-          const waitMs = Math.min(plan.seconds * 1000, left());
+          const step = plan[used - 1];
+          const waitMs = step.seconds * 1000;
           const until = performance.now() + (fast ? Math.min(waitMs, 250) : waitMs);
           if (fast) bankedMs += waitMs - Math.min(waitMs, 250);
           while (performance.now() < until) {
             await sleep(50);
             alive(id);
           }
-          if (left() <= 0) {
-            item.reached = false;
-            break;
-          }
-          item.ok = plan.right;
-          if (plan.right) {
+          item.ok = step.right;
+          if (step.right) {
             status(`The computer: right (${shown}).`);
             await sleep(fast ? 150 : 700);
             alive(id);
@@ -575,8 +575,7 @@ export function initSim(ctx) {
     if (!online) await bouncebacks(1 - team, turn.items.filter((i) => !i.ok), id);
   }
 
-  async function botTakesBounce(item, shown, id) {
-    const stolen = botBounce(profile);
+  async function botTakesBounce(item, shown, id, stolen) {
     item.bounceTried = true;
     item.bounce = stolen ? BOT : null;
     if (stolen) award(m, BOT, LIGHTNING.points, { kind: 'bounce' });
@@ -608,6 +607,7 @@ export function initSim(ctx) {
     await sleep(fast ? 300 : 1200);
     alive(id);
     let got = 0;
+    const takes = team === BOT ? planBotBounces(profile, list.length) : null;
     for (let i = 0; i < list.length; i++) {
       const item = list[i];
       const shown = mainAnswer(item.q.answerHtml) || item.q.answerPlain;
@@ -620,7 +620,7 @@ export function initSim(ctx) {
         status('The computer answers.');
         await sleep(fast ? 200 : 900);
         alive(id);
-        await botTakesBounce(item, shown, id);
+        await botTakesBounce(item, shown, id, takes[i]);
       }
       if (item.bounce === team) got++;
     }
