@@ -71,3 +71,18 @@ export function isTyping(t) {
 }
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** "History / European", with "(guess)" when the subcategory is only an estimate. */
+export function catLine(q) {
+  const sub = q.subcategory && q.subcategory !== q.category ? ` / ${q.subcategory.replace(' History', '')}` : '';
+  const guess = q.subGuess && !(q.fx || []).includes('sub') ? ' (guess)' : '';
+  return `${q.category}${sub}${guess}`;
+}
+
+/** The short source badge shown above a question. */
+export function badgeOf(source) {
+  if (source === 'ai') return 'AI-written';
+  if (source === 'iac-bee-qbreader') return 'IAC Bee';
+  if (source === 'iac-packet' || source === 'iac-packet-short') return 'IAC packet';
+  return 'QB Reader';
+}

@@ -22,3 +22,7 @@ node_modules/
 # Borderline pipeline inputs and scratch (rebuilt by play-src/scripts/borderline/)
 play-src/data/borderline/raw/
 play-src/data/borderline/build/
+
+# IAC packets for History Bowl Study: never committed (the repo is public).
+# See play-src/scripts/historybowl/import-packets.mjs.
+play-src/data/historybowl/iac/
