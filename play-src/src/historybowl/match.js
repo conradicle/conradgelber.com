@@ -228,3 +228,33 @@ export function winner(match) {
   const [a, b] = scores(match);
   return a === b ? null : a > b ? 0 : 1;
 }
+
+// ---------- lightning plans ----------
+// The simulator draws every random lightning outcome through these two
+// functions, so the odds can be checked by running them many times.
+
+/**
+ * The computer's whole 60-second turn, decided up front: for each question,
+ * whether its clock reaches it and whether its answer is right.
+ * [{ reached, right, seconds }], one per question.
+ */
+export function planBotLightning(profile, count = LIGHTNING.questions, rnd = Math.random) {
+  const out = [];
+  let used = 0;
+  for (let i = 0; i < count; i++) {
+    const { right, seconds } = botLightning(profile, rnd);
+    if (used + seconds > LIGHTNING.seconds) {
+      // Out of time: this question and the rest are not reached.
+      for (let j = i; j < count; j++) out.push({ reached: false, right: false, seconds: 0 });
+      break;
+    }
+    used += seconds;
+    out.push({ reached: true, right, seconds });
+  }
+  return out;
+}
+
+/** The computer's answers to a list of bouncebacks: true for each it gets. */
+export function planBotBounces(profile, count, rnd = Math.random) {
+  return Array.from({ length: count }, () => botBounce(profile, rnd));
+}
