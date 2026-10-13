@@ -1,5 +1,6 @@
 import { UpstreamError, bonuses, checkAnswer, parseBonusQuery, parseTossupQuery, tossups } from './qb.js';
 import { allow } from './limiter.js';
+import { handleIac } from './iac.js';
 
 export { Limiter } from './limiter.js';
 
@@ -11,6 +12,7 @@ export { Limiter } from './limiter.js';
  *   GET  /historybowl/api/bonuses?cat=History&sub=European%20History&level=regional&n=3
  *   POST /historybowl/api/check   {answerline, given}
  *   POST /historybowl/api/report  {qid, source, note}
+ *   GET  /historybowl/api/iac/{check,index,packet,tossups}  (team passcode in X-Team-Passcode; see iac.js)
  *
  * Nothing secret belongs in this folder: Pages serves the repo as it is.
  */
@@ -57,6 +59,8 @@ async function handleApi(request, env, url) {
   const route = url.pathname.slice(API.length);
   if (!originAllowed(request, url, env)) return fail(403, 'Forbidden');
   if (!(await allow(request, env, route === '/report' ? 'report' : 'api'))) return fail(429, 'Too many requests. Wait a minute and try again.');
+
+  if (route.startsWith('/iac/') && request.method === 'GET') return handleIac(route, request, env, url, { json, fail });
 
   if (route === '/tossups' && request.method === 'GET') {
     const q = parseTossupQuery(url.searchParams);

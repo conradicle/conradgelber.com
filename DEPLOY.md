@@ -503,8 +503,56 @@ passing on only whitelisted parameters:
   npm --prefix historybowl-worker run reports -- --clear
   ```
 
+- `GET /historybowl/api/iac/{check,index,packet,tossups}`: IAC National History
+  Bowl regional packets, for the team only (see below).
+
 Rate limits per IP, per minute (the `Limiter` Durable Object from Pool and
-Cambio): 120 API calls, 10 reports. Nothing secret belongs in the folder;
+Cambio): 120 API calls, 10 reports, 10 wrong team passcodes. The passcode
+limit is checked before the passcode itself, so a guess made during a
+lockout reveals nothing.
+
+### IAC packets (team only)
+
+IAC's past questions are not ours to publish, and this repo is public, so
+packet text never enters git. The pipeline:
+
+1. Put the packet PDFs anywhere outside the repo, then import them:
+
+   ```bash
+   node play-src/scripts/historybowl/import-packets.mjs "C:/path/to/packets"
+   ```
+
+   This reads each PDF with `pdfjs-dist` (the bold in an answer is its
+   required part), parses the quarters (`play-src/src/historybowl/packet.js`)
+   and writes `play-src/data/historybowl/iac/` (git-ignored): one JSON file
+   per packet, `kv.json` for upload, and `report.txt`, which lists every
+   packet with its counts and anything the parser could not place. A packet
+   needs 10 + 8 tossups, 8 bonuses, three lightning categories of 8 and 8
+   fourth-quarter tossups to count as complete.
+2. Upload to the `historybowl-iac` KV namespace (binding `IAC`):
+
+   ```bash
+   npm --prefix historybowl-worker run upload-iac
+   ```
+
+   (`-- --local` uploads to local dev instead.)
+3. The passcode is a Worker secret, set once (and again to change it):
+
+   ```bash
+   npx --prefix historybowl-worker wrangler secret put TEAM_PASSCODE -c historybowl-worker/wrangler.jsonc
+   ```
+
+   For local dev, put `TEAM_PASSCODE=...` in `historybowl-worker/.dev.vars`
+   (git-ignored).
+
+The page's settings take the passcode once per device (kept in
+`historybowl:team`, never exported). With it, the simulator plays a whole
+packet (real short tossups, bonuses, lightning categories and long tossups;
+QB Reader fills any quarter a packet lacks), and the reader can mix packet
+tossups in. Packet questions carry no categories: their subcategory is a
+guess from the text, flagged so the weakest-areas ranking ignores it until
+corrected. Real first-quarter tossups count in stats as their own source
+(`iac-packet-short`). Nothing secret belongs in the folder;
 Pages serves it like the rest of the repo.
 
 Deploy (Wrangler must be logged in):

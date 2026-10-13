@@ -4,9 +4,10 @@
 
 import { mainAnswer } from './answer.js';
 import { words as splitWords, sentences, schedule, shownAt, buzzFraction } from './text.js';
-import { fetchTossups, fetchBonuses } from './api.js';
+import { fetchTossups, fetchBonuses, iacPacket } from './api.js';
 import { withFix } from './store.js';
-import { $, show, announce, pct, el, plural, uid, renderAnswerline, judge, isTyping, sleep } from './ui.js';
+import { estimateEra, estimateRegion } from './tags.js';
+import { $, show, announce, pct, el, plural, uid, renderAnswerline, judge, isTyping, sleep, badgeOf, catLine } from './ui.js';
 import {
   QUARTERS, LIGHTNING, BONUS_POINTS, TOSSUP_POINTS, tossupPoints, lightningPoints, firstPick, shorten,
   botProfile, botTossup, botAfterMiss, botBonus, botLightning, botBounce, botBuzzWord, BOT_PRESETS,
@@ -28,9 +29,13 @@ export function initSim(ctx) {
   let profile = null;
   let pool = null;
   let items = [];
+  // Each lightning turn: { team, cat, items, awarded }, so a ruling can be overturned later.
+  let turns = [];
   let reading = null;
   let pending = null;
   let fast = false;
+  // The IAC packet this match is played from, if any.
+  let usedPacket = null;
 
   // ---------- waiting on the player ----------
 
@@ -90,8 +95,8 @@ export function initSim(ctx) {
     const box = $('s-meta');
     box.textContent = '';
     const ai = q.source === 'ai';
-    box.append(el('span', 'badge' + (ai ? ' badge-ai' : ''), ai ? 'AI-written' : q.source === 'iac-bee-qbreader' ? 'IAC Bee' : 'QB Reader'));
-    const cat = `${q.category}${q.subcategory && q.subcategory !== q.category ? ' / ' + q.subcategory.replace(' History', '') : ''}`;
+    box.append(el('span', 'badge' + (ai ? ' badge-ai' : ''), badgeOf(q.source)));
+    const cat = catLine(q);
     box.append(' ' + [cat, ...extra].join(' \u00b7 '));
   }
 
@@ -216,11 +221,11 @@ export function initSim(ctx) {
 
   // ---------- one tossup ----------
 
-  async function playTossup(q, quarter, number, total, id) {
+  async function playTossup(q, quarter, number, total, id, real = false) {
     resetStage();
     const settings = ctx.settings();
     const spec = QUARTERS[quarter - 1] || QUARTERS[3];
-    const short = spec.maxWords ? shorten(q.text, spec.maxWords) : { text: q.text, shortened: false };
+    const short = spec.maxWords && !real ? shorten(q.text, spec.maxWords) : { text: q.text, shortened: false };
     const list = splitWords(short.text);
     const n = list.length;
     meta(q, short.shortened ? ['shortened'] : []);
@@ -311,7 +316,8 @@ export function initSim(ctx) {
 
   /** Fourth-quarter and tiebreak tossups are full pyramids, so they count in stats like the reader's. */
   function recordForStats(out, n) {
-    if (out.quarter < 4) return;
+    // Shortened stand-ins would skew buzz points; real packet tossups count in every quarter.
+    if (out.quarter < 4 && !isPacket(out.q)) return;
     // Beaten to it before buzzing: no evidence either way.
     if (out.yourShown === null && out.winner === BOT && out.botShown < n) return;
     const q = out.q;
@@ -329,10 +335,14 @@ export function initSim(ctx) {
       ts: Date.now(),
       diff: Number.isFinite(q.difficulty) ? q.difficulty : null,
       fx: q.fx || [],
+      fmt: q.source === 'iac-packet-short' ? 'short' : 'tossup',
+      sg: q.subGuess === true,
     };
     out.recordId = rec.id;
     ctx.addRecord(rec);
   }
+
+  const isPacket = (q) => q.source === 'iac-packet' || q.source === 'iac-packet-short';
 
   /** The ruling after a tossup or bonus, with the overrule button; resolves on Continue. */
   async function ruling(out, id, extra = '') {
@@ -456,14 +466,18 @@ export function initSim(ctx) {
     return lightningFromBonuses(bonuses);
   }
 
-  /** Sixty seconds for one team; misses bounce to the other. */
+  /**
+   * Sixty seconds for one team. Questions it misses or does not reach
+   * bounce to the other team: as one list after the clock under IAC's
+   * in-person rules (the default), or one at a time under its online rules.
+   */
   async function lightningTurn(team, cat, qs, id) {
     resetStage();
     setQuarter(`Lightning: ${team === YOU ? 'you' : 'computer'}`);
-    const results = [];
-    let used = 0;
-    const clockStart = () => performance.now();
-    let started = clockStart();
+    const online = ctx.settings().bounceRule === 'online';
+    const turn = { team, cat, items: [], awarded: 0 };
+    turns.push(turn);
+    let started = performance.now();
     let bankedMs = 0;
     const left = () => Math.max(0, LIGHTNING.seconds * 1000 - bankedMs - (started === null ? 0 : performance.now() - started));
     const pause = () => {
@@ -480,38 +494,38 @@ export function initSim(ctx) {
       if (ms <= 0 && team === YOU) fire('submit');
     }, 100);
     $('s-fast').hidden = team !== BOT;
+    const newItem = (lq, reached) => {
+      const item = { kind: 'lightning', q: { ...lq }, cat, text: [lq.leadin, lq.text].filter(Boolean).join(' '), quarter: 3, team, ok: false, reached, bounce: null, bounceTried: false, given: '', bounceGiven: '', recordId: null, bounceRecordId: null };
+      items.push(item);
+      turn.items.push(item);
+      return item;
+    };
+    let used = 0;
     try {
-      for (const lq of qs) {
+      for (const lq of qs.slice(0, LIGHTNING.questions)) {
         if (left() <= 0) break;
         used++;
-        const q = { ...lq, source: lq.source };
         const shown = mainAnswer(lq.answerHtml) || lq.answerPlain;
-        meta({ ...q, category: cat.label, subcategory: cat.label }, [`${used} of ${LIGHTNING.questions}`]);
+        meta({ ...lq, category: cat.label, subcategory: cat.label }, [`${used} of ${LIGHTNING.questions}`]);
         $('s-text').textContent = [lq.leadin, lq.text].filter(Boolean).join(' ');
-        const item = { kind: 'lightning', q, text: $('s-text').textContent, quarter: 3, team, ok: false, bounce: null, given: '' };
-        items.push(item);
+        const item = newItem(lq, true);
         if (team === YOU) {
           const given = await ask('Your answer (Enter to send)', 0, id, { pass: true });
-          if (left() <= 0 && !given) break;
+          if (left() <= 0 && !given) {
+            item.reached = false;
+            break;
+          }
           const r = await judge(lq.answerHtml, given, { remote: false });
           alive(id);
           item.ok = r.directive === 'accept';
           item.given = given;
-          results.push(item.ok);
-          if (item.ok) {
-            status(`Right: ${shown}`);
-          } else {
-            // Bounce: the computer answers at once.
+          item.recordId = recordLightning(item, item.ok);
+          if (item.ok) status(`Right: ${shown}`);
+          else if (online) {
             pause();
-            const stolen = botBounce(profile);
-            item.bounce = stolen ? BOT : null;
-            if (stolen) award(m, BOT, LIGHTNING.points, { kind: 'bounce' });
-            board();
-            status(`${given ? 'Wrong' : 'Passed'}. Answer: ${shown}. Bounce: the computer ${stolen ? 'gets it (+10)' : 'misses'}.`);
-            await sleep(fast ? 300 : 1300);
-            alive(id);
+            await botTakesBounce(item, shown, id);
             resume();
-          }
+          } else status(`${given ? 'Wrong' : 'Passed'}. Answer: ${shown}.`);
         } else {
           const plan = botLightning(profile);
           const waitMs = Math.min(plan.seconds * 1000, left());
@@ -522,27 +536,23 @@ export function initSim(ctx) {
             alive(id);
           }
           if (left() <= 0) {
-            results.push(null);
+            item.reached = false;
             break;
           }
           item.ok = plan.right;
-          results.push(item.ok);
           if (plan.right) {
             status(`The computer: right (${shown}).`);
             await sleep(fast ? 150 : 700);
             alive(id);
-          } else {
+          } else if (online) {
             pause();
             status('The computer misses. Bounce to you.');
-            const r = await answerFor(lq.answerHtml, 'Bounce: your answer', 8, id, { local: true });
-            item.given = r.given;
-            item.bounce = r.ok ? YOU : null;
-            if (r.ok) award(m, YOU, LIGHTNING.points, { kind: 'bounce' });
-            board();
-            status(r.ok ? `Bounce right (+10): ${shown}` : `Bounce missed. Answer: ${shown}`);
-            await sleep(fast ? 300 : 1300);
-            alive(id);
+            await youTakeBounce(item, shown, 8, id);
             resume();
+          } else {
+            status(`The computer misses (${shown}).`);
+            await sleep(fast ? 150 : 700);
+            alive(id);
           }
         }
       }
@@ -551,15 +561,96 @@ export function initSim(ctx) {
       $('s-form').hidden = true;
       $('s-fast').hidden = true;
     }
-    const points = lightningPoints(results);
-    award(m, team, points, { kind: 'lightning' });
+    // Questions the clock cut off are part of the turn too: unanswered.
+    for (const lq of qs.slice(used, LIGHTNING.questions)) newItem(lq, false);
+    turn.awarded = lightningPoints(turn.items.map((i) => i.ok));
+    award(m, team, turn.awarded, { kind: 'lightning' });
     board();
-    const right = results.filter((r) => r === true).length;
-    const msg = `${team === YOU ? 'You' : 'The computer'}: ${right} of ${LIGHTNING.questions} right${right === LIGHTNING.questions ? ', plus 20 for the sweep' : ''}. +${points}.`;
+    const right = turn.items.filter((i) => i.ok).length;
+    const msg = `${team === YOU ? 'You' : 'The computer'}: ${right} of ${LIGHTNING.questions} right${right === LIGHTNING.questions ? ', plus 20 for the sweep' : ''}. +${turn.awarded}.`;
     status(msg);
     announce(msg);
     await sleep(fast ? 400 : 1800);
     alive(id);
+    if (!online) await bouncebacks(1 - team, turn.items.filter((i) => !i.ok), id);
+  }
+
+  async function botTakesBounce(item, shown, id) {
+    const stolen = botBounce(profile);
+    item.bounceTried = true;
+    item.bounce = stolen ? BOT : null;
+    if (stolen) award(m, BOT, LIGHTNING.points, { kind: 'bounce' });
+    board();
+    status(`${item.given ? 'Wrong' : 'Passed'}. Answer: ${shown}. Bounce: the computer ${stolen ? 'gets it (+10)' : 'misses'}.`);
+    await sleep(fast ? 300 : 1300);
+    alive(id);
+  }
+
+  async function youTakeBounce(item, shown, seconds, id) {
+    const r = await answerFor(item.q.answerHtml, 'Bounceback: your answer', seconds, id, { local: true });
+    item.bounceTried = true;
+    item.bounceGiven = r.given;
+    item.bounce = r.ok ? YOU : null;
+    item.bounceRecordId = recordLightning(item, r.ok);
+    if (r.ok) award(m, YOU, LIGHTNING.points, { kind: 'bounce' });
+    board();
+    status(r.ok ? `Bounceback right (+10): ${shown}` : `Bounceback missed. Answer: ${shown}`);
+    await sleep(fast ? 300 : 1300);
+    alive(id);
+  }
+
+  /** In-person rules: after the clock, the other team takes the unanswered questions in turn. */
+  async function bouncebacks(team, list, id) {
+    if (!list.length) return;
+    resetStage();
+    setQuarter(team === YOU ? 'Your bouncebacks' : 'Computer bouncebacks');
+    status(`${plural(list.length, 'question')} bounce back to ${team === YOU ? 'you' : 'the computer'}.`);
+    await sleep(fast ? 300 : 1200);
+    alive(id);
+    let got = 0;
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      const shown = mainAnswer(item.q.answerHtml) || item.q.answerPlain;
+      meta({ ...item.q, category: item.cat.label, subcategory: item.cat.label }, [`bounceback ${i + 1} of ${list.length}`]);
+      $('s-text').textContent = item.text;
+      setClock('Left', String(list.length - i));
+      if (team === YOU) {
+        await youTakeBounce(item, shown, 10, id);
+      } else {
+        status('The computer answers.');
+        await sleep(fast ? 200 : 900);
+        alive(id);
+        await botTakesBounce(item, shown, id);
+      }
+      if (item.bounce === team) got++;
+    }
+    const msg = `${team === YOU ? 'You' : 'The computer'} took ${got} of ${plural(list.length, 'bounceback')}.`;
+    status(msg);
+    announce(msg);
+    await sleep(fast ? 400 : 1500);
+    alive(id);
+  }
+
+  /** Lightning answers count in stats as their own format. */
+  function recordLightning(item, ok) {
+    const q = item.q;
+    const rec = {
+      id: `${Date.now()}-${q.id}`,
+      qid: q.id,
+      src: q.source,
+      cat: q.category,
+      sub: q.subcategory,
+      era: estimateEra(item.text, q.subcategory),
+      region: estimateRegion(item.text, q.category, q.subcategory),
+      ok,
+      buzz: null,
+      ovr: false,
+      ts: Date.now(),
+      fmt: 'lightning',
+      fx: [],
+    };
+    ctx.addRecord(rec);
+    return rec.id;
   }
 
   async function lightningRound(id) {
@@ -617,7 +708,7 @@ export function initSim(ctx) {
       const sum = el('summary');
       const answer = mainAnswer(it.q.answerHtml) || it.q.answerPlain;
       const who = it.kind === 'lightning'
-        ? (it.ok ? `${it.team === YOU ? 'you' : 'computer'}, right` : it.bounce === YOU ? 'your bounce' : it.bounce === BOT ? 'computer bounce' : 'missed')
+        ? lightningLabel(it)
         : it.kind === 'bonus'
           ? `${it.team === YOU ? 'your' : 'computer'} bonus, ${it.ok ? 'right' : 'missed'}`
           : it.winner === YOU ? `you, +${it.points}` : it.winner === BOT ? `computer, +${it.points}` : 'dead';
@@ -654,9 +745,72 @@ export function initSim(ctx) {
       }
       d.append(clues);
       if (it.shortened) d.append(el('p', 'review-note', 'Shortened from a longer tossup for this quarter.'));
+      if (it.kind === 'lightning') addLightningOverrule(d, it);
       if (!it.ok || it.winner !== YOU) d.open = list.length <= 4;
       box.append(d);
     });
+  }
+
+  function lightningLabel(it) {
+    const mine = it.team === YOU;
+    if (it.ok) return `${mine ? 'you' : 'computer'}, right${it.overruled ? ' (your call)' : ''}`;
+    const lead = mine ? (it.reached ? (it.given ? 'you missed' : 'you passed') : 'you did not reach it') : it.reached ? 'computer missed' : 'computer did not reach it';
+    if (it.bounce === YOU) return `${lead}; your bounceback${it.overruled ? ' (your call)' : ''}`;
+    if (it.bounce === BOT) return `${lead}; computer bounceback`;
+    return it.bounceTried ? `${lead}; bounceback missed` : lead;
+  }
+
+  /** "I was right" on a lightning question you answered and were ruled wrong on. */
+  function addLightningOverrule(d, it) {
+    const mineMissed = it.team === YOU && it.reached && !it.ok && it.given;
+    const bounceMissed = it.team === BOT && it.bounceTried && it.bounce !== YOU && it.bounceGiven;
+    if (!mineMissed && !bounceMissed) return;
+    const row = el('div', 'review-actions');
+    row.append(el('span', 'review-said', `You said "${mineMissed ? it.given : it.bounceGiven}".`));
+    const b = el('button', 'btn btn-quiet btn-small', 'I was right');
+    b.type = 'button';
+    b.addEventListener('click', () => {
+      if (mineMissed) overruleMyLightning(it);
+      else overruleMyBounce(it);
+      it.overruled = true;
+      b.remove();
+      d.querySelector('.review-who').textContent = lightningLabel(it);
+      const s = scores(m);
+      $('sb-score').textContent = `You ${s[YOU]}, the computer ${s[BOT]}.`;
+      board();
+      announce(`Counted as right. You ${s[YOU]}, the computer ${s[BOT]}.`);
+      // A card made from a question you knew after all can go too.
+      if (ctx.hasCardFor(it.q.id)) {
+        const rm = el('button', 'btn btn-quiet btn-small', 'Remove the card you made from it');
+        rm.type = 'button';
+        rm.addEventListener('click', () => {
+          const n = ctx.removeCardsFor(it.q.id);
+          rm.replaceWith(el('span', 'review-said', n ? 'Card removed.' : 'No card to remove.'));
+          for (const c of d.querySelectorAll('.clue.carded')) c.classList.remove('carded');
+        });
+        row.append(rm);
+      }
+    });
+    row.append(b);
+    d.append(row);
+  }
+
+  function overruleMyLightning(it) {
+    const turn = turns.find((t) => t.items.includes(it));
+    it.ok = true;
+    // The computer's bounceback on it no longer stands.
+    if (it.bounce === BOT) unaward(m, BOT, LIGHTNING.points, 3);
+    it.bounce = null;
+    const now = lightningPoints(turn.items.map((i) => i.ok));
+    if (now > turn.awarded) award(m, YOU, now - turn.awarded, { kind: 'lightning', overrule: true });
+    turn.awarded = now;
+    if (it.recordId) ctx.updateRecord(it.recordId, { ok: true, ovr: true });
+  }
+
+  function overruleMyBounce(it) {
+    it.bounce = YOU;
+    award(m, YOU, LIGHTNING.points, { kind: 'bounce', overrule: true });
+    if (it.bounceRecordId) ctx.updateRecord(it.bounceRecordId, { ok: true, ovr: true });
   }
 
   let editing = null;
@@ -714,36 +868,69 @@ export function initSim(ctx) {
     for (const c of offer) lightning.set(c.label, lightningQuestions(c).catch(() => []));
     // The fourth quarter prefers the Bee's full pyramids when that source is on.
     const q4src = s.sources.includes('bee') ? { sources: ['bee'] } : {};
-    return {
+    const qbOnly = { sources: s.sources.filter((x) => x === 'bee' || x === 'qb').length ? s.sources.filter((x) => x === 'bee' || x === 'qb') : ['bee', 'qb'] };
+    const later = (make) => {
+      let p = null;
+      return () => (p = p || make());
+    };
+    const pool = {
       offer,
       lightning,
-      q1: getTossups(QUARTERS[0].tossups),
-      q2: getTossups(QUARTERS[1].tossups),
-      q2b: fetchBonuses({ cat: 'History', level: s.level, n: QUARTERS[1].tossups }).catch(() => []),
-      q4: getTossups(QUARTERS[3].tossups + TIEBREAK_TOSSUPS, q4src),
+      packet: s.teamPass ? iacPacket(s.teamPass, ctx.packetsUsed()).catch(() => null) : Promise.resolve(null),
+      q1: later(() => getTossups(QUARTERS[0].tossups, qbOnly)),
+      q2: later(() => getTossups(QUARTERS[1].tossups, qbOnly)),
+      q2b: later(() => fetchBonuses({ cat: 'History', level: s.level, n: QUARTERS[1].tossups }).catch(() => [])),
+      q4: later(() => getTossups(QUARTERS[3].tossups + TIEBREAK_TOSSUPS, { ...qbOnly, ...q4src })),
     };
+    // Without a packet the stand-ins are needed at once.
+    if (!s.teamPass) for (const k of ['q1', 'q2', 'q2b', 'q4']) pool[k]();
+    return pool;
   }
 
   async function run(id) {
+    status('Fetching questions...');
+    // An IAC packet (team passcode) supplies every quarter it has in full.
+    const pk = await pool.packet;
+    alive(id);
+    const fix = (q) => withFix(q, ctx.fixes());
+    const use = {
+      q1: pk && pk.q1.length >= QUARTERS[0].tossups ? pk.q1.map(fix) : null,
+      q2: pk && pk.q2.length >= QUARTERS[1].tossups && pk.q2.every((x) => x.bonus) ? pk.q2 : null,
+      q3: pk && pk.q3.length >= 2 && pk.q3.every((c) => c.questions.length >= LIGHTNING.questions) ? pk.q3 : null,
+      q4: pk && pk.q4.length >= QUARTERS[3].tossups ? pk.q4.map(fix) : null,
+    };
+    usedPacket = pk && (use.q1 || use.q2 || use.q3 || use.q4) ? pk : null;
+    if (usedPacket) ctx.usePacket(pk.id);
     // Quarters 1 and 2.
     for (const quarter of [1, 2]) {
       m.quarter = quarter;
       const spec = QUARTERS[quarter - 1];
+      const real = Boolean(use[`q${quarter}`]);
       status('Fetching questions...');
-      const qs = await pool[`q${quarter}`];
+      const qs = quarter === 1 ? use.q1 || (await pool.q1()) : use.q2 ? use.q2.map((x) => fix(x.tossup)) : await pool.q2();
       alive(id);
-      const bonuses = quarter === 2 ? await pool.q2b : [];
+      // A packet's bonus belongs to its tossup; stand-in bonuses are taken in turn.
+      const packetBonuses = quarter === 2 && use.q2 ? use.q2.map((x) => x.bonus) : null;
+      const bonuses = quarter === 2 && !use.q2 ? await pool.q2b() : [];
       alive(id);
       if (!qs.length) throw new Error('no questions');
       for (let i = 0; i < Math.min(spec.tossups, qs.length); i++) {
-        const out = await playTossup(qs[i], quarter, i + 1, spec.tossups, id);
+        const out = await playTossup(qs[i], quarter, i + 1, spec.tossups, id, real);
         await ruling(out, id, out.winner === BOT ? `The computer said ${mainAnswer(out.q.answerHtml) || out.q.answerPlain}.` : '');
-        if (spec.bonus && out.winner !== null && bonuses.length) {
-          const b = bonuses.shift();
-          if (b && b.parts[0]) await playBonus({ ...b.parts[0], leadin: b.leadin, category: b.category, subcategory: b.subcategory, source: b.source }, out.winner, id);
+        if (spec.bonus && out.winner !== null) {
+          if (packetBonuses) {
+            if (packetBonuses[i]) await playBonus(packetBonuses[i], out.winner, id);
+          } else if (bonuses.length) {
+            const b = bonuses.shift();
+            if (b && b.parts[0]) await playBonus({ ...b.parts[0], leadin: b.leadin, category: b.category, subcategory: b.subcategory, source: b.source }, out.winner, id);
+          }
         }
       }
       await quarterBreak(quarter, id);
+    }
+    if (use.q3) {
+      pool.offer = use.q3.slice(0, 3).map((c) => ({ label: c.label, cat: 'History', sub: null }));
+      pool.lightning = new Map(use.q3.map((c) => [c.label, Promise.resolve(c.questions)]));
     }
     // Quarter 3.
     m.quarter = 3;
@@ -752,17 +939,18 @@ export function initSim(ctx) {
     // Quarter 4.
     m.quarter = 4;
     status('Fetching questions...');
-    const q4 = await pool.q4;
+    // A packet's extra questions are its tiebreakers; stand-ins fill in after them.
+    const q4 = use.q4 ? [...use.q4, ...pk.extra.map(fix), ...(pk.extra.length >= 2 ? [] : (await pool.q4()).slice(QUARTERS[3].tossups))] : await pool.q4();
     alive(id);
     for (let i = 0; i < Math.min(QUARTERS[3].tossups, q4.length); i++) {
-      const out = await playTossup(q4[i], 4, i + 1, QUARTERS[3].tossups, id);
+      const out = await playTossup(q4[i], 4, i + 1, QUARTERS[3].tossups, id, Boolean(use.q4));
       await ruling(out, id, out.winner === BOT ? `The computer buzzed at ${pct(out.botShown / splitWords(out.text).length)}.` : '');
     }
     if (afterFourth(m) === 'tiebreak') {
       await quarterBreak(4, id);
       const spare = q4.slice(QUARTERS[3].tossups);
       for (let i = 0; i < spare.length && !m.done; i++) {
-        const out = await playTossup(spare[i], 5, i + 1, spare.length, id);
+        const out = await playTossup(spare[i], 5, i + 1, spare.length, id, isPacket(spare[i]));
         await ruling(out, id);
         if (out.winner !== null) m.done = true;
       }
@@ -788,7 +976,8 @@ export function initSim(ctx) {
     }
     const yours = items.filter((it) => it.kind === 'tossup');
     const got = yours.filter((it) => it.winner === YOU).length;
-    $('se-sub').textContent = `You took ${got} of ${yours.length} tossups. The computer was set to buzz right at about ${pct(profile.mu)}.`;
+    const from = usedPacket ? ` Questions: IAC packet ${usedPacket.label}, with QB Reader for any quarter it could not fill.` : ' Questions: QB Reader.';
+    $('se-sub').textContent = `You took ${got} of ${yours.length} tossups. The computer was set to buzz right at about ${pct(profile.mu)}.${from}`;
     $('se-title').focus({ preventScroll: true });
     announce($('se-title').textContent);
     ctx.refreshHome();
@@ -800,6 +989,7 @@ export function initSim(ctx) {
     profile = botProfile(mu);
     m = newMatch(['You', 'Computer']);
     items = [];
+    turns = [];
     fast = false;
     pool = prefetch();
     show('screen-sim');
@@ -882,6 +1072,11 @@ export function initSim(ctx) {
   }
   showStrength();
   $('sim-start').addEventListener('click', start);
+  for (const r of document.querySelectorAll('input[name=bounce-rule]')) {
+    r.addEventListener('change', () => {
+      if (r.checked) ctx.saveSetting('bounceRule', r.value);
+    });
+  }
   $('sim-setup-back').addEventListener('click', () => ctx.home());
   $('s-buzz').addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
@@ -934,6 +1129,7 @@ export function initSim(ctx) {
 
   return {
     open() {
+      for (const r of document.querySelectorAll('input[name=bounce-rule]')) r.checked = r.value === ctx.settings().bounceRule;
       show('screen-sim-setup');
       $('sim-setup-title').focus({ preventScroll: true });
     },
