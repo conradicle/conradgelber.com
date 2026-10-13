@@ -4,10 +4,10 @@
 
 import { mainAnswer } from './answer.js';
 import { words as splitWords, sentences, schedule, shownAt, buzzFraction } from './text.js';
-import { fetchTossups, fetchBonuses } from './api.js';
+import { fetchTossups, fetchBonuses, iacPacket } from './api.js';
 import { withFix } from './store.js';
 import { estimateEra, estimateRegion } from './tags.js';
-import { $, show, announce, pct, el, plural, uid, renderAnswerline, judge, isTyping, sleep } from './ui.js';
+import { $, show, announce, pct, el, plural, uid, renderAnswerline, judge, isTyping, sleep, badgeOf, catLine } from './ui.js';
 import {
   QUARTERS, LIGHTNING, BONUS_POINTS, TOSSUP_POINTS, tossupPoints, lightningPoints, firstPick, shorten,
   botProfile, botTossup, botAfterMiss, botBonus, botLightning, botBounce, botBuzzWord, BOT_PRESETS,
@@ -34,6 +34,8 @@ export function initSim(ctx) {
   let reading = null;
   let pending = null;
   let fast = false;
+  // The IAC packet this match is played from, if any.
+  let usedPacket = null;
 
   // ---------- waiting on the player ----------
 
@@ -93,8 +95,8 @@ export function initSim(ctx) {
     const box = $('s-meta');
     box.textContent = '';
     const ai = q.source === 'ai';
-    box.append(el('span', 'badge' + (ai ? ' badge-ai' : ''), ai ? 'AI-written' : q.source === 'iac-bee-qbreader' ? 'IAC Bee' : 'QB Reader'));
-    const cat = `${q.category}${q.subcategory && q.subcategory !== q.category ? ' / ' + q.subcategory.replace(' History', '') : ''}`;
+    box.append(el('span', 'badge' + (ai ? ' badge-ai' : ''), badgeOf(q.source)));
+    const cat = catLine(q);
     box.append(' ' + [cat, ...extra].join(' \u00b7 '));
   }
 
@@ -219,11 +221,11 @@ export function initSim(ctx) {
 
   // ---------- one tossup ----------
 
-  async function playTossup(q, quarter, number, total, id) {
+  async function playTossup(q, quarter, number, total, id, real = false) {
     resetStage();
     const settings = ctx.settings();
     const spec = QUARTERS[quarter - 1] || QUARTERS[3];
-    const short = spec.maxWords ? shorten(q.text, spec.maxWords) : { text: q.text, shortened: false };
+    const short = spec.maxWords && !real ? shorten(q.text, spec.maxWords) : { text: q.text, shortened: false };
     const list = splitWords(short.text);
     const n = list.length;
     meta(q, short.shortened ? ['shortened'] : []);
@@ -314,7 +316,8 @@ export function initSim(ctx) {
 
   /** Fourth-quarter and tiebreak tossups are full pyramids, so they count in stats like the reader's. */
   function recordForStats(out, n) {
-    if (out.quarter < 4) return;
+    // Shortened stand-ins would skew buzz points; real packet tossups count in every quarter.
+    if (out.quarter < 4 && !isPacket(out.q)) return;
     // Beaten to it before buzzing: no evidence either way.
     if (out.yourShown === null && out.winner === BOT && out.botShown < n) return;
     const q = out.q;
@@ -332,10 +335,14 @@ export function initSim(ctx) {
       ts: Date.now(),
       diff: Number.isFinite(q.difficulty) ? q.difficulty : null,
       fx: q.fx || [],
+      fmt: q.source === 'iac-packet-short' ? 'short' : 'tossup',
+      sg: q.subGuess === true,
     };
     out.recordId = rec.id;
     ctx.addRecord(rec);
   }
+
+  const isPacket = (q) => q.source === 'iac-packet' || q.source === 'iac-packet-short';
 
   /** The ruling after a tossup or bonus, with the overrule button; resolves on Continue. */
   async function ruling(out, id, extra = '') {
@@ -861,36 +868,69 @@ export function initSim(ctx) {
     for (const c of offer) lightning.set(c.label, lightningQuestions(c).catch(() => []));
     // The fourth quarter prefers the Bee's full pyramids when that source is on.
     const q4src = s.sources.includes('bee') ? { sources: ['bee'] } : {};
-    return {
+    const qbOnly = { sources: s.sources.filter((x) => x === 'bee' || x === 'qb').length ? s.sources.filter((x) => x === 'bee' || x === 'qb') : ['bee', 'qb'] };
+    const later = (make) => {
+      let p = null;
+      return () => (p = p || make());
+    };
+    const pool = {
       offer,
       lightning,
-      q1: getTossups(QUARTERS[0].tossups),
-      q2: getTossups(QUARTERS[1].tossups),
-      q2b: fetchBonuses({ cat: 'History', level: s.level, n: QUARTERS[1].tossups }).catch(() => []),
-      q4: getTossups(QUARTERS[3].tossups + TIEBREAK_TOSSUPS, q4src),
+      packet: s.teamPass ? iacPacket(s.teamPass, ctx.packetsUsed()).catch(() => null) : Promise.resolve(null),
+      q1: later(() => getTossups(QUARTERS[0].tossups, qbOnly)),
+      q2: later(() => getTossups(QUARTERS[1].tossups, qbOnly)),
+      q2b: later(() => fetchBonuses({ cat: 'History', level: s.level, n: QUARTERS[1].tossups }).catch(() => [])),
+      q4: later(() => getTossups(QUARTERS[3].tossups + TIEBREAK_TOSSUPS, { ...qbOnly, ...q4src })),
     };
+    // Without a packet the stand-ins are needed at once.
+    if (!s.teamPass) for (const k of ['q1', 'q2', 'q2b', 'q4']) pool[k]();
+    return pool;
   }
 
   async function run(id) {
+    status('Fetching questions...');
+    // An IAC packet (team passcode) supplies every quarter it has in full.
+    const pk = await pool.packet;
+    alive(id);
+    const fix = (q) => withFix(q, ctx.fixes());
+    const use = {
+      q1: pk && pk.q1.length >= QUARTERS[0].tossups ? pk.q1.map(fix) : null,
+      q2: pk && pk.q2.length >= QUARTERS[1].tossups && pk.q2.every((x) => x.bonus) ? pk.q2 : null,
+      q3: pk && pk.q3.length >= 2 && pk.q3.every((c) => c.questions.length >= LIGHTNING.questions) ? pk.q3 : null,
+      q4: pk && pk.q4.length >= QUARTERS[3].tossups ? pk.q4.map(fix) : null,
+    };
+    usedPacket = pk && (use.q1 || use.q2 || use.q3 || use.q4) ? pk : null;
+    if (usedPacket) ctx.usePacket(pk.id);
     // Quarters 1 and 2.
     for (const quarter of [1, 2]) {
       m.quarter = quarter;
       const spec = QUARTERS[quarter - 1];
+      const real = Boolean(use[`q${quarter}`]);
       status('Fetching questions...');
-      const qs = await pool[`q${quarter}`];
+      const qs = quarter === 1 ? use.q1 || (await pool.q1()) : use.q2 ? use.q2.map((x) => fix(x.tossup)) : await pool.q2();
       alive(id);
-      const bonuses = quarter === 2 ? await pool.q2b : [];
+      // A packet's bonus belongs to its tossup; stand-in bonuses are taken in turn.
+      const packetBonuses = quarter === 2 && use.q2 ? use.q2.map((x) => x.bonus) : null;
+      const bonuses = quarter === 2 && !use.q2 ? await pool.q2b() : [];
       alive(id);
       if (!qs.length) throw new Error('no questions');
       for (let i = 0; i < Math.min(spec.tossups, qs.length); i++) {
-        const out = await playTossup(qs[i], quarter, i + 1, spec.tossups, id);
+        const out = await playTossup(qs[i], quarter, i + 1, spec.tossups, id, real);
         await ruling(out, id, out.winner === BOT ? `The computer said ${mainAnswer(out.q.answerHtml) || out.q.answerPlain}.` : '');
-        if (spec.bonus && out.winner !== null && bonuses.length) {
-          const b = bonuses.shift();
-          if (b && b.parts[0]) await playBonus({ ...b.parts[0], leadin: b.leadin, category: b.category, subcategory: b.subcategory, source: b.source }, out.winner, id);
+        if (spec.bonus && out.winner !== null) {
+          if (packetBonuses) {
+            if (packetBonuses[i]) await playBonus(packetBonuses[i], out.winner, id);
+          } else if (bonuses.length) {
+            const b = bonuses.shift();
+            if (b && b.parts[0]) await playBonus({ ...b.parts[0], leadin: b.leadin, category: b.category, subcategory: b.subcategory, source: b.source }, out.winner, id);
+          }
         }
       }
       await quarterBreak(quarter, id);
+    }
+    if (use.q3) {
+      pool.offer = use.q3.slice(0, 3).map((c) => ({ label: c.label, cat: 'History', sub: null }));
+      pool.lightning = new Map(use.q3.map((c) => [c.label, Promise.resolve(c.questions)]));
     }
     // Quarter 3.
     m.quarter = 3;
@@ -899,17 +939,18 @@ export function initSim(ctx) {
     // Quarter 4.
     m.quarter = 4;
     status('Fetching questions...');
-    const q4 = await pool.q4;
+    // A packet's extra questions are its tiebreakers; stand-ins fill in after them.
+    const q4 = use.q4 ? [...use.q4, ...pk.extra.map(fix), ...(pk.extra.length >= 2 ? [] : (await pool.q4()).slice(QUARTERS[3].tossups))] : await pool.q4();
     alive(id);
     for (let i = 0; i < Math.min(QUARTERS[3].tossups, q4.length); i++) {
-      const out = await playTossup(q4[i], 4, i + 1, QUARTERS[3].tossups, id);
+      const out = await playTossup(q4[i], 4, i + 1, QUARTERS[3].tossups, id, Boolean(use.q4));
       await ruling(out, id, out.winner === BOT ? `The computer buzzed at ${pct(out.botShown / splitWords(out.text).length)}.` : '');
     }
     if (afterFourth(m) === 'tiebreak') {
       await quarterBreak(4, id);
       const spare = q4.slice(QUARTERS[3].tossups);
       for (let i = 0; i < spare.length && !m.done; i++) {
-        const out = await playTossup(spare[i], 5, i + 1, spare.length, id);
+        const out = await playTossup(spare[i], 5, i + 1, spare.length, id, isPacket(spare[i]));
         await ruling(out, id);
         if (out.winner !== null) m.done = true;
       }
@@ -935,7 +976,8 @@ export function initSim(ctx) {
     }
     const yours = items.filter((it) => it.kind === 'tossup');
     const got = yours.filter((it) => it.winner === YOU).length;
-    $('se-sub').textContent = `You took ${got} of ${yours.length} tossups. The computer was set to buzz right at about ${pct(profile.mu)}.`;
+    const from = usedPacket ? ` Questions: IAC packet ${usedPacket.label}, with QB Reader for any quarter it could not fill.` : ' Questions: QB Reader.';
+    $('se-sub').textContent = `You took ${got} of ${yours.length} tossups. The computer was set to buzz right at about ${pct(profile.mu)}.${from}`;
     $('se-title').focus({ preventScroll: true });
     announce($('se-title').textContent);
     ctx.refreshHome();

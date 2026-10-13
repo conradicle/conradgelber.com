@@ -12,6 +12,8 @@ export const KEYS = {
   queue: 'historybowl:queue',
   fixes: 'historybowl:fixes',
   deckFixes: 'historybowl:deck-fixes',
+  team: 'historybowl:team',
+  packetsUsed: 'historybowl:packets-used',
 };
 /** The tags a player can correct on a question. */
 export const FIX_FIELDS = ['cat', 'sub', 'era', 'region'];
@@ -64,6 +66,8 @@ export function cleanRecord(r) {
     diff: isNum(r.diff) ? r.diff : null,
     // tossup (a full pyramid), short (a real first-quarter tossup) or lightning.
     fmt: ['short', 'lightning'].includes(r.fmt) ? r.fmt : 'tossup',
+    // The subcategory is a guess (IAC packets carry none), until corrected.
+    sg: r.sg === true,
     // Which tags the player corrected by hand.
     fx: Array.isArray(r.fx) ? r.fx.filter((k) => FIX_FIELDS.includes(k)) : [],
   };

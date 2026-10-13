@@ -59,7 +59,8 @@ const byScore = (a, b) => a.score - b.score || b.n - a.n || String(a.key).locale
 export function weakestAreas(all, { count = 3, min = MIN_IN_AREA } = {}) {
   // Tossups only: a lightning answer carries no buzz point.
   const records = all.filter((r) => r.fmt !== 'lightning');
-  const subs = group(records, (r) => (r.sub && r.sub !== 'Unknown' ? r.sub : null))
+  // A guessed subcategory (IAC packets) counts only once the player has corrected it.
+  const subs = group(records, (r) => (r.sub && r.sub !== 'Unknown' && (!r.sg || (r.fx || []).includes('sub')) ? r.sub : null))
     .filter((g) => g.n >= min)
     .sort(byScore)
     .map((g) => ({ kind: 'sub', key: g.key, label: g.key, category: g.sample.cat, n: g.n, score: g.score, accuracy: g.accuracy, avgBuzz: g.avgBuzz, estimated: false }));

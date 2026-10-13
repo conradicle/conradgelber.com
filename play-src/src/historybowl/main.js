@@ -14,8 +14,8 @@ import {
 } from './store.js';
 import { weakestAreas, inAreas, MIN_IN_AREA, BEE_SOURCE } from './areas.js';
 import { RATINGS, rate, preview, dueToday, dueNow, interleave } from './srs.js';
-import { fetchTossups, sendReport } from './api.js';
-import { $, show, announce, pct, el, plural, uid, renderAnswerline, judge as judgeAnswer, isTyping } from './ui.js';
+import { fetchTossups, sendReport, iacCheck } from './api.js';
+import { $, show, announce, pct, el, plural, uid, renderAnswerline, judge as judgeAnswer, isTyping, badgeOf, catLine } from './ui.js';
 import { initSim } from './sim.js';
 import { initDeck, loadDeckFixes, applyDeckFixes, STARTER_URL } from './deck.js';
 
@@ -31,7 +31,7 @@ const PICK_CATS = ['History', 'Geography', 'Fine Arts', 'Literature', 'Current E
 const BATCH = 8;
 const LOW_WATER = 3;
 
-let settings = loadSettings(storage);
+let settings = { ...loadSettings(storage), teamPass: readJSON(storage, KEYS.team, '') || '' };
 let records = loadRecords(storage);
 let cards = loadCards(storage);
 let seen = loadSeen(storage);
@@ -146,9 +146,58 @@ function buildSettings() {
   $('answer-secs').value = settings.answerSecs;
   $('buzz-secs').value = settings.buzzSecs;
   showSliderValues();
+  showTeam();
+  $('team-form').addEventListener('submit', unlockTeam);
   form.addEventListener('input', onSettingsChange);
   form.addEventListener('change', onSettingsChange);
   form.addEventListener('submit', (e) => e.preventDefault());
+}
+
+function showTeam() {
+  const on = Boolean(settings.teamPass);
+  const box = form$('src', 'iac');
+  box.disabled = !on;
+  box.checked = on && settings.sources.includes('iac');
+  $('team-forget').hidden = !on;
+  if (on && !$('team-status').textContent) $('team-status').textContent = 'IAC packets unlocked on this device.';
+}
+const form$ = (name, value) => $('settings-form').querySelector(`input[name=${name}][value=${value}]`);
+
+async function unlockTeam(e) {
+  e.preventDefault();
+  const pass = $('team-pass').value.trim();
+  const status = $('team-status');
+  if (!pass) return;
+  status.textContent = 'Checking...';
+  try {
+    const r = await iacCheck(pass);
+    settings = { ...settings, teamPass: pass, sources: settings.sources.includes('iac') ? settings.sources : [...settings.sources, 'iac'] };
+    writeJSON(storage, KEYS.team, pass);
+    const { teamPass, ...toSave } = settings;
+    saveSettings(storage, toSave);
+    $('team-pass').value = '';
+    status.textContent = `Unlocked: ${plural(r.packets, 'packet')}${r.packets ? `, ${r.complete} complete` : ', none uploaded yet'}. Matches use them first.`;
+    queue = [];
+    writeJSON(storage, KEYS.queue, []);
+  } catch (err) {
+    status.textContent = err.status === 401 ? 'That passcode is not right.' : err.status === 429 ? 'Too many tries. Wait a minute.' : err.status === 503 ? 'IAC packets are not set up on the server yet.' : 'Could not check the passcode. Try again.';
+  }
+  showTeam();
+}
+
+function forgetTeam() {
+  const left = settings.sources.filter((s) => s !== 'iac');
+  settings = { ...settings, teamPass: '', sources: left.length ? left : ['bee', 'qb'] };
+  try {
+    storage.removeItem(KEYS.team);
+  } catch (e) {
+    // nothing to forget
+  }
+  const { teamPass, ...toSave } = settings;
+  saveSettings(storage, toSave);
+  $('team-status').textContent = 'Forgotten on this device.';
+  queue = [];
+  showTeam();
 }
 
 function showSliderValues() {
@@ -181,7 +230,8 @@ function onSettingsChange() {
   };
   const filtersChanged = ['sources', 'cats', 'subs', 'level'].some((k) => JSON.stringify(next[k]) !== JSON.stringify(settings[k]));
   settings = next;
-  saveSettings(storage, settings);
+  const { teamPass, ...toSave } = settings;
+  saveSettings(storage, toSave);
   if (filtersChanged) {
     // Questions already fetched were picked under the old filters.
     queue = [];
@@ -312,8 +362,8 @@ async function startTossup() {
 function renderMeta(q) {
   const meta = $('q-meta');
   meta.textContent = '';
-  const badge = el('span', 'badge' + (q.source === 'ai' ? ' badge-ai' : ''), q.source === 'ai' ? 'AI-written' : q.source === 'iac-bee-qbreader' ? 'IAC Bee' : 'QB Reader');
-  meta.append(badge, ` ${q.category}${q.subcategory && q.subcategory !== q.category ? ' / ' + q.subcategory.replace(' History', '') : ''}`);
+  const badge = el('span', 'badge' + (q.source === 'ai' ? ' badge-ai' : ''), badgeOf(q.source));
+  meta.append(badge, ` ${catLine(q)}`);
 }
 
 function paintWords(n) {
@@ -444,6 +494,8 @@ function finish({ ok, buzz, reason }) {
     ts: Date.now(),
     diff: Number.isFinite(q.difficulty) ? q.difficulty : null,
     fx: q.fx || [],
+    fmt: q.source === 'iac-packet-short' ? 'short' : 'tossup',
+    sg: q.subGuess === true,
   };
   cur.recordId = rec.id;
   records.push(rec);
@@ -1090,12 +1142,23 @@ function init() {
     },
     saveSetting(key, value) {
       settings = { ...settings, [key]: value };
-      saveSettings(storage, settings);
+      const { teamPass, ...toSave } = settings;
+      saveSettings(storage, toSave);
+    },
+    packetsUsed: () => {
+      const v = readJSON(storage, KEYS.packetsUsed, []);
+      return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : [];
+    },
+    usePacket(id) {
+      const v = readJSON(storage, KEYS.packetsUsed, []);
+      const list = (Array.isArray(v) ? v : []).filter((x) => x !== id).concat(id).slice(-60);
+      writeJSON(storage, KEYS.packetsUsed, list);
     },
     refreshHome,
     home: leaveReader,
   });
   $('go-sim').addEventListener('click', () => sim.open());
+  $('team-forget').addEventListener('click', forgetTeam);
   const deckPage = initDeck({
     storage,
     cards: () => cards,

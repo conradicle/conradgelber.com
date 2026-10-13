@@ -388,6 +388,11 @@
 .deck-edit textarea,.deck-edit input{display:block;width:100%;padding:.45rem .6rem;border:1px solid var(--ink-soft);border-radius:2px;background:#fff;color:var(--ink);font:inherit;margin:0 0 .5rem}
 .deck-edit textarea:focus-visible,.deck-edit input:focus-visible{outline:2px solid var(--lamp-lit);outline-offset:2px}
 
+/* Team passcode */
+.team-form{margin:1rem 0 0;padding:1rem 0 0;border-top:1px solid var(--rule)}
+.team-form label{display:block;font-weight:500;margin:0 0 .2rem}
+.team-form .btn[hidden]{display:none}
+
 @media (max-width:640px){
   .slider-row{grid-template-columns:1fr 4rem}
   .slider-row label{grid-column:1 / -1}
