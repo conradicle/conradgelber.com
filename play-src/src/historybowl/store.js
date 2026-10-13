@@ -11,6 +11,7 @@ export const KEYS = {
   seen: 'historybowl:seen',
   queue: 'historybowl:queue',
   fixes: 'historybowl:fixes',
+  deckFixes: 'historybowl:deck-fixes',
 };
 /** The tags a player can correct on a question. */
 export const FIX_FIELDS = ['cat', 'sub', 'era', 'region'];
@@ -61,6 +62,8 @@ export function cleanRecord(r) {
     ts: r.ts,
     // QB Reader difficulty (0 for the unrated Bee sets), when known.
     diff: isNum(r.diff) ? r.diff : null,
+    // tossup (a full pyramid), short (a real first-quarter tossup) or lightning.
+    fmt: ['short', 'lightning'].includes(r.fmt) ? r.fmt : 'tossup',
     // Which tags the player corrected by hand.
     fx: Array.isArray(r.fx) ? r.fx.filter((k) => FIX_FIELDS.includes(k)) : [],
   };
@@ -168,6 +171,8 @@ export const DEFAULT_SETTINGS = {
   wpm: 230,
   answerSecs: 8,
   buzzSecs: 5,
+  // Lightning bouncebacks: after the 60 seconds (IAC in person) or one at a time (IAC online).
+  bounceRule: 'in-person',
 };
 export const SPEED_RANGE = [120, 450];
 
@@ -182,6 +187,7 @@ export function loadSettings(storage) {
     if (isNum(v.wpm)) s.wpm = Math.min(SPEED_RANGE[1], Math.max(SPEED_RANGE[0], Math.round(v.wpm)));
     if (isNum(v.answerSecs)) s.answerSecs = Math.min(30, Math.max(3, Math.round(v.answerSecs)));
     if (isNum(v.buzzSecs)) s.buzzSecs = Math.min(15, Math.max(2, Math.round(v.buzzSecs)));
+    if (['in-person', 'online'].includes(v.bounceRule)) s.bounceRule = v.bounceRule;
   }
   return s;
 }
@@ -198,6 +204,7 @@ export function exportData(storage, now = Date.now()) {
     records: loadRecords(storage),
     cards: loadCards(storage),
     fixes: loadFixes(storage),
+    deckFixes: readJSON(storage, KEYS.deckFixes, {}),
     settings: loadSettings(storage),
   };
 }
@@ -245,7 +252,14 @@ export function importData(storage, data) {
   }
   for (let i = 0; i < records.length; i++) if (fixes[records[i].qid]) records[i] = withFix(records[i], fixes);
   for (let i = 0; i < cards.length; i++) if (cards[i].qid && fixes[cards[i].qid]) cards[i] = withFix(cards[i], fixes);
-  const saved = saveRecords(storage, records) && saveCards(storage, cards) && writeJSON(storage, KEYS.fixes, fixes);
+  // Starter-deck fixes: this device's win for the same card.
+  const deckFixes = readJSON(storage, KEYS.deckFixes, {});
+  if (data.deckFixes && typeof data.deckFixes === 'object' && !Array.isArray(data.deckFixes)) {
+    for (const [id, f] of Object.entries(data.deckFixes)) {
+      if (typeof id === 'string' && f && typeof f === 'object' && !deckFixes[id]) deckFixes[id] = f;
+    }
+  }
+  const saved = saveRecords(storage, records) && saveCards(storage, cards) && writeJSON(storage, KEYS.fixes, fixes) && writeJSON(storage, KEYS.deckFixes, deckFixes);
   if (!saved) return { ok: false, error: 'This browser would not save the data (storage is full or blocked).' };
   return { ok: true, records: addedR, cards: addedC, fixes: addedF };
 }
