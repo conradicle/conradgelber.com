@@ -56,7 +56,9 @@ const byScore = (a, b) => a.score - b.score || b.n - a.n || String(a.key).locale
  * The weakest areas, at most `count`, each
  * { kind: 'sub'|'era'|'region', key, label, category, n, score, accuracy, avgBuzz, estimated }.
  */
-export function weakestAreas(records, { count = 3, min = MIN_IN_AREA } = {}) {
+export function weakestAreas(all, { count = 3, min = MIN_IN_AREA } = {}) {
+  // Tossups only: a lightning answer carries no buzz point.
+  const records = all.filter((r) => r.fmt !== 'lightning');
   const subs = group(records, (r) => (r.sub && r.sub !== 'Unknown' ? r.sub : null))
     .filter((g) => g.n >= min)
     .sort(byScore)
