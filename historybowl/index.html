@@ -17,8 +17,8 @@
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css?v=8">
 <link rel="stylesheet" href="/play/play.css?v=4">
-<link rel="stylesheet" href="/historybowl/historybowl.css?v=3">
-<script src="/historybowl/historybowl.js?v=3" defer></script>
+<link rel="stylesheet" href="/historybowl/historybowl.css?v=4">
+<script src="/historybowl/historybowl.js?v=4" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -235,6 +235,11 @@
         </div>
         <p class="hint">Lower is earlier, so stronger. A stronger computer also knows more of the questions.</p>
       </fieldset>
+      <fieldset class="strength">
+        <legend>Lightning bouncebacks</legend>
+        <label class="check"><input type="radio" name="bounce-rule" value="in-person"> In person: the other team gets every unanswered question as a list after the 60 seconds</label>
+        <label class="check"><input type="radio" name="bounce-rule" value="online"> Online rules: each missed question bounces at once</label>
+      </fieldset>
       <p class="hint">Questions follow your source and level settings. The first two quarters use the last sentences of longer tossups, marked "shortened". The fourth quarter uses the IAC Bee's full pyramids when that source is on, and counts in your stats.</p>
       <div class="end-actions">
         <button type="button" class="btn btn-lamp" id="sim-start">Start the match</button>
@@ -364,7 +369,23 @@
       </div>
 
       <div class="end-actions next-row">
+        <button type="button" class="btn btn-quiet" id="deck-manage">Check the starter deck</button>
         <button type="button" class="btn btn-quiet" id="review-home">Done</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-deck" hidden aria-labelledby="deck-title">
+      <h1 class="game-title" id="deck-title" tabindex="-1">Starter deck</h1>
+      <p class="game-intro">Every AI-written starter card on one page. Edit or delete
+        any that are wrong. Changes are kept on this device, reach your review if
+        the deck is in it, and travel in exports. "Download my changes" makes a
+        file to send so the deck itself can be fixed.</p>
+      <p class="deck-summary" id="deck-summary"></p>
+      <p class="game-status" id="deck-status" role="status"></p>
+      <ol class="deck-list" id="deck-list"></ol>
+      <div class="end-actions next-row">
+        <button type="button" class="btn btn-quiet" id="deck-download">Download my changes</button>
+        <button type="button" class="btn btn-quiet" id="deck-back">Back to review</button>
       </div>
     </section>
 
@@ -378,6 +399,7 @@
         <label for="stats-source">Source</label>
         <select id="stats-source">
           <option value="regional">Regional level (all but the Bee)</option>
+          <option value="iac-packet-short">IAC packet short tossups (Q1)</option>
           <option value="iac-bee-qbreader">IAC History Bee nationals</option>
           <option value="all">Everything</option>
         </select>

@@ -370,6 +370,24 @@
 .buzz-mark.cpu-mark{background:var(--ink-soft)}
 #s-fast[hidden],#s-pause[hidden],#s-pass[hidden]{display:none}
 
+/* Lightning overrule on the break screen */
+.review-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .8rem;padding:.5rem .7rem;border-top:1px solid var(--card-rule)}
+.review-said{font-size:.9rem;color:var(--ink-soft)}
+
+/* Starter deck page */
+.deck-summary{margin:0 0 .4rem;font-weight:500}
+.deck-list{margin:0;padding:0;list-style:none;display:grid;gap:.5rem;max-width:var(--measure)}
+.deck-row{padding:.6rem .8rem;background:var(--card);border:1px solid var(--card-rule);border-radius:2px}
+.deck-row.deleted{opacity:.6}
+.deck-row.deleted .deck-front,.deck-row.deleted .deck-back{text-decoration:line-through}
+.deck-head{display:flex;gap:.6rem;margin:0 0 .2rem;font-size:.85rem;color:var(--ink-soft)}
+.deck-front{margin:0 0 .2rem;font-family:Spectral,Georgia,serif;font-size:1.08rem;line-height:1.45}
+.deck-back{margin:0 0 .4rem;font-weight:500}
+.deck-actions{display:flex;gap:.5rem}
+.deck-edit label{display:block;font-weight:500;margin:.4rem 0 .2rem}
+.deck-edit textarea,.deck-edit input{display:block;width:100%;padding:.45rem .6rem;border:1px solid var(--ink-soft);border-radius:2px;background:#fff;color:var(--ink);font:inherit;margin:0 0 .5rem}
+.deck-edit textarea:focus-visible,.deck-edit input:focus-visible{outline:2px solid var(--lamp-lit);outline-offset:2px}
+
 @media (max-width:640px){
   .slider-row{grid-template-columns:1fr 4rem}
   .slider-row label{grid-column:1 / -1}
