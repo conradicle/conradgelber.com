@@ -17,8 +17,8 @@
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css?v=8">
 <link rel="stylesheet" href="/play/play.css?v=4">
-<link rel="stylesheet" href="/historybowl/historybowl.css?v=4">
-<script src="/historybowl/historybowl.js?v=4" defer></script>
+<link rel="stylesheet" href="/historybowl/historybowl.css?v=5">
+<script src="/historybowl/historybowl.js?v=5" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -79,6 +79,7 @@
             <legend>Sources</legend>
             <label class="check"><input type="checkbox" name="src" value="bee"> IAC History Bee Nationals (2015 to 2022), via QB Reader</label>
             <label class="check"><input type="checkbox" name="src" value="qb"> High school quizbowl sets on QB Reader</label>
+            <label class="check"><input type="checkbox" name="src" value="iac" disabled> IAC regional packets (team passcode below)</label>
           </fieldset>
           <fieldset>
             <legend>Categories</legend>
@@ -110,6 +111,16 @@
             <output id="buzz-out" for="buzz-secs"></output>
           </div>
           <p class="game-status" id="settings-status" role="status"></p>
+        </form>
+        <form class="team-form" id="team-form" autocomplete="off">
+          <label for="team-pass">Team passcode for IAC packets</label>
+          <p class="hint" id="team-help">Old National History Bowl regional packets, for this team only. The passcode is kept on this device.</p>
+          <div class="answer-row">
+            <input class="answer-input" id="team-pass" type="password" maxlength="100" aria-describedby="team-help team-status" autocomplete="off">
+            <button type="submit" class="btn btn-lamp">Unlock</button>
+            <button type="button" class="btn btn-quiet" id="team-forget" hidden>Forget</button>
+          </div>
+          <p class="game-status" id="team-status" role="status"></p>
         </form>
       </details>
     </section>
