@@ -8,6 +8,7 @@ import {
 } from '../src/historybowl/match.js';
 import { fromQbBonus } from '../src/historybowl/question.js';
 import { words } from '../src/historybowl/text.js';
+import { readFileSync } from 'node:fs';
 
 function seeded(seed = 1) {
   let s = seed;
@@ -125,4 +126,52 @@ test('scoring a match, an overrule, and a tiebreak', () => {
   award(m, 0, 10);
   assert.equal(afterFourth(m), 'done');
   assert.equal(winner(m), 0);
+});
+
+// Lightning odds, through the same planners the simulator calls.
+import { planBotLightning, planBotBounces } from '../src/historybowl/match.js';
+
+function histogram(runs, draw) {
+  const h = Array(9).fill(0);
+  for (let i = 0; i < runs; i++) h[draw()]++;
+  const mean = h.reduce((s, c, k) => s + c * k, 0) / runs;
+  return { h, mean };
+}
+
+test('lightning turns and bounceback lists center on 8 times the per-question odds', () => {
+  const runs = 10000;
+  for (const [name, mu] of Object.entries(BOT_PRESETS)) {
+    const p = botProfile(mu);
+    const rnd = seeded(1000 + name.length);
+    const own = histogram(runs, () => planBotLightning(p, 8, rnd).filter((q) => q.right).length);
+    const bounce = histogram(runs, () => planBotBounces(p, 8, rnd).filter(Boolean).length);
+    // Standard error of the mean is under 0.02 here; 0.08 is four of them.
+    assert.ok(Math.abs(own.mean - 8 * p.lightning) < 0.08, `${name} own turn mean ${own.mean}`);
+    assert.ok(Math.abs(bounce.mean - 8 * p.lightning * 0.6) < 0.08, `${name} bounceback mean ${bounce.mean}`);
+    // A clean sweep of 8 bouncebacks is rare at every level (under 1%).
+    assert.ok(bounce.h[8] / runs < 0.01, `${name} 8 of 8 bouncebacks: ${bounce.h[8]}`);
+  }
+  // At Hard, the medians: own turn 6, bouncebacks 3 or 4.
+  const hard = botProfile(BOT_PRESETS.hard);
+  const rnd7 = seeded(7);
+  const b = histogram(runs, () => planBotBounces(hard, 8, rnd7).filter(Boolean).length);
+  assert.ok(b.mean > 3.5 && b.mean < 3.7, `hard bounceback mean ${b.mean}`);
+});
+
+test('a slow computer runs out of time and the rest go unreached', () => {
+  const slow = { ...botProfile(0.95), pace: 11 };
+  const plan = planBotLightning(slow, 8, seeded(3));
+  const reached = plan.filter((q) => q.reached).length;
+  assert.ok(reached < 8 && reached >= 4, `reached ${reached}`);
+  assert.equal(plan.length, 8);
+  // Once one is unreached, all later ones are, and none of them count as right.
+  const first = plan.findIndex((q) => !q.reached);
+  assert.ok(plan.slice(first).every((q) => !q.reached && !q.right));
+  assert.ok(plan.filter((q) => q.reached).reduce((s, q) => s + q.seconds, 0) <= 60);
+});
+
+test('the simulator draws lightning outcomes only through the tested planners', () => {
+  const src = readFileSync(new URL('../src/historybowl/sim.js', import.meta.url), 'utf8');
+  assert.ok(src.includes('planBotLightning(') && src.includes('planBotBounces('));
+  assert.ok(!/\bbotLightning\(|\bbotBounce\(/.test(src), 'sim.js calls botLightning or botBounce directly');
 });
