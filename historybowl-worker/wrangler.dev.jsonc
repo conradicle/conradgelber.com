@@ -10,7 +10,9 @@
     "bindings": [{ "name": "LIMITER", "class_name": "Limiter" }]
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Limiter"] }],
-  "kv_namespaces": [{ "binding": "REPORTS", "id": "local-reports" }],
+  "kv_namespaces": [{ "binding": "REPORTS", "id": "local-reports" },
+    // IAC packets (team only; see src/iac.js). Uploaded from a git-ignored folder.
+    { "binding": "IAC", "id": "local-iac" }],
   "workers_dev": false,
   "observability": { "enabled": false }
 }

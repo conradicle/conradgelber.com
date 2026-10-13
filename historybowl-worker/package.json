@@ -8,7 +8,8 @@
     "deploy": "wrangler deploy",
     "test": "node --test \"test/*.test.mjs\"",
     "api-check": "node test/api-check.mjs",
-    "reports": "node scripts/reports.mjs"
+    "reports": "node scripts/reports.mjs",
+    "upload-iac": "node scripts/upload-iac.mjs"
   },
   "devDependencies": {
     "wrangler": "4.137.0",
