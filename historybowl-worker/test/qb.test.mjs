@@ -64,3 +64,12 @@ test('bonus queries: one known category, a subcategory that belongs to it', () =
   assert.equal(b('cat=Bogus'), null);
   assert.equal(b('cat=History&n=50'), null);
 });
+
+test('the team passcode check', async () => {
+  const { passcodeMatches } = await import('../src/passcode.js');
+  assert.equal(await passcodeMatches('rho kappa', 'rho kappa'), true);
+  assert.equal(await passcodeMatches(' rho kappa ', 'rho kappa'), true);
+  assert.equal(await passcodeMatches('rho', 'rho kappa'), false);
+  assert.equal(await passcodeMatches('', 'rho kappa'), false);
+  assert.equal(await passcodeMatches('x', ''), false);
+});

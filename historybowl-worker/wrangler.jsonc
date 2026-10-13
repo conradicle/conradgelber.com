@@ -16,7 +16,9 @@
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Limiter"] }],
   // Error reports from the page's "Report an error" button: question id and note only.
-  "kv_namespaces": [{ "binding": "REPORTS", "id": "339321cfca604ac883e03d573b11c321" }],
+  "kv_namespaces": [{ "binding": "REPORTS", "id": "339321cfca604ac883e03d573b11c321" },
+    // IAC packets (team only; see src/iac.js). Uploaded from a git-ignored folder.
+    { "binding": "IAC", "id": "ab6f7a6f51474b5ab754717cfce0ba52" }],
   // Only reachable at conradgelber.com/historybowl/api: no separate workers.dev address.
   "workers_dev": false,
   // No Workers Logs: nothing about players is kept beyond Cloudflare defaults.
