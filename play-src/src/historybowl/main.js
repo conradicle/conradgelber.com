@@ -17,6 +17,7 @@ import { RATINGS, rate, preview, dueToday, dueNow, interleave } from './srs.js';
 import { fetchTossups, sendReport } from './api.js';
 import { $, show, announce, pct, el, plural, uid, renderAnswerline, judge as judgeAnswer, isTyping } from './ui.js';
 import { initSim } from './sim.js';
+import { initDeck, loadDeckFixes, applyDeckFixes, STARTER_URL } from './deck.js';
 
 let storage = null;
 try {
@@ -47,10 +48,11 @@ let session = { heard: 0, right: 0, buzzes: [] };
 // ---------- home ----------
 
 function refreshHome() {
-  const ok = records.filter((r) => r.ok);
+  const tossups = records.filter((r) => r.fmt !== 'lightning');
+  const ok = tossups.filter((r) => r.ok);
   const buzzes = ok.map((r) => r.buzz).filter((b) => b !== null);
-  $('home-heard').textContent = String(records.length);
-  $('home-acc').textContent = records.length ? pct(ok.length / records.length) : '-';
+  $('home-heard').textContent = String(tossups.length);
+  $('home-acc').textContent = tossups.length ? pct(ok.length / tossups.length) : '-';
   $('home-buzz').textContent = buzzes.length ? pct(buzzes.reduce((a, b) => a + b, 0) / buzzes.length) : '-';
   const due = dueToday(cards).length;
   $('home-due').textContent = String(due);
@@ -722,17 +724,57 @@ const DIMENSIONS = [
   ['region', 'By region (estimated)', (k) => k],
 ];
 
+// Each source and format is shown apart: the Bee runs harder than a
+// regional set, and short tossups and lightning answers are different skills.
+const PACKET_SHORT = 'iac-packet-short';
 const SOURCE_FILTERS = {
-  regional: (r) => r.src !== BEE_SOURCE,
+  regional: (r) => r.src !== BEE_SOURCE && r.fmt === 'tossup',
+  [PACKET_SHORT]: (r) => r.fmt === 'short',
   [BEE_SOURCE]: (r) => r.src === BEE_SOURCE,
   all: () => true,
 };
 
-function summary(list) {
+function summary(list, noun = 'tossup') {
   const ok = list.filter((r) => r.ok);
   const buzzes = ok.map((r) => r.buzz).filter((b) => b !== null);
   if (!list.length) return 'none yet';
-  return `${plural(list.length, 'tossup')}, ${pct(ok.length / list.length)} right, average correct buzz at ${buzzes.length ? pct(buzzes.reduce((a, b) => a + b, 0) / buzzes.length) : '-'}`;
+  const buzz = buzzes.length ? `, average correct buzz at ${pct(buzzes.reduce((a, b) => a + b, 0) / buzzes.length)}` : '';
+  return `${plural(list.length, noun)}, ${pct(ok.length / list.length)} right${buzz}`;
+}
+
+function statsTable(title, rows, label, withBuzz = true) {
+  const block = el('section', 'stats-block');
+  block.append(el('h2', null, title));
+  const table = el('table', 'rounds stats-table');
+  const head = el('tr');
+  const cols = [[title.replace('By ', '').replace(/^./, (c) => c.toUpperCase()), ''], ['Heard', 'num'], ['Right', 'num'], ['', 'bar-cell']];
+  if (withBuzz) cols.push(['Buzz', 'num']);
+  for (const [t, cls] of cols) {
+    const th = el('th', cls, t);
+    th.scope = 'col';
+    head.append(th);
+  }
+  head.children[3].append(el('span', 'visually-hidden', 'Accuracy bar'));
+  const thead = el('thead');
+  thead.append(head);
+  const tbody = el('tbody');
+  for (const r of rows) {
+    const tr = el('tr');
+    tr.append(el('td', 'name', label(r.key)), el('td', 'num', String(r.heard)), el('td', 'num', pct(r.accuracy)));
+    const barCell = el('td', 'bar-cell');
+    const bar = el('span', 'acc-bar');
+    bar.setAttribute('aria-hidden', 'true');
+    const fill = el('span');
+    fill.style.width = `${Math.round(r.accuracy * 100)}%`;
+    bar.append(fill);
+    barCell.append(bar);
+    tr.append(barCell);
+    if (withBuzz) tr.append(el('td', 'num', pct(r.avgBuzz)));
+    tbody.append(tr);
+  }
+  table.append(thead, tbody);
+  block.append(table);
+  return block;
 }
 
 function renderStats() {
@@ -741,11 +783,14 @@ function renderStats() {
   box.textContent = '';
   const weakBox = $('stats-weak');
   weakBox.textContent = '';
+  const lightningAll = records.filter((r) => r.fmt === 'lightning');
   if (records.length) {
-    // The Bee nationals run harder than a regional set, so they are kept apart.
     const totals = el('dl', 'stats-split');
-    totals.append(el('dt', null, 'Regional level'), el('dd', null, summary(records.filter(SOURCE_FILTERS.regional))));
-    totals.append(el('dt', null, 'IAC Bee nationals (harder)'), el('dd', null, summary(records.filter(SOURCE_FILTERS[BEE_SOURCE]))));
+    const line = (label, list, noun) => totals.append(el('dt', null, label), el('dd', null, summary(list, noun)));
+    line('Regional level', records.filter(SOURCE_FILTERS.regional));
+    if (records.some(SOURCE_FILTERS[PACKET_SHORT])) line('IAC packet short tossups (Q1)', records.filter(SOURCE_FILTERS[PACKET_SHORT]));
+    line('IAC Bee nationals (harder)', records.filter(SOURCE_FILTERS[BEE_SOURCE]));
+    if (lightningAll.length) line('Lightning round', lightningAll, 'question');
     weakBox.append(totals);
     const h = el('h2', 'weak-title', 'Your weakest areas');
     const list = el('ol', 'weak-list');
@@ -753,43 +798,18 @@ function renderStats() {
     weakBox.append(h, list, note);
     renderWeak(list, note, null);
   }
-  const mine = records.filter(filter);
-  if (!mine.length) {
+  const mine = records.filter((r) => r.fmt !== 'lightning' && filter(r));
+  if (!mine.length && !lightningAll.length) {
     box.append(el('p', 'game-status', records.length ? 'No tossups from this source yet.' : 'Nothing yet. Read a few tossups first.'));
     return;
   }
   for (const [field, title, label] of DIMENSIONS) {
-    const rows = aggregate(records, field, filter);
-    const block = el('section', 'stats-block');
-    block.append(el('h2', null, title));
-    const table = el('table', 'rounds stats-table');
-    const head = el('tr');
-    for (const [t, cls] of [['', ''], ['Heard', 'num'], ['Right', 'num'], ['', 'bar-cell'], ['Buzz', 'num']]) {
-      const th = el('th', cls, t);
-      th.scope = 'col';
-      head.append(th);
-    }
-    if (head.firstChild) head.firstChild.textContent = title.replace('By ', '').replace(/^./, (c) => c.toUpperCase());
-    head.children[3].append(el('span', 'visually-hidden', 'Accuracy bar'));
-    const thead = el('thead');
-    thead.append(head);
-    const tbody = el('tbody');
-    for (const r of rows) {
-      const tr = el('tr');
-      tr.append(el('td', 'name', label(r.key)), el('td', 'num', String(r.heard)), el('td', 'num', pct(r.accuracy)));
-      const barCell = el('td', 'bar-cell');
-      const bar = el('span', 'acc-bar');
-      bar.setAttribute('aria-hidden', 'true');
-      const fill = el('span');
-      fill.style.width = `${Math.round(r.accuracy * 100)}%`;
-      bar.append(fill);
-      barCell.append(bar);
-      tr.append(barCell, el('td', 'num', pct(r.avgBuzz)));
-      tbody.append(tr);
-    }
-    table.append(thead, tbody);
-    block.append(table);
-    box.append(block);
+    const rows = aggregate(records, field, (r) => r.fmt !== 'lightning' && filter(r));
+    if (rows.length) box.append(statsTable(title, rows, label));
+  }
+  if (lightningAll.length) {
+    // Lightning answers have no buzz point; they are shown by category from every source.
+    box.append(statsTable('Lightning round, by category', aggregate(lightningAll, 'cat'), (k) => k, false));
   }
 }
 
@@ -844,7 +864,6 @@ function doImport(e) {
 
 // ---------- flashcard review ----------
 
-const STARTER_URL = '/historybowl/data/decks/starter.json?v=1';
 let review = null;
 
 function startReview() {
@@ -996,7 +1015,8 @@ async function addStarterDeck() {
     const have = new Set(cards.map((c) => c.id));
     const now = Date.now();
     let added = 0;
-    for (const c of deck.cards || []) {
+    // Cards edited or deleted on the deck page stay that way.
+    for (const c of applyDeckFixes(deck.cards || [], loadDeckFixes(storage))) {
       if (have.has(c.id)) continue;
       cards.push({ id: c.id, front: c.front, back: c.back, qid: null, src: 'ai', cat: c.cat, sub: c.sub, era: c.era, created: now, fsrs: null, deck: deck.id, fx: [] });
       added++;
@@ -1061,10 +1081,31 @@ function init() {
       return saveCards(storage, cards);
     },
     hasCard: (qid, front) => cards.some((c) => c.qid === qid && c.front === front),
+    hasCardFor: (qid) => cards.some((c) => c.qid === qid),
+    removeCardsFor(qid) {
+      const before = cards.length;
+      cards = cards.filter((c) => c.qid !== qid);
+      saveCards(storage, cards);
+      return before - cards.length;
+    },
+    saveSetting(key, value) {
+      settings = { ...settings, [key]: value };
+      saveSettings(storage, settings);
+    },
     refreshHome,
     home: leaveReader,
   });
   $('go-sim').addEventListener('click', () => sim.open());
+  const deckPage = initDeck({
+    storage,
+    cards: () => cards,
+    setCards(list) {
+      cards = list;
+      saveCards(storage, cards);
+    },
+    back: () => startReview(),
+  });
+  $('deck-manage').addEventListener('click', () => deckPage.open());
   $('go-read').addEventListener('click', () => {
     if (focus) clearFocus();
     startSession();
