@@ -26,6 +26,9 @@
 <link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css?v=8">
+<link rel="preload" href="/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/cable.css?v=2">
+<script src="/cable.js?v=1"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -54,7 +57,38 @@
 <a class="skip" href="#main">Skip to main content</a>
 <div class="wrap">
 
-  <header class="mast">
+  <section class="cable" aria-label="Welcome cable">
+    <div class="cable-sheet" id="cable-sheet">
+      <p class="cable-mark">UNCLASSIFIED</p>
+      <p class="cable-hl"><span>R</span><span><time id="cable-dtg" datetime="2026-10-13T12:00Z">131200Z OCT 26</time></span></p>
+      <p class="cable-hl"><span>FM</span><span>CONRAD GELBER, MIAMI, FLORIDA</span></p>
+      <p class="cable-hl"><span>TO</span><span>VISITOR, WHEREVER YOU ARE</span></p>
+      <p class="cable-hl cable-hl-last"><span>INFO</span><span>FRIENDS, FAMILY, ADMISSIONS OFFICERS</span></p>
+      <p class="cable-subject">SUBJECT: ARRIVAL OF VISITOR; INTRODUCTION OF THE AUTHOR</p>
+      <p>TAGS: PREL, PGOV, OEXC, KGAME</p>
+      <p>1. (U) SUMMARY: Welcome. You have reached the personal site of
+        Conrad Gelber, a student in Miami who runs a nonprofit that
+        watches county government and plans to serve as a U.S. diplomat.
+        Action requested: look around. END SUMMARY.</p>
+      <p>2. (U) The author co-founded Miami-Dade Commission Watch, which
+        tracks how the Miami-Dade Board of County Commissioners votes.
+        <button type="button" class="redact" aria-expanded="false" aria-label="Redacted line. Activate to reveal." disabled><span class="redact-text">Has read more county ordinances than most commissioners.</span></button></p>
+      <p>3. (U) Travel record: Iceland, Japan, Costa Rica, the United
+        Kingdom, Ecuador, Italy.
+        <button type="button" class="redact" aria-expanded="false" aria-label="Redacted line. Activate to reveal." disabled><span class="redact-text">Being abroad is second nature.</span></button></p>
+      <p>4. (U) Off-duty activities include varsity baseball, backcountry
+        fishing, and trap shooting.
+        <button type="button" class="redact" aria-expanded="false" aria-label="Redacted line. Activate to reveal." disabled><span class="redact-text">Undefeated at lunchtime Cambio. This claim has not been independently verified.</span></button></p>
+      <p>5. (U) COMMENT: Visitor is encouraged to try the games in the
+        Games tab. Post assesses they are better than they need to be.
+        END COMMENT.</p>
+      <p class="cable-sig">GELBER</p>
+      <p class="cable-note">Personal website. Not affiliated with the U.S. Department of State.</p>
+      <p class="cable-go"><a href="#site">Continue to site</a></p>
+    </div>
+  </section>
+
+  <header class="mast" id="site">
     <div class="mast-grid">
       <div class="mast-text">
         <h1><a href="/">Conrad<br>Gelber</a></h1>
