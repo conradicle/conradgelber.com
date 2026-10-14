@@ -484,7 +484,11 @@ Tests: `historybowl.test.mjs` in `npm --prefix play-src test` (answer
 checking on real answerline shapes, era and region, the reading schedule,
 blocked and corrupt storage, export then import), and
 `npm --prefix historybowl-worker test` (query checks, the category mix,
-answerline cleaning).
+answerline cleaning). Against a running Worker,
+`node historybowl-worker/test/api-check.mjs http://localhost:8801` (or
+`https://conradgelber.com`) checks tossups, bonuses, answer checks and the
+400, 403 and 404 cases over real HTTP. It is read-only: it never posts a
+report or touches the team-only packet routes.
 
 Storage, per browser: `historybowl:records` (one entry per tossup heard:
 question id, source, category, era, region, right or wrong, buzz point,
