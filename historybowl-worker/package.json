@@ -12,7 +12,7 @@
     "upload-iac": "node scripts/upload-iac.mjs"
   },
   "devDependencies": {
-    "wrangler": "4.137.0",
+    "wrangler": "4.150.0",
     "ws": "8.21.3"
   }
 }
