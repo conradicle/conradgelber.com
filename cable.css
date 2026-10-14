@@ -29,19 +29,6 @@
   --cable-focus:#14675E;
   padding:clamp(1.25rem,4vw,2.5rem) 0 0;
 }
-@media (prefers-color-scheme:dark){
-  .cable{
-    --cable-paper:#1D2024;
-    --cable-ink:#E8E3D6;
-    --cable-soft:#A9AEB6;
-    --cable-rule:#3D424A;
-    --cable-bar:#000;
-    --cable-bar-edge:#8E96A2;
-    --cable-shown:#3A3527;
-    --cable-focus:#7FD1C4;
-  }
-}
-
 .cable-sheet{
   max-width:74ch;
   padding:clamp(1rem,4vw,2.25rem);
@@ -137,6 +124,3 @@
 .cable-anim .redact:not(.cable-on){opacity:0}
 ::highlight(cable-untyped){color:transparent}
 ::highlight(cable-caret){color:transparent;background-color:#1E2328}
-@media (prefers-color-scheme:dark){
-  ::highlight(cable-caret){background-color:#E8E3D6}
-}
