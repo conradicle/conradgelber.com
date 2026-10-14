@@ -10,7 +10,7 @@
     "ws-check": "node test/ws-check.mjs"
   },
   "devDependencies": {
-    "wrangler": "4.137.0",
+    "wrangler": "4.150.0",
     "ws": "8.21.3"
   }
 }
