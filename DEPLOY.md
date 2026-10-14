@@ -171,6 +171,37 @@ deploys; test that link on the live site. The game loads `/fonts/*.woff2` and
 with `npm run deploy:poker` there. It also loads `/fonts/*.woff2` and
 `/favicon.svg` from this site.
 
+## The front page cable
+
+The front page opens with a mock diplomatic cable (`<section class="cable">`
+in `index.html`), styled by `cable.css` and driven by `cable.js`. Only
+`index.html` loads them, so its head has three lines the other pages lack: the
+IBM Plex Mono preload, `cable.css?v=` and `cable.js?v=`. Bump the `?v=` on
+either file when it changes.
+
+- The whole cable is plain HTML. `cable.js` only writes the date-time group
+  (UTC, `DDHHMMZ MON YY`; the HTML holds a fixed fallback for visitors without
+  JavaScript), enables the redaction buttons, and types the cable out.
+- `cable.js` loads in `<head>` without `defer` on purpose: it has to put
+  `cable-anim` on `<html>` before the first paint, or a first-time visitor
+  sees the full cable flash before it is hidden and typed.
+- Typing happens once per browser (`localStorage` key `cable-seen`) and never
+  with reduced motion, without storage, or in a browser without the CSS Custom
+  Highlight API. It hides untyped characters with a highlight range, so the
+  text is never split or rewritten and screen readers get it whole. Any key,
+  a tap in the cable, focus in the cable, or hiding the tab finishes it, and a
+  15-second timer finishes it regardless. To see it again, clear
+  `cable-seen` in DevTools (Application, Local Storage).
+- Each redacted line is a `<button class="redact">` with `aria-expanded` and an
+  `aria-label`; revealing it removes the label so the button's name becomes
+  the revealed text. The buttons ship `disabled` and `cable.js` enables them.
+- Guardrails for edits: the only marking is `UNCLASSIFIED`, there is no seal or
+  State Department branding, and the "Personal website. Not affiliated with
+  the U.S. Department of State." line stays on the cable.
+- The fonts are `fonts/ibm-plex-mono-latin-400.woff2` and `-500.woff2`,
+  byte-identical to `@fontsource/ibm-plex-mono` 5.3.0. No CSP change was
+  needed.
+
 ## The /play/ game
 
 `play/` is what Pages serves: `index.html`, `play.css`, the bundled

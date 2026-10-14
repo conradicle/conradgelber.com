@@ -1,0 +1,142 @@
+/* The welcome cable at the top of the front page. Loaded only by index.html.
+   Plain HTML first: cable.js fills in the date-time group, types the cable out
+   on a first visit, and wires up the redaction buttons. See DEPLOY.md. */
+@font-face{
+  font-family:"IBM Plex Mono";
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url("/fonts/ibm-plex-mono-latin-400.woff2") format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:"IBM Plex Mono";
+  font-style:normal;
+  font-weight:500;
+  font-display:swap;
+  src:url("/fonts/ibm-plex-mono-latin-500.woff2") format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+.cable{
+  --cable-paper:#FBF8F0;
+  --cable-ink:#1E2328;
+  --cable-soft:#575D66;
+  --cable-rule:#CFC8B6;
+  --cable-bar:#111317;
+  --cable-bar-edge:#111317;
+  --cable-shown:#EDE4C8;
+  --cable-focus:#14675E;
+  padding:clamp(1.25rem,4vw,2.5rem) 0 0;
+}
+@media (prefers-color-scheme:dark){
+  .cable{
+    --cable-paper:#1D2024;
+    --cable-ink:#E8E3D6;
+    --cable-soft:#A9AEB6;
+    --cable-rule:#3D424A;
+    --cable-bar:#000;
+    --cable-bar-edge:#8E96A2;
+    --cable-shown:#3A3527;
+    --cable-focus:#7FD1C4;
+  }
+}
+
+.cable-sheet{
+  max-width:74ch;
+  padding:clamp(1rem,4vw,2.25rem);
+  background:var(--cable-paper);
+  color:var(--cable-ink);
+  border:1px solid var(--cable-rule);
+  box-shadow:0 1px 2px rgba(19,35,60,.08),0 6px 18px rgba(19,35,60,.06);
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:clamp(.78rem,2.6vw,.94rem);
+  line-height:1.55;
+  overflow-wrap:break-word;
+}
+.cable-sheet p{margin:0 0 .95em}
+.cable-sheet p:last-child{margin-bottom:0}
+
+.cable-mark{
+  text-align:center;
+  font-weight:500;
+  letter-spacing:.18em;
+}
+/* Header lines: the routing code in a fixed column, like a teletype form */
+.cable-sheet p.cable-hl{
+  display:grid;
+  grid-template-columns:5.5ch minmax(0,1fr);
+  margin:0;
+}
+.cable-sheet p.cable-hl-last{margin-bottom:.95em}
+.cable-subject{font-weight:500}
+.cable-sig{font-weight:500}
+
+/* Redacted lines. The bar is the hidden text itself, inked over, so each bar
+   is as long as the line it hides. */
+.redact{
+  display:inline;
+  margin:0;
+  padding:2px 0;
+  min-height:24px;
+  font:inherit;
+  color:inherit;
+  text-align:left;
+  background:none;
+  border:0;
+  border-radius:0;
+  cursor:pointer;
+}
+.redact[disabled]{cursor:default}
+.redact-text{
+  color:transparent;
+  background:var(--cable-bar);
+  outline:1px solid var(--cable-bar-edge);
+  -webkit-box-decoration-break:clone;
+  box-decoration-break:clone;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.redact[aria-expanded="true"]{cursor:default}
+.redact[aria-expanded="true"] .redact-text{
+  color:var(--cable-ink);
+  background:var(--cable-shown);
+  outline:0;
+  -webkit-user-select:text;
+  user-select:text;
+}
+.redact:focus-visible{outline:2px solid var(--cable-focus);outline-offset:3px}
+
+.cable-note{
+  padding-top:.95em;
+  border-top:1px dashed var(--cable-rule);
+  color:var(--cable-soft);
+  font-size:.92em;
+}
+.cable-sheet a{color:var(--cable-ink);border-bottom-color:var(--cable-focus)}
+.cable-sheet a:focus-visible{outline:2px solid var(--cable-focus);outline-offset:3px}
+.cable-go a{
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
+  padding:0 1.1rem;
+  border:1px solid var(--cable-ink);
+  border-radius:2px;
+  font-weight:500;
+}
+.cable-go a:hover{color:var(--cable-ink);background:var(--cable-shown)}
+
+/* The front page masthead sits closer under the cable */
+.cable + .mast{padding-top:clamp(2.5rem,7vw,4.5rem)}
+
+/* First visit: cable.js adds .cable-anim to <html> before the page paints,
+   reveals the cable a block at a time, and hides the untyped characters with
+   a CSS highlight. The text never leaves the DOM, so screen readers get all
+   of it at once. */
+.cable-anim .cable-sheet > :not(.cable-on),
+.cable-anim .redact:not(.cable-on){opacity:0}
+::highlight(cable-untyped){color:transparent}
+::highlight(cable-caret){color:transparent;background-color:#1E2328}
+@media (prefers-color-scheme:dark){
+  ::highlight(cable-caret){background-color:#E8E3D6}
+}
