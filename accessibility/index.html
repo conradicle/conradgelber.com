@@ -39,16 +39,36 @@
     <h1 class="page-title">Accessibility</h1>
     <div class="prose">
       <h2>The standard</h2>
+      <p class="role">Last updated October 13, 2026</p>
       <p>This site aims to meet the Web Content Accessibility
         Guidelines (WCAG) 2.2 at level AA. It was last reviewed in
-        September 2026, with automated checks (axe and pa11y) at phone
-        and desktop widths and by hand with a keyboard alone.</p>
+        October 2026, with automated checks (axe) at phone and desktop
+        widths and by hand with a keyboard alone.</p>
       <p>Every page can be used with a keyboard, shows where the
         focus is, and starts with a link that skips to the main
         content. Text meets a contrast ratio of at least 4.5:1, and
         pages reflow to a single column when zoomed to 400% with no
-        sideways scrolling. The two games respect the reduced motion
-        setting on your device.</p>
+        sideways scrolling. Animations, including the ones in the
+        games, follow the reduced motion setting on your device.</p>
+
+      <h2>The welcome cable</h2>
+      <p>The front page opens with a short welcome written like an old
+        diplomatic telegram. It is a joke in the form of a cable, and
+        all of it is ordinary text on the page.</p>
+      <p>To skip it, use the "Skip to main content" link, which is the
+        first thing a keyboard reaches, or the "Continue to site" link
+        at the bottom of the cable.</p>
+      <p>On your first visit the cable types itself out over a few
+        seconds. Pressing any key, tapping the cable, or moving focus
+        into it shows the whole thing at once. If your device is set to
+        reduce motion, or on any later visit, the cable appears in full
+        right away. Screen readers get the full text from the start; it
+        is never read out a letter at a time.</p>
+      <p>The black bars are buttons. Each one is labelled "Redacted
+        line. Activate to reveal." Press Enter or Space, or tap or click
+        it, to show the hidden line. With a mouse, pointing at a bar
+        also reveals it. A revealed line stays revealed. The buttons
+        need JavaScript, so with it turned off the bars stay closed.</p>
 
       <h2>Known limitations</h2>
       <p><a href="/play/">Pin drop</a> is a visual game. You can play
@@ -57,6 +77,12 @@
         result is read out to screen readers. The globe has no labels
         on purpose, though, so the game cannot be played without
         sight.</p>
+      <p><a href="/flight-path/">Flight Path</a> names both cities in
+        text, and every guess is typed into a text box with suggestions
+        you can move through with the arrow keys, so it can be played
+        with a keyboard or a screen reader. The route itself is only
+        drawn on the globe. After you reveal it, the countries on the
+        route are listed below the globe as text.</p>
       <p><a href="/borderline/">Borderline</a> is a map game, but it can be
         played without sight: each map's description lists the country
         names printed on it, the year is a text box as well as a slider,
@@ -79,6 +105,17 @@
         bet size is a slider, so the game works with a keyboard, and
         each move, your turn and the winning hand are announced to
         screen readers.</p>
+      <p><a href="/pool/">Pool</a> is drawn on a canvas. It can be played
+        with a keyboard alone (the keys are listed under the table), and
+        a written summary of the table is available to screen readers.
+        Aiming a shot depends on seeing the angles, though, so the game
+        is hard to play without sight.</p>
+      <p><a href="/historybowl/">History Bowl Study</a> is text on the
+        page, and the buzzer works with the Space bar or a button. Each
+        question appears one word at a time at a reading speed you can
+        set. Buzzing early is the point of the game, and the lightning
+        round in the match simulator has a 60-second limit, as in the
+        real competition.</p>
 
       <h2>Reporting a problem</h2>
       <p>If something on this site is hard or impossible to use,
