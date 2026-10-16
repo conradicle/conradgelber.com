@@ -2,7 +2,7 @@
   "name": "conradgelber-play",
   "private": true,
   "type": "module",
-  "description": "Source for the browser games: /play/ (pin drop) builds to ../play/play.js, /flight-path/ to ../flight-path/flight-path.js, /pool/ to ../pool/pool.js, /borderline/ to ../borderline/borderline.js, /historybowl/ to ../historybowl/historybowl.js.",
+  "description": "Source for the browser games: /play/ (pin drop) builds to ../play/play.js, /flight-path/ to ../flight-path/flight-path.js, /pool/ to ../pool/pool.js, /borderline/ to ../borderline/borderline.js, /historybowl/ to ../historybowl/historybowl.js, /12axes/ to ../12axes/12axes.js.",
   "scripts": {
     "build": "esbuild src/main.js --bundle --minify --format=iife --target=es2019 --outfile=../play/play.js",
     "build:flight": "esbuild src/flight-path/main.js --bundle --minify --format=iife --target=es2019 --outfile=../flight-path/flight-path.js",
@@ -14,7 +14,9 @@
     "test": "node scripts/pool-version.mjs --check && node --test \"test/*.test.mjs\"",
     "build:borderline": "esbuild src/borderline/main.js --bundle --minify --format=iife --target=es2019 --outfile=../borderline/borderline.js",
     "borderline:data": "node scripts/borderline/fetch-sources.mjs && node scripts/borderline/build-geo.mjs && node scripts/borderline/build-bank.mjs && node scripts/borderline/build-curated.mjs && node scripts/borderline/build-maps.mjs",
-    "build:historybowl": "esbuild src/historybowl/main.js --bundle --minify --format=iife --target=es2019 --outfile=../historybowl/historybowl.js"
+    "build:historybowl": "esbuild src/historybowl/main.js --bundle --minify --format=iife --target=es2019 --outfile=../historybowl/historybowl.js",
+    "build:12axes": "esbuild src/12axes/main.js --bundle --minify --format=iife --target=es2019 --outfile=../12axes/12axes.js",
+    "12axes:data": "node scripts/12axes/import-source.mjs"
   },
   "dependencies": {
     "d3-geo": "3.1.1",
