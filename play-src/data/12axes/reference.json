@@ -1,0 +1,173 @@
+{
+ "note": "Every coordinate here is an illustrative editorial estimate, not a measurement. They place each thinker or country on the same four reference dimensions used for ideology matching: econ (economic equality %), govt (security %), dipl (globalist trade %), scty (social progress %), each from 0 to 100. Countries are judged by their government's policies in the period named, and thinkers by their main political writings. Edit freely.",
+ "items": [
+  {
+   "kind": "thinker", "name": "Confucius", "when": "551-479 BCE", "where": "China",
+   "summary": "Teacher whose sayings, collected by his students, made moral example, ritual, and family duty the basis of good government. Rulers were to govern by virtue rather than by punishment, and the people were owed care in return for loyalty.",
+   "source": "https://plato.stanford.edu/entries/confucius/",
+   "stats": { "econ": 55, "govt": 70, "dipl": 45, "scty": 15 }
+  },
+  {
+   "kind": "thinker", "name": "Kautilya (Chanakya)", "when": "c. 4th century BCE", "where": "India",
+   "summary": "Adviser to the Maurya court traditionally credited with the Arthashastra, a manual of statecraft. It covers taxation, spies, war, and diplomacy in hard-headed terms, with the king's power and the security of the realm at the center.",
+   "source": "https://www.britannica.com/biography/Chanakya",
+   "stats": { "econ": 40, "govt": 90, "dipl": 35, "scty": 25 }
+  },
+  {
+   "kind": "thinker", "name": "Plato", "when": "c. 428-348 BCE", "where": "Athens",
+   "summary": "In the Republic he described a city ruled by trained philosopher-guardians who would own no private property. He distrusted democracy, wanted tight control over education and the arts, and pictured a self-contained city with limited outside trade.",
+   "source": "https://plato.stanford.edu/entries/plato-ethics-politics/",
+   "stats": { "econ": 70, "govt": 90, "dipl": 20, "scty": 35 }
+  },
+  {
+   "kind": "thinker", "name": "Ibn Khaldun", "when": "1332-1406", "where": "North Africa",
+   "summary": "Historian whose Muqaddimah explained the rise and fall of dynasties through group solidarity, which he called asabiyyah. He argued that heavy taxes and rulers running businesses themselves weaken an economy, and that trade and settled city life drive prosperity.",
+   "source": "https://www.britannica.com/biography/Ibn-Khaldun",
+   "stats": { "econ": 30, "govt": 65, "dipl": 65, "scty": 30 }
+  },
+  {
+   "kind": "thinker", "name": "Thomas Hobbes", "when": "1588-1679", "where": "England",
+   "summary": "Writing after the English Civil War, he argued in Leviathan that without a strong sovereign, life would be a war of all against all. People agree to obey an almost unlimited authority in exchange for peace and safety.",
+   "source": "https://plato.stanford.edu/entries/hobbes-moral/",
+   "stats": { "econ": 40, "govt": 95, "dipl": 50, "scty": 45 }
+  },
+  {
+   "kind": "thinker", "name": "John Locke", "when": "1632-1704", "where": "England",
+   "summary": "Held that people have natural rights to life, liberty, and property, and that government exists by consent to protect them. A government that violates those rights may rightly be resisted, an idea that shaped later revolutions.",
+   "source": "https://plato.stanford.edu/entries/locke-political/",
+   "stats": { "econ": 25, "govt": 30, "dipl": 60, "scty": 60 }
+  },
+  {
+   "kind": "thinker", "name": "Adam Smith", "when": "1723-1790", "where": "Scotland",
+   "summary": "In The Wealth of Nations he argued that the division of labor and free exchange, including trade between nations, create wealth. He criticized trade restrictions and monopolies but also wrote about the moral sentiments that hold a society together.",
+   "source": "https://plato.stanford.edu/entries/smith-moral-political/",
+   "stats": { "econ": 30, "govt": 30, "dipl": 95, "scty": 55 }
+  },
+  {
+   "kind": "thinker", "name": "Edmund Burke", "when": "1729-1797", "where": "Ireland and Britain",
+   "summary": "Statesman whose Reflections on the Revolution in France defended inherited institutions and gradual reform against abstract plans to remake society. He also backed freer trade and criticized abuses of British rule in America and India.",
+   "source": "https://plato.stanford.edu/entries/burke/",
+   "stats": { "econ": 30, "govt": 60, "dipl": 65, "scty": 15 }
+  },
+  {
+   "kind": "thinker", "name": "Joseph de Maistre", "when": "1753-1821", "where": "Savoy",
+   "summary": "A leading critic of the French Revolution and the Enlightenment. He defended hereditary monarchy and papal authority, and saw order, religion, and obedience as the foundations of any lasting society.",
+   "source": "https://www.britannica.com/biography/Joseph-de-Maistre",
+   "stats": { "econ": 40, "govt": 95, "dipl": 30, "scty": 5 }
+  },
+  {
+   "kind": "thinker", "name": "Mary Wollstonecraft", "when": "1759-1797", "where": "England",
+   "summary": "In A Vindication of the Rights of Woman she argued that women are as capable of reason as men and deserve the same education and rights. She also criticized inherited privilege and supported the early ideals of the French Revolution.",
+   "source": "https://plato.stanford.edu/entries/wollstonecraft/",
+   "stats": { "econ": 60, "govt": 30, "dipl": 60, "scty": 90 }
+  },
+  {
+   "kind": "thinker", "name": "John Stuart Mill", "when": "1806-1873", "where": "England",
+   "summary": "In On Liberty he argued that the state may limit a person's freedom only to prevent harm to others. He supported representative government, votes for women, and free trade, and in later work was open to cooperative forms of ownership.",
+   "source": "https://plato.stanford.edu/entries/mill/",
+   "stats": { "econ": 55, "govt": 15, "dipl": 85, "scty": 90 }
+  },
+  {
+   "kind": "thinker", "name": "Karl Marx", "when": "1818-1883", "where": "Germany and England",
+   "summary": "Analyzed capitalism as a system built on the exploitation of wage labor and predicted it would be replaced by a classless society with common ownership. He called on workers of all countries to unite across national lines.",
+   "source": "https://plato.stanford.edu/entries/marx/",
+   "stats": { "econ": 100, "govt": 60, "dipl": 80, "scty": 85 }
+  },
+  {
+   "kind": "thinker", "name": "Friedrich List", "when": "1789-1846", "where": "Germany and the United States",
+   "summary": "Economist who argued that developing nations should use tariffs to protect young industries until they could compete with established ones. His national system of political economy influenced industrial policy in Germany and beyond.",
+   "source": "https://www.britannica.com/money/Friedrich-List",
+   "stats": { "econ": 40, "govt": 60, "dipl": 10, "scty": 50 }
+  },
+  {
+   "kind": "thinker", "name": "Peter Kropotkin", "when": "1842-1921", "where": "Russia",
+   "summary": "Geographer and anarchist who argued in Mutual Aid that cooperation, not only competition, drives survival. He proposed a society without a state, organized through free federations of communities that share goods according to need.",
+   "source": "https://www.britannica.com/biography/Peter-Alekseyevich-Kropotkin",
+   "stats": { "econ": 95, "govt": 0, "dipl": 70, "scty": 85 }
+  },
+  {
+   "kind": "thinker", "name": "Mohandas Gandhi", "when": "1869-1948", "where": "India",
+   "summary": "Leader of India's independence movement who developed nonviolent mass resistance. He promoted village self-reliance and homespun cloth over imported goods, campaigned against untouchability, and drew deeply on religious ethics.",
+   "source": "https://www.britannica.com/biography/Mahatma-Gandhi",
+   "stats": { "econ": 70, "govt": 15, "dipl": 15, "scty": 50 }
+  },
+  {
+   "kind": "thinker", "name": "Friedrich Hayek", "when": "1899-1992", "where": "Austria and Britain",
+   "summary": "Economist who argued that prices let markets coordinate knowledge no central planner could gather. In The Road to Serfdom he warned that economic planning tends to erode political freedom.",
+   "source": "https://plato.stanford.edu/entries/friedrich-hayek/",
+   "stats": { "econ": 10, "govt": 25, "dipl": 90, "scty": 45 }
+  },
+  {
+   "kind": "country", "name": "Athens", "when": "5th century BCE", "where": "Greece",
+   "summary": "Adult male citizens voted directly in the assembly and many offices were filled by lot. Women, enslaved people, and foreign residents were excluded. The city grew rich on sea trade and led an alliance of other Greek states.",
+   "source": "https://www.britannica.com/place/Athens/History",
+   "stats": { "econ": 40, "govt": 45, "dipl": 70, "scty": 50 }
+  },
+  {
+   "kind": "country", "name": "Qin China", "when": "221-206 BCE", "where": "China",
+   "summary": "The first unified Chinese empire, governed on Legalist principles of strict laws and harsh punishments. It standardized weights, coins, and writing, and is remembered for suppressing rival schools of thought.",
+   "source": "https://www.britannica.com/topic/Qin-dynasty",
+   "stats": { "econ": 45, "govt": 100, "dipl": 20, "scty": 20 }
+  },
+  {
+   "kind": "country", "name": "Mughal India under Akbar", "when": "1556-1605", "where": "South Asia",
+   "summary": "A centralized empire run by the emperor and a salaried nobility. Akbar abolished the tax on non-Muslims and promoted a policy of tolerance across religions, while the empire traded widely by land and sea.",
+   "source": "https://www.britannica.com/biography/Akbar",
+   "stats": { "econ": 30, "govt": 80, "dipl": 60, "scty": 60 }
+  },
+  {
+   "kind": "country", "name": "Tokugawa Japan", "when": "around 1700", "where": "Japan",
+   "summary": "Military rule by the shogun kept a fixed social order and long internal peace. Foreign trade and contact were limited to a few tightly controlled channels, and Christianity was banned.",
+   "source": "https://www.britannica.com/event/Tokugawa-period",
+   "stats": { "econ": 30, "govt": 85, "dipl": 5, "scty": 10 }
+  },
+  {
+   "kind": "country", "name": "Meiji Japan", "when": "1868-1912", "where": "Japan",
+   "summary": "A new imperial government ended the old class system, opened the country, and modernized quickly by adopting Western industry, schooling, and law. It kept strong central control and built up a modern army and navy.",
+   "source": "https://www.britannica.com/event/Meiji-Restoration",
+   "stats": { "econ": 30, "govt": 75, "dipl": 50, "scty": 55 }
+  },
+  {
+   "kind": "country", "name": "Victorian Britain", "when": "1850s-1860s", "where": "United Kingdom",
+   "summary": "After repealing its grain tariffs in 1846, Britain led the world in free trade and industry. Government stayed small, the vote was limited, and the empire was at its height.",
+   "source": "https://www.britannica.com/event/Victorian-era",
+   "stats": { "econ": 15, "govt": 40, "dipl": 95, "scty": 40 }
+  },
+  {
+   "kind": "country", "name": "Soviet Union", "when": "1930s", "where": "Russia and neighboring republics",
+   "summary": "Under Stalin, farms were collectivized and five-year plans drove rapid state-run industrialization. One party held power, dissent was punished harshly, and the economy aimed at self-sufficiency.",
+   "source": "https://www.britannica.com/place/Soviet-Union",
+   "stats": { "econ": 95, "govt": 100, "dipl": 15, "scty": 50 }
+  },
+  {
+   "kind": "country", "name": "Spain under Franco", "when": "1940s", "where": "Spain",
+   "summary": "After the civil war, a military dictatorship ruled with a single legal party and close ties to the Catholic Church. Economic policy aimed at self-sufficiency, and public life followed strict traditional norms.",
+   "source": "https://www.britannica.com/biography/Francisco-Franco",
+   "stats": { "econ": 40, "govt": 95, "dipl": 5, "scty": 5 }
+  },
+  {
+   "kind": "country", "name": "Peronist Argentina", "when": "1946-1955", "where": "Argentina",
+   "summary": "Juan Perón's government expanded workers' rights and welfare, nationalized railways and utilities, and protected domestic industry. It won elections but restricted the press and the opposition.",
+   "source": "https://www.britannica.com/biography/Juan-Peron",
+   "stats": { "econ": 70, "govt": 75, "dipl": 15, "scty": 45 }
+  },
+  {
+   "kind": "country", "name": "Sweden", "when": "1970s", "where": "Sweden",
+   "summary": "Social Democratic governments, including Olof Palme's, ran one of the world's largest welfare states, funded by high taxes, within an export-oriented market economy. The country was neutral in foreign policy and socially liberal.",
+   "source": "https://www.britannica.com/biography/Olof-Palme",
+   "stats": { "econ": 80, "govt": 40, "dipl": 80, "scty": 85 }
+  },
+  {
+   "kind": "country", "name": "Yugoslavia", "when": "1970s", "where": "Southeastern Europe",
+   "summary": "A one-party socialist federation in which enterprises were run under workers' self-management with some market elements. It led the Non-Aligned Movement and allowed its citizens to work abroad.",
+   "source": "https://www.britannica.com/place/Yugoslavia-former-federated-nation-1929-2003",
+   "stats": { "econ": 80, "govt": 75, "dipl": 55, "scty": 60 }
+  },
+  {
+   "kind": "country", "name": "Hong Kong", "when": "1970s", "where": "Hong Kong",
+   "summary": "A British colony with an appointed government, low taxes, and almost no tariffs. Officials followed a policy of minimal intervention in business, while the government built large amounts of public housing.",
+   "source": "https://www.britannica.com/place/Hong-Kong",
+   "stats": { "econ": 15, "govt": 55, "dipl": 100, "scty": 40 }
+  }
+ ]
+}
