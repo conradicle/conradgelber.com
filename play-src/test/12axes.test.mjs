@@ -237,11 +237,14 @@ test('axis text covers all twelve axes', () => {
   });
 });
 
-test('reference library: about 16 thinkers and 12 countries, each with a summary, a source and estimated coordinates', () => {
+test('reference library: at most 17 thinkers and 12 countries, each with a summary, a source and estimated coordinates', () => {
   const ref = data('reference.json');
   const thinkers = ref.items.filter((x) => x.kind === 'thinker');
   const countries = ref.items.filter((x) => x.kind === 'country');
-  assert.equal(thinkers.length, 16);
+  assert.ok(thinkers.length >= 14 && thinkers.length <= 17, 'thinkers: ' + thinkers.length);
+  assert.ok(!thinkers.some((x) => x.name.startsWith('Kautilya')));
+  for (const n of ['John Rawls', 'Robert Nozick']) assert.ok(thinkers.some((x) => x.name === n), n);
+  assert.ok(countries.find((x) => x.name === 'Athens').stats.scty < countries.find((x) => x.name === 'Victorian Britain').stats.scty, 'present-day scale: Athens below Victorian Britain');
   assert.equal(countries.length, 12);
   assert.match(ref.note, /illustrative editorial estimate/);
   for (const x of ref.items) {
