@@ -1,0 +1,2022 @@
+{
+ "source": "https://github.com/politicaltests/politicaltests.github.io/tree/5a508de557cc88eb7e9a44d89f45501dbe912d61/12axes",
+ "license": "MIT, Copyright (c) 2020 8values (SapplyValues); see /12axes/LICENSE-12axes.txt",
+ "questions": [
+  {
+   "id": 0,
+   "axis": 0,
+   "bucket": 4,
+   "dir": 1,
+   "text": "There is no need for a national government."
+  },
+  {
+   "id": 1,
+   "axis": 0,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Subdivisions of nations should have their own militaries."
+  },
+  {
+   "id": 2,
+   "axis": 0,
+   "bucket": 4,
+   "dir": 1,
+   "text": "State laws should have precedence over national laws."
+  },
+  {
+   "id": 3,
+   "axis": 0,
+   "bucket": 3,
+   "dir": 1,
+   "text": "State and local laws should have precedence over national laws"
+  },
+  {
+   "id": 4,
+   "axis": 0,
+   "bucket": 3,
+   "dir": 1,
+   "text": "The national government can't understand what the people need."
+  },
+  {
+   "id": 5,
+   "axis": 0,
+   "bucket": 3,
+   "dir": 1,
+   "text": "People should hold more loyalty to their local state than their country."
+  },
+  {
+   "id": 6,
+   "axis": 0,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Local governments should have more power than they currently do."
+  },
+  {
+   "id": 7,
+   "axis": 0,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Laws should vary from area to area and culture to culture within a country."
+  },
+  {
+   "id": 8,
+   "axis": 0,
+   "bucket": 2,
+   "dir": 1,
+   "text": "It's a good idea to test a policy in one state rather than implementing it nationwide right away."
+  },
+  {
+   "id": 9,
+   "axis": 0,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Local governments can understand their citizens better than the national government could."
+  },
+  {
+   "id": 10,
+   "axis": 0,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Local governments address issues that the national government would never touch without them."
+  },
+  {
+   "id": 11,
+   "axis": 0,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Local governments give each region good representation of their views."
+  },
+  {
+   "id": 12,
+   "axis": 0,
+   "bucket": -1,
+   "dir": -1,
+   "text": "A country cannot function without a national government"
+  },
+  {
+   "id": 13,
+   "axis": 0,
+   "bucket": -1,
+   "dir": -1,
+   "text": "The national government protects minorities better than some local governments do."
+  },
+  {
+   "id": 14,
+   "axis": 0,
+   "bucket": -1,
+   "dir": -1,
+   "text": "There are many issues that it does not make sense to address at a local level."
+  },
+  {
+   "id": 15,
+   "axis": 0,
+   "bucket": -2,
+   "dir": -1,
+   "text": "The national government needs more power."
+  },
+  {
+   "id": 16,
+   "axis": 0,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Subdivisions should not be able to exempt from national laws."
+  },
+  {
+   "id": 17,
+   "axis": 0,
+   "bucket": -2,
+   "dir": -1,
+   "text": "People should think of themselves as citizens of their nation rather than their state."
+  },
+  {
+   "id": 18,
+   "axis": 0,
+   "bucket": -3,
+   "dir": -1,
+   "text": "A group of states without a strong national government is merely an alliance, not a nation."
+  },
+  {
+   "id": 19,
+   "axis": 0,
+   "bucket": -3,
+   "dir": -1,
+   "text": "A national government must be strong to adequately protect all its citizens."
+  },
+  {
+   "id": 20,
+   "axis": 0,
+   "bucket": -3,
+   "dir": -1,
+   "text": "States cannot function without a strong national government."
+  },
+  {
+   "id": 21,
+   "axis": 0,
+   "bucket": -4,
+   "dir": -1,
+   "text": "There is no need for local or state governments."
+  },
+  {
+   "id": 22,
+   "axis": 0,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Laws should be completely consistent within all regions of a nation."
+  },
+  {
+   "id": 23,
+   "axis": 0,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Strong states weaken a nation"
+  },
+  {
+   "id": 24,
+   "axis": 1,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Direct democracy is the best form of government."
+  },
+  {
+   "id": 25,
+   "axis": 1,
+   "bucket": 4,
+   "dir": 1,
+   "text": "People should vote issue by issue themselves."
+  },
+  {
+   "id": 26,
+   "axis": 1,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Representatives rarely represent the nation well."
+  },
+  {
+   "id": 27,
+   "axis": 1,
+   "bucket": 3,
+   "dir": 1,
+   "text": "It is important that the government follows the majority opinion, even if it is wrong."
+  },
+  {
+   "id": 28,
+   "axis": 1,
+   "bucket": 3,
+   "dir": 1,
+   "text": "The more people asked, the better chance there is of reaching the best decision."
+  },
+  {
+   "id": 29,
+   "axis": 1,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Nobody but me can adequately represent my views."
+  },
+  {
+   "id": 30,
+   "axis": 1,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Elections are an effective way of showing government approval."
+  },
+  {
+   "id": 31,
+   "axis": 1,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Democracy is the worst form of government, except for all the others we've tried."
+  },
+  {
+   "id": 32,
+   "axis": 1,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Each person should have one vote, each equal to every other."
+  },
+  {
+   "id": 33,
+   "axis": 1,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Democracy is more than a decision-making process."
+  },
+  {
+   "id": 34,
+   "axis": 1,
+   "bucket": 1,
+   "dir": 1,
+   "text": "People should have the power to choose their leaders"
+  },
+  {
+   "id": 35,
+   "axis": 1,
+   "bucket": 1,
+   "dir": 1,
+   "text": "The government must be by the people for the people."
+  },
+  {
+   "id": 36,
+   "axis": 1,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Democracy is inefficient and slow."
+  },
+  {
+   "id": 37,
+   "axis": 1,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Popular opinion is not always right"
+  },
+  {
+   "id": 38,
+   "axis": 1,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Autocracy is the best way to rule a nation."
+  },
+  {
+   "id": 39,
+   "axis": 1,
+   "bucket": -2,
+   "dir": -1,
+   "text": "A hierarchical state is best."
+  },
+  {
+   "id": 40,
+   "axis": 1,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Society could not function without leaders and followers."
+  },
+  {
+   "id": 41,
+   "axis": 1,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Democracy makes it too easy for a majority to further itself at the expense of minorities."
+  },
+  {
+   "id": 42,
+   "axis": 1,
+   "bucket": -3,
+   "dir": -1,
+   "text": "The general populace makes poor decisions."
+  },
+  {
+   "id": 43,
+   "axis": 1,
+   "bucket": -3,
+   "dir": -1,
+   "text": "An absolute monarchy is more preferable than a liberal democracy."
+  },
+  {
+   "id": 44,
+   "axis": 1,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Public opinion swings too much with emotional events to be useful for policy making."
+  },
+  {
+   "id": 45,
+   "axis": 1,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Elections are a waste of resources."
+  },
+  {
+   "id": 46,
+   "axis": 1,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Catering to popular opinion is detrimental to a nation."
+  },
+  {
+   "id": 47,
+   "axis": 1,
+   "bucket": -4,
+   "dir": -1,
+   "text": "A nation must obey its leadership without question."
+  },
+  {
+   "id": 48,
+   "axis": 2,
+   "bucket": 4,
+   "dir": 1,
+   "text": "A united world government would be beneficial to mankind."
+  },
+  {
+   "id": 49,
+   "axis": 2,
+   "bucket": 4,
+   "dir": 1,
+   "text": "We are first and foremost citizens of Earth."
+  },
+  {
+   "id": 50,
+   "axis": 2,
+   "bucket": 4,
+   "dir": 1,
+   "text": "In order for humanity to survive, we must get past having separate nations."
+  },
+  {
+   "id": 51,
+   "axis": 2,
+   "bucket": 3,
+   "dir": 1,
+   "text": "The United Nations needs more power."
+  },
+  {
+   "id": 52,
+   "axis": 2,
+   "bucket": 3,
+   "dir": 1,
+   "text": "The United Nations should have a military to enforce its resolutions."
+  },
+  {
+   "id": 53,
+   "axis": 2,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Having independent nations with the risk of global conflict creates a large threat to humanity as a whole."
+  },
+  {
+   "id": 54,
+   "axis": 2,
+   "bucket": 2,
+   "dir": 1,
+   "text": "I support regional unions, such as the European Union."
+  },
+  {
+   "id": 55,
+   "axis": 2,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Governments should be accountable to the international community."
+  },
+  {
+   "id": 56,
+   "axis": 2,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Nations fighting among each other gets in the way of progress."
+  },
+  {
+   "id": 57,
+   "axis": 2,
+   "bucket": 1,
+   "dir": 1,
+   "text": "International trade is generally beneficial."
+  },
+  {
+   "id": 58,
+   "axis": 2,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Alliances are important for protecting a nation"
+  },
+  {
+   "id": 59,
+   "axis": 2,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Nations should cooperate whenever it benefits them both"
+  },
+  {
+   "id": 60,
+   "axis": 2,
+   "bucket": -1,
+   "dir": -1,
+   "text": "It is important to maintain our national sovereignty."
+  },
+  {
+   "id": 61,
+   "axis": 2,
+   "bucket": -1,
+   "dir": -1,
+   "text": "An ideal nation must mostly stay neutral during foreign affairs."
+  },
+  {
+   "id": 62,
+   "axis": 2,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Intervention has caused more harm than good."
+  },
+  {
+   "id": 63,
+   "axis": 2,
+   "bucket": -2,
+   "dir": -1,
+   "text": "International aid is a waste of money most of the time."
+  },
+  {
+   "id": 64,
+   "axis": 2,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Alliances can pose a threat to a nation's sovereignty."
+  },
+  {
+   "id": 65,
+   "axis": 2,
+   "bucket": -2,
+   "dir": -1,
+   "text": "National cultures are important to protect."
+  },
+  {
+   "id": 66,
+   "axis": 2,
+   "bucket": -3,
+   "dir": -1,
+   "text": "My nation should stay out of international affairs."
+  },
+  {
+   "id": 67,
+   "axis": 2,
+   "bucket": -3,
+   "dir": -1,
+   "text": "The United Nations should be abolished."
+  },
+  {
+   "id": 68,
+   "axis": 2,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Nobody in other countries has our best interests in mind."
+  },
+  {
+   "id": 69,
+   "axis": 2,
+   "bucket": -4,
+   "dir": -1,
+   "text": "My nation is better than all other nations."
+  },
+  {
+   "id": 70,
+   "axis": 2,
+   "bucket": -4,
+   "dir": -1,
+   "text": "There should not be international law."
+  },
+  {
+   "id": 71,
+   "axis": 2,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Any deals other countries want must be bad for us."
+  },
+  {
+   "id": 72,
+   "axis": 3,
+   "bucket": 4,
+   "dir": 1,
+   "text": "War is needed to make an economy thrive."
+  },
+  {
+   "id": 73,
+   "axis": 3,
+   "bucket": 4,
+   "dir": 1,
+   "text": "A constant state of war benefits a country."
+  },
+  {
+   "id": 74,
+   "axis": 3,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Only those who serve in the military should be allowed to have influence on who is in power."
+  },
+  {
+   "id": 75,
+   "axis": 3,
+   "bucket": 3,
+   "dir": 1,
+   "text": "There should be compulsory military service."
+  },
+  {
+   "id": 76,
+   "axis": 3,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Countries that do not serve our interests should be toppled."
+  },
+  {
+   "id": 77,
+   "axis": 3,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Only those who served in the military should be able to gain power in government."
+  },
+  {
+   "id": 78,
+   "axis": 3,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Military action by our nation is often necessary to protect it."
+  },
+  {
+   "id": 79,
+   "axis": 3,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Countries that violate human rights should be toppled"
+  },
+  {
+   "id": 80,
+   "axis": 3,
+   "bucket": 2,
+   "dir": 1,
+   "text": "A military option should always be considered."
+  },
+  {
+   "id": 81,
+   "axis": 3,
+   "bucket": 1,
+   "dir": 1,
+   "text": "A government must maintain a strong military to defend itself."
+  },
+  {
+   "id": 82,
+   "axis": 3,
+   "bucket": 1,
+   "dir": 1,
+   "text": "A nation usually needs a military in order to survive."
+  },
+  {
+   "id": 83,
+   "axis": 3,
+   "bucket": 1,
+   "dir": 1,
+   "text": "We should respect those who have served in our military."
+  },
+  {
+   "id": 84,
+   "axis": 3,
+   "bucket": -1,
+   "dir": -1,
+   "text": "It is more important to retain peaceful relations than to further our strength."
+  },
+  {
+   "id": 85,
+   "axis": 3,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Diplomatic options should always be tried before war is even considered."
+  },
+  {
+   "id": 86,
+   "axis": 3,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Peace is preferable to war whenever possible."
+  },
+  {
+   "id": 87,
+   "axis": 3,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Humanity has passed the point in which war is needed for resources."
+  },
+  {
+   "id": 88,
+   "axis": 3,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Lasting peace leads to prosperity."
+  },
+  {
+   "id": 89,
+   "axis": 3,
+   "bucket": -2,
+   "dir": -1,
+   "text": "My country spends too much money on the military."
+  },
+  {
+   "id": 90,
+   "axis": 3,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Military spending is a waste of money."
+  },
+  {
+   "id": 91,
+   "axis": 3,
+   "bucket": -3,
+   "dir": -1,
+   "text": "We have no right to militarily intervene in other nations."
+  },
+  {
+   "id": 92,
+   "axis": 3,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Countries fall apart with constant war."
+  },
+  {
+   "id": 93,
+   "axis": 3,
+   "bucket": -4,
+   "dir": -1,
+   "text": "War is never justified."
+  },
+  {
+   "id": 94,
+   "axis": 3,
+   "bucket": -4,
+   "dir": -1,
+   "text": "In the modern era, militaries aren't really necessary."
+  },
+  {
+   "id": 95,
+   "axis": 3,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Nations should not maintain a military."
+  },
+  {
+   "id": 96,
+   "axis": 4,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Those who disagree with the government should be removed from the country."
+  },
+  {
+   "id": 97,
+   "axis": 4,
+   "bucket": 4,
+   "dir": 1,
+   "text": "The government should monitor all citizens to combat terrorism."
+  },
+  {
+   "id": 98,
+   "axis": 4,
+   "bucket": 4,
+   "dir": 1,
+   "text": "People should not have protections that could hinder discovering their criminal activity."
+  },
+  {
+   "id": 99,
+   "axis": 4,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Police need more power and protection."
+  },
+  {
+   "id": 100,
+   "axis": 4,
+   "bucket": 3,
+   "dir": 1,
+   "text": "It is very important to maintain law and order."
+  },
+  {
+   "id": 101,
+   "axis": 4,
+   "bucket": 3,
+   "dir": 1,
+   "text": "A country must be sure to take all measures to enforce its laws."
+  },
+  {
+   "id": 102,
+   "axis": 4,
+   "bucket": 2,
+   "dir": 1,
+   "text": "If you have nothing to hide, then you have nothing to fear."
+  },
+  {
+   "id": 103,
+   "axis": 4,
+   "bucket": 2,
+   "dir": 1,
+   "text": "The sacrifice of some civil liberties is necessary to protect us from acts of terrorism."
+  },
+  {
+   "id": 104,
+   "axis": 4,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Government surveillance is necessary in the modern world."
+  },
+  {
+   "id": 105,
+   "axis": 4,
+   "bucket": 1,
+   "dir": 1,
+   "text": "The government should have access to the emails of suspected terrorists."
+  },
+  {
+   "id": 106,
+   "axis": 4,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Some freedom must be given up in order to keep people safe."
+  },
+  {
+   "id": 107,
+   "axis": 4,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Any variant of anarchism will never work."
+  },
+  {
+   "id": 108,
+   "axis": 4,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Marijuana should be legal."
+  },
+  {
+   "id": 109,
+   "axis": 4,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Those who would give up essential Liberty to purchase a temporary Safety deserve neither."
+  },
+  {
+   "id": 110,
+   "axis": 4,
+   "bucket": -1,
+   "dir": -1,
+   "text": "The government has no business looking into most people's personal lives."
+  },
+  {
+   "id": 111,
+   "axis": 4,
+   "bucket": -2,
+   "dir": -1,
+   "text": "The right to bear arms should not be infringed."
+  },
+  {
+   "id": 112,
+   "axis": 4,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Every person has unalienable rights, including the right to life, liberty and the pursuit of happiness."
+  },
+  {
+   "id": 113,
+   "axis": 4,
+   "bucket": -2,
+   "dir": -1,
+   "text": "No authority should be left unquestioned."
+  },
+  {
+   "id": 114,
+   "axis": 4,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Victimless crimes (such as drug use) should not be crimes at all."
+  },
+  {
+   "id": 115,
+   "axis": 4,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Taxation is theft."
+  },
+  {
+   "id": 116,
+   "axis": 4,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Whistleblowers are good for society."
+  },
+  {
+   "id": 117,
+   "axis": 4,
+   "bucket": -4,
+   "dir": -1,
+   "text": "The very existence of the state is a threat to our liberty."
+  },
+  {
+   "id": 118,
+   "axis": 4,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Taxation should be voluntary or abolished."
+  },
+  {
+   "id": 119,
+   "axis": 4,
+   "bucket": -4,
+   "dir": -1,
+   "text": "People's freedom should have no limits."
+  },
+  {
+   "id": 120,
+   "axis": 5,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Communism, if implemented correctly, would be a good form of economics."
+  },
+  {
+   "id": 121,
+   "axis": 5,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Absolute equality is good."
+  },
+  {
+   "id": 122,
+   "axis": 5,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Equality of outcome is important."
+  },
+  {
+   "id": 123,
+   "axis": 5,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Private property should be abolished."
+  },
+  {
+   "id": 124,
+   "axis": 5,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Classes should not exist."
+  },
+  {
+   "id": 125,
+   "axis": 5,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Most, if not all corporations are inherently evil."
+  },
+  {
+   "id": 126,
+   "axis": 5,
+   "bucket": 2,
+   "dir": 1,
+   "text": "I support single-payer, universal healthcare."
+  },
+  {
+   "id": 127,
+   "axis": 5,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Class war is a real and important issue."
+  },
+  {
+   "id": 128,
+   "axis": 5,
+   "bucket": 2,
+   "dir": 1,
+   "text": "I prefer Collectivism over Individualism."
+  },
+  {
+   "id": 129,
+   "axis": 5,
+   "bucket": 1,
+   "dir": 1,
+   "text": "The wealthy have far more than they need."
+  },
+  {
+   "id": 130,
+   "axis": 5,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Services like roads should be publicly owned."
+  },
+  {
+   "id": 131,
+   "axis": 5,
+   "bucket": 1,
+   "dir": 1,
+   "text": "People born to wealthy families have unfair success even when they aren't skilled and don't work hard."
+  },
+  {
+   "id": 132,
+   "axis": 5,
+   "bucket": -1,
+   "dir": -1,
+   "text": "People should have the right to leave their wealth to their descendents."
+  },
+  {
+   "id": 133,
+   "axis": 5,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Privitization is needed for economic success."
+  },
+  {
+   "id": 134,
+   "axis": 5,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Economies without any capitalism will collapse."
+  },
+  {
+   "id": 135,
+   "axis": 5,
+   "bucket": -2,
+   "dir": -1,
+   "text": "It is better to maintain a balanced budget than to ensure welfare for all citizens."
+  },
+  {
+   "id": 136,
+   "axis": 5,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Capitalism is better than any existing alternative."
+  },
+  {
+   "id": 137,
+   "axis": 5,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Economic classes are inevitable."
+  },
+  {
+   "id": 138,
+   "axis": 5,
+   "bucket": -3,
+   "dir": -1,
+   "text": "The freer the market, the freer the people."
+  },
+  {
+   "id": 139,
+   "axis": 5,
+   "bucket": -3,
+   "dir": -1,
+   "text": "People should have to work for anything they get."
+  },
+  {
+   "id": 140,
+   "axis": 5,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Socialism will never has and will never work."
+  },
+  {
+   "id": 141,
+   "axis": 5,
+   "bucket": -4,
+   "dir": -1,
+   "text": "The government should not regulate the economy at all."
+  },
+  {
+   "id": 142,
+   "axis": 5,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Most economic problems we see today are not caused by Capitalism, but by government."
+  },
+  {
+   "id": 143,
+   "axis": 5,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Private charities are a better means of helping the poor than public welfare is."
+  },
+  {
+   "id": 144,
+   "axis": 6,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Religion should be banned."
+  },
+  {
+   "id": 145,
+   "axis": 6,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Faith is complete nonsense."
+  },
+  {
+   "id": 146,
+   "axis": 6,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Religion must decline for society to progress."
+  },
+  {
+   "id": 147,
+   "axis": 6,
+   "bucket": 3,
+   "dir": 1,
+   "text": "I consider myself an Atheist."
+  },
+  {
+   "id": 148,
+   "axis": 6,
+   "bucket": 3,
+   "dir": 1,
+   "text": "There is no higher power."
+  },
+  {
+   "id": 149,
+   "axis": 6,
+   "bucket": 3,
+   "dir": 1,
+   "text": "The government should not fund any religious organizations in any way."
+  },
+  {
+   "id": 150,
+   "axis": 6,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Creationism is a myth."
+  },
+  {
+   "id": 151,
+   "axis": 6,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Huamnity has progressed beyond the need for religion."
+  },
+  {
+   "id": 152,
+   "axis": 6,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Most organized religions contradict themselves."
+  },
+  {
+   "id": 153,
+   "axis": 6,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Religion in government should be eliminated."
+  },
+  {
+   "id": 154,
+   "axis": 6,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Laws should not be based on religion."
+  },
+  {
+   "id": 155,
+   "axis": 6,
+   "bucket": 1,
+   "dir": 1,
+   "text": "There must be a separation between church and state."
+  },
+  {
+   "id": 156,
+   "axis": 6,
+   "bucket": -1,
+   "dir": -1,
+   "text": "I believe there is something after death."
+  },
+  {
+   "id": 157,
+   "axis": 6,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Religion is beneficial for society."
+  },
+  {
+   "id": 158,
+   "axis": 6,
+   "bucket": -1,
+   "dir": -1,
+   "text": "People must be allowed to follow a religion."
+  },
+  {
+   "id": 159,
+   "axis": 6,
+   "bucket": -2,
+   "dir": -1,
+   "text": "I believe in a higher power."
+  },
+  {
+   "id": 160,
+   "axis": 6,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Religious organizations often provide better assistance to the poor than the government does."
+  },
+  {
+   "id": 161,
+   "axis": 6,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Children should be educated in religious values."
+  },
+  {
+   "id": 162,
+   "axis": 6,
+   "bucket": -3,
+   "dir": -1,
+   "text": "My religion is true."
+  },
+  {
+   "id": 163,
+   "axis": 6,
+   "bucket": -3,
+   "dir": -1,
+   "text": "My religious values should be spread as much as possible."
+  },
+  {
+   "id": 164,
+   "axis": 6,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Religion is important for society."
+  },
+  {
+   "id": 165,
+   "axis": 6,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Theocracy is a good system of government"
+  },
+  {
+   "id": 166,
+   "axis": 6,
+   "bucket": -4,
+   "dir": -1,
+   "text": "The government should support and only recognize one religion"
+  },
+  {
+   "id": 167,
+   "axis": 6,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Most bad things happening in the world are caused by us turning away from religion"
+  },
+  {
+   "id": 168,
+   "axis": 7,
+   "bucket": 4,
+   "dir": 1,
+   "text": "We should pay reperations for the descendants of slaves."
+  },
+  {
+   "id": 169,
+   "axis": 7,
+   "bucket": 4,
+   "dir": 1,
+   "text": "White guilt is sometimes justified."
+  },
+  {
+   "id": 170,
+   "axis": 7,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Tradition just hinders the progress of humanity."
+  },
+  {
+   "id": 171,
+   "axis": 7,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Gender is a social construct."
+  },
+  {
+   "id": 172,
+   "axis": 7,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Traditions are of no value on their own."
+  },
+  {
+   "id": 173,
+   "axis": 7,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Affirmative action is mostly beneficial."
+  },
+  {
+   "id": 174,
+   "axis": 7,
+   "bucket": 2,
+   "dir": 1,
+   "text": "I support the LGBTQ+ movement."
+  },
+  {
+   "id": 175,
+   "axis": 7,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Abortion should be legal."
+  },
+  {
+   "id": 176,
+   "axis": 7,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Statues of certain people should be taken down."
+  },
+  {
+   "id": 177,
+   "axis": 7,
+   "bucket": 1,
+   "dir": 1,
+   "text": "I support the BLM movement."
+  },
+  {
+   "id": 178,
+   "axis": 7,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Environmental regulations are essential."
+  },
+  {
+   "id": 179,
+   "axis": 7,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Same sex marriage should be legalized."
+  },
+  {
+   "id": 180,
+   "axis": 7,
+   "bucket": -1,
+   "dir": -1,
+   "text": "To chase progress at all costs is dangerous."
+  },
+  {
+   "id": 181,
+   "axis": 7,
+   "bucket": -1,
+   "dir": -1,
+   "text": "We must preserve our culture."
+  },
+  {
+   "id": 182,
+   "axis": 7,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Traditions are important."
+  },
+  {
+   "id": 183,
+   "axis": 7,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Sex before marriage is immoral."
+  },
+  {
+   "id": 184,
+   "axis": 7,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Homosexuality is immoral."
+  },
+  {
+   "id": 185,
+   "axis": 7,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Maintaining family values is essential."
+  },
+  {
+   "id": 186,
+   "axis": 7,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Society has become too progressive."
+  },
+  {
+   "id": 187,
+   "axis": 7,
+   "bucket": -3,
+   "dir": -1,
+   "text": "It is important that we maintain the traditions of our past."
+  },
+  {
+   "id": 188,
+   "axis": 7,
+   "bucket": -3,
+   "dir": -1,
+   "text": "The elders in society know the best path for it."
+  },
+  {
+   "id": 189,
+   "axis": 7,
+   "bucket": -4,
+   "dir": -1,
+   "text": "The Enlightenment should never have happened."
+  },
+  {
+   "id": 190,
+   "axis": 7,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Homosexuality should be criminalized."
+  },
+  {
+   "id": 191,
+   "axis": 7,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Sharia law isn't as bad as people think it is."
+  },
+  {
+   "id": 192,
+   "axis": 8,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Foreigners should never enter the country."
+  },
+  {
+   "id": 193,
+   "axis": 8,
+   "bucket": 4,
+   "dir": 1,
+   "text": "We should not allow any refugees."
+  },
+  {
+   "id": 194,
+   "axis": 8,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Only our national language(s) should be spoken in our country."
+  },
+  {
+   "id": 195,
+   "axis": 8,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Only extremely talented immigrants, if that, should be permitted to enter the country."
+  },
+  {
+   "id": 196,
+   "axis": 8,
+   "bucket": 3,
+   "dir": 1,
+   "text": "If we accept migrants at all, it is important that they assimilate into our culture."
+  },
+  {
+   "id": 197,
+   "axis": 8,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Immigrants can never really adapt to our way of life."
+  },
+  {
+   "id": 198,
+   "axis": 8,
+   "bucket": 2,
+   "dir": 1,
+   "text": "In general, immigrants are bad for the country."
+  },
+  {
+   "id": 199,
+   "axis": 8,
+   "bucket": 2,
+   "dir": 1,
+   "text": "A nation's culture is important to protect."
+  },
+  {
+   "id": 200,
+   "axis": 8,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Illegal immigrants do not provide a benefit to the hosting country."
+  },
+  {
+   "id": 201,
+   "axis": 8,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Illegal immigrants should be deported in most or all cases."
+  },
+  {
+   "id": 202,
+   "axis": 8,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Immigrants should be expected to learn the language of the country."
+  },
+  {
+   "id": 203,
+   "axis": 8,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Border protection is important."
+  },
+  {
+   "id": 204,
+   "axis": 8,
+   "bucket": -1,
+   "dir": -1,
+   "text": "We should be taking in more refugees."
+  },
+  {
+   "id": 205,
+   "axis": 8,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Immigrants are a net positive."
+  },
+  {
+   "id": 206,
+   "axis": 8,
+   "bucket": -1,
+   "dir": -1,
+   "text": "I enjoy some foreign cultures."
+  },
+  {
+   "id": 207,
+   "axis": 8,
+   "bucket": -2,
+   "dir": -1,
+   "text": "No cultures are superior to others."
+  },
+  {
+   "id": 208,
+   "axis": 8,
+   "bucket": -2,
+   "dir": -1,
+   "text": "We should be more accepting to other cultures."
+  },
+  {
+   "id": 209,
+   "axis": 8,
+   "bucket": -2,
+   "dir": -1,
+   "text": "All societies are a blend of cultures."
+  },
+  {
+   "id": 210,
+   "axis": 8,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Everybody should speak at least two languages."
+  },
+  {
+   "id": 211,
+   "axis": 8,
+   "bucket": -3,
+   "dir": -1,
+   "text": "All humans share a common identity."
+  },
+  {
+   "id": 212,
+   "axis": 8,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Our culture would be better with other cultures mixed in more."
+  },
+  {
+   "id": 213,
+   "axis": 8,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Governments should be as concerned about foreign citizens as they are about those within their borders."
+  },
+  {
+   "id": 214,
+   "axis": 8,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Anybody who wants to enter the country should be able to."
+  },
+  {
+   "id": 215,
+   "axis": 8,
+   "bucket": -4,
+   "dir": -1,
+   "text": "The benefits of open borders would outweigh the costs."
+  },
+  {
+   "id": 216,
+   "axis": 9,
+   "bucket": 4,
+   "dir": 1,
+   "text": "I prefer a planned economy over a free and open economy."
+  },
+  {
+   "id": 217,
+   "axis": 9,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Most, if not all businesses must be owned by the government."
+  },
+  {
+   "id": 218,
+   "axis": 9,
+   "bucket": 4,
+   "dir": 1,
+   "text": "The state knows best what an economy needs."
+  },
+  {
+   "id": 219,
+   "axis": 9,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Economic planning ensures maximum prosperity and growth."
+  },
+  {
+   "id": 220,
+   "axis": 9,
+   "bucket": 3,
+   "dir": 1,
+   "text": "High levels of economic regulation is good for my nation."
+  },
+  {
+   "id": 221,
+   "axis": 9,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Taxation for the rich should be very high."
+  },
+  {
+   "id": 222,
+   "axis": 9,
+   "bucket": 2,
+   "dir": 1,
+   "text": "It is necessary for the government to intervene in the economy to protect consumers."
+  },
+  {
+   "id": 223,
+   "axis": 9,
+   "bucket": 2,
+   "dir": 1,
+   "text": "The government must break up monopolies to ensure fairness within the market."
+  },
+  {
+   "id": 224,
+   "axis": 9,
+   "bucket": 2,
+   "dir": 1,
+   "text": "The hourly minimum wage should be 15 USD or more."
+  },
+  {
+   "id": 225,
+   "axis": 9,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Without economic regulation, monopolies will dominate the entire market."
+  },
+  {
+   "id": 226,
+   "axis": 9,
+   "bucket": 1,
+   "dir": 1,
+   "text": "An unregulated economy will never succeed."
+  },
+  {
+   "id": 227,
+   "axis": 9,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Taxation for the rich should be higher than it is now."
+  },
+  {
+   "id": 228,
+   "axis": 9,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Excessive government intervention is a threat to the economy."
+  },
+  {
+   "id": 229,
+   "axis": 9,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Income taxes for the middle and lower classes should be lowered."
+  },
+  {
+   "id": 230,
+   "axis": 9,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Planned economies never perform as well as free market economies."
+  },
+  {
+   "id": 231,
+   "axis": 9,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Economic regulation causes more harm than good."
+  },
+  {
+   "id": 232,
+   "axis": 9,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Currently, taxation is too complex and should be simplified."
+  },
+  {
+   "id": 233,
+   "axis": 9,
+   "bucket": -2,
+   "dir": -1,
+   "text": "UBI is a better means of providing welfare when compared to the current welfare system."
+  },
+  {
+   "id": 234,
+   "axis": 9,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Fully privatized healthcare is a better means of providing healthcare than single-payer systems."
+  },
+  {
+   "id": 235,
+   "axis": 9,
+   "bucket": -3,
+   "dir": -1,
+   "text": "The government actively works with large corporations to destroy small businesses."
+  },
+  {
+   "id": 236,
+   "axis": 9,
+   "bucket": -3,
+   "dir": -1,
+   "text": "The government should control the market as minimally as possible."
+  },
+  {
+   "id": 237,
+   "axis": 9,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Government should not regulate the economy at all."
+  },
+  {
+   "id": 238,
+   "axis": 9,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Most, if not all economic crises are caused by government intervention."
+  },
+  {
+   "id": 239,
+   "axis": 9,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Taxation is theft."
+  },
+  {
+   "id": 240,
+   "axis": 10,
+   "bucket": 4,
+   "dir": 1,
+   "text": "All products should be made in my country."
+  },
+  {
+   "id": 241,
+   "axis": 10,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Foreign products should be banned or heavily restricted from entry."
+  },
+  {
+   "id": 242,
+   "axis": 10,
+   "bucket": 4,
+   "dir": 1,
+   "text": "I only buy products that are made in my country."
+  },
+  {
+   "id": 243,
+   "axis": 10,
+   "bucket": 3,
+   "dir": 1,
+   "text": "High tariffs are needed to protect local industries."
+  },
+  {
+   "id": 244,
+   "axis": 10,
+   "bucket": 3,
+   "dir": 1,
+   "text": "The government must intervene in the foreign exchange market to higher import prices."
+  },
+  {
+   "id": 245,
+   "axis": 10,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Without tariffs, my country's economy will likely fail."
+  },
+  {
+   "id": 246,
+   "axis": 10,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Export subsidies should be used for protecting local industries."
+  },
+  {
+   "id": 247,
+   "axis": 10,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Patents should be protected to prevent other countries from outcompeting my country."
+  },
+  {
+   "id": 248,
+   "axis": 10,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Technical and scientific knowledge should be protected from other countries."
+  },
+  {
+   "id": 249,
+   "axis": 10,
+   "bucket": 1,
+   "dir": 1,
+   "text": "The government should prioritize my country over all others."
+  },
+  {
+   "id": 250,
+   "axis": 10,
+   "bucket": 1,
+   "dir": 1,
+   "text": "The government should encourage local production and consumption."
+  },
+  {
+   "id": 251,
+   "axis": 10,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Economic globalism caused more negative impacts than positive ones."
+  },
+  {
+   "id": 252,
+   "axis": 10,
+   "bucket": -1,
+   "dir": -1,
+   "text": "The world must cooperate together in terms of economics."
+  },
+  {
+   "id": 253,
+   "axis": 10,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Trade is often beneficial to both parties."
+  },
+  {
+   "id": 254,
+   "axis": 10,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Global economic cooperation will generally lead to positive outcomes."
+  },
+  {
+   "id": 255,
+   "axis": 10,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Tariffs should be lowered."
+  },
+  {
+   "id": 256,
+   "axis": 10,
+   "bucket": -2,
+   "dir": -1,
+   "text": "The concept of a free market should be extended towards global trade as well."
+  },
+  {
+   "id": 257,
+   "axis": 10,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Restrictions on trade are bad for the economy."
+  },
+  {
+   "id": 258,
+   "axis": 10,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Economic globalization is inevitable."
+  },
+  {
+   "id": 259,
+   "axis": 10,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Tariffs should be eliminated."
+  },
+  {
+   "id": 260,
+   "axis": 10,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Foreign products are as good as local products."
+  },
+  {
+   "id": 261,
+   "axis": 10,
+   "bucket": -4,
+   "dir": -1,
+   "text": "We must actively promote foreign products."
+  },
+  {
+   "id": 262,
+   "axis": 10,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Protectionism is an unnecessary and unrealistic idea."
+  },
+  {
+   "id": 263,
+   "axis": 10,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Local products are often poor in quality."
+  },
+  {
+   "id": 264,
+   "axis": 11,
+   "bucket": 4,
+   "dir": 1,
+   "text": "If AI could rule more effectively than humans, then AI should rule."
+  },
+  {
+   "id": 265,
+   "axis": 11,
+   "bucket": 4,
+   "dir": 1,
+   "text": "Genetic modification is a force for good, even on humans."
+  },
+  {
+   "id": 266,
+   "axis": 11,
+   "bucket": 4,
+   "dir": 1,
+   "text": "We should continue developing AI even if that means we are going to be replaced."
+  },
+  {
+   "id": 267,
+   "axis": 11,
+   "bucket": 3,
+   "dir": 1,
+   "text": "Technological progress and innovation cannot be stopped."
+  },
+  {
+   "id": 268,
+   "axis": 11,
+   "bucket": 3,
+   "dir": 1,
+   "text": "I am a transhumanist."
+  },
+  {
+   "id": 269,
+   "axis": 11,
+   "bucket": 3,
+   "dir": 1,
+   "text": "When people have already suffered for technology to be developed, we should use that technology."
+  },
+  {
+   "id": 270,
+   "axis": 11,
+   "bucket": 2,
+   "dir": 1,
+   "text": "We should put effort into getting a person on Mars in the near future"
+  },
+  {
+   "id": 271,
+   "axis": 11,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Transhumanism isn't as radical as many people think it is."
+  },
+  {
+   "id": 272,
+   "axis": 11,
+   "bucket": 2,
+   "dir": 1,
+   "text": "Technological progress is usually good."
+  },
+  {
+   "id": 273,
+   "axis": 11,
+   "bucket": 1,
+   "dir": 1,
+   "text": "The quality of life is generally going up decade by decade."
+  },
+  {
+   "id": 274,
+   "axis": 11,
+   "bucket": 1,
+   "dir": 1,
+   "text": "Developing alternative technology is a better means of helping the environment than environmental regulations."
+  },
+  {
+   "id": 275,
+   "axis": 11,
+   "bucket": 1,
+   "dir": 1,
+   "text": "A better world will come from automation, science, and technology."
+  },
+  {
+   "id": 276,
+   "axis": 11,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Technology must be slowed down to protect the environment."
+  },
+  {
+   "id": 277,
+   "axis": 11,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Regulations on industries must be implemented to protect the environment."
+  },
+  {
+   "id": 278,
+   "axis": 11,
+   "bucket": -1,
+   "dir": -1,
+   "text": "Technology is making people lose jobs, which is ultimately harmful for humanity."
+  },
+  {
+   "id": 279,
+   "axis": 11,
+   "bucket": -2,
+   "dir": -1,
+   "text": "I oppose human genetic modification."
+  },
+  {
+   "id": 280,
+   "axis": 11,
+   "bucket": -2,
+   "dir": -1,
+   "text": "Genetic modification should be used rarely, if ever."
+  },
+  {
+   "id": 281,
+   "axis": 11,
+   "bucket": -2,
+   "dir": -1,
+   "text": "The threat of machines taking over humanity is very real."
+  },
+  {
+   "id": 282,
+   "axis": 11,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Society was better many years ago than it is now."
+  },
+  {
+   "id": 283,
+   "axis": 11,
+   "bucket": -3,
+   "dir": -1,
+   "text": "Modern technology and the modern lifestyle made life meaningless and dull."
+  },
+  {
+   "id": 284,
+   "axis": 11,
+   "bucket": -3,
+   "dir": -1,
+   "text": "If we continue human technological progress, humanity is doomed."
+  },
+  {
+   "id": 285,
+   "axis": 11,
+   "bucket": -4,
+   "dir": -1,
+   "text": "Traditional medicines are often more effective than modern medicines."
+  },
+  {
+   "id": 286,
+   "axis": 11,
+   "bucket": -4,
+   "dir": -1,
+   "text": "The Internet should be banned."
+  },
+  {
+   "id": 287,
+   "axis": 11,
+   "bucket": -4,
+   "dir": -1,
+   "text": "We must return to a primitive lifestyle."
+  }
+ ]
+}

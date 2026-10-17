@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12 Axes &middot; Conrad Gelber</title>
+<meta name="description" content="A free political values test on twelve axes, from federal vs. unitary to accelerationist vs. bioconservative. Short, Full, and Extreme lengths, with ideology matches, answer evidence, share links, and side-by-side comparison. Runs entirely in your browser.">
+<link rel="canonical" href="https://conradgelber.com/12axes/">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=8">
+<link rel="stylesheet" href="/play/play.css?v=4">
+<link rel="stylesheet" href="/12axes/12axes.css?v=1">
+<script src="/12axes/12axes.js?v=4" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="wrap">
+
+  <header class="playhead">
+    <a href="/">Conrad Gelber</a>
+    <a class="back" href="/games/">&larr; Games</a>
+  </header>
+
+  <main id="main" class="game ax">
+
+    <section class="screen" id="screen-start" aria-labelledby="title">
+      <h1 class="game-title" id="title" tabindex="-1">12 Axes</h1>
+      <p class="game-intro">A political values test that places you on twelve
+        separate axes instead of a single left-right line. You'll see a series
+        of statements and say how much you agree with each. At the end you get a
+        score on every axis, the ideologies, thinkers, and historical countries
+        closest to your answers, and a list showing which answers moved each
+        score. Everything runs in your browser: your answers are not sent
+        anywhere. <a href="#about-axes">About the axes</a></p>
+      <div class="tiers">
+        <button type="button" class="tier" data-mode="short">
+          <span class="tier-name">Short</span>
+          <span class="tier-desc">36 statements, 3 per axis. About 5 minutes.</span>
+        </button>
+        <button type="button" class="tier" data-mode="full">
+          <span class="tier-name">Full</span>
+          <span class="tier-desc">60 statements, 5 per axis. About 9 minutes.</span>
+        </button>
+        <button type="button" class="tier" data-mode="extreme">
+          <span class="tier-name">Extreme</span>
+          <span class="tier-desc">240 statements, 20 per axis. About 30 minutes.</span>
+        </button>
+      </div>
+      <div class="end-actions ax-resume">
+        <button type="button" class="btn" id="resume" hidden>Resume where you left off</button>
+        <button type="button" class="btn btn-quiet" id="last" hidden>See your last result</button>
+      </div>
+      <p class="game-status" id="storage-note"></p>
+    </section>
+
+    <section class="screen" id="screen-quiz" hidden aria-labelledby="statement">
+      <div class="round-meta">
+        <span id="q-count"></span>
+        <span id="q-mode"></span>
+      </div>
+      <div class="ax-progress" aria-hidden="true"><div class="ax-progress-fill" id="q-progress"></div></div>
+      <p class="ax-prompt">How much do you agree?</p>
+      <h1 class="ax-statement" id="statement" tabindex="-1"></h1>
+      <div class="ax-answers" id="answers" role="group" aria-label="Your answer"></div>
+      <div class="ax-quiz-actions">
+        <button type="button" class="btn btn-quiet" id="back">Back</button>
+        <button type="button" class="btn btn-quiet" id="quit">Save and leave</button>
+      </div>
+      <p class="hint ax-keys">Keyboard: press 1 to 5 to answer.</p>
+    </section>
+
+    <section class="screen" id="screen-result" hidden aria-labelledby="result-title">
+      <h1 class="game-title" id="result-title" tabindex="-1">Your results</h1>
+      <p class="game-intro" id="result-meta"></p>
+      <div class="ax-banner" id="shared-banner" hidden>
+        <p>This is a shared result, shown read-only.</p>
+        <button type="button" class="btn" id="take-own">Take the test yourself</button>
+      </div>
+      <div class="ax-banner" id="whatif-banner" hidden>
+        <p>What-if mode: you've changed some answers below, and everything on
+          this page shows the changed version. Your saved result and share link
+          still use your original answers.</p>
+        <div class="end-actions">
+          <button type="button" class="btn btn-quiet" id="whatif-reset">Reset to my answers</button>
+          <button type="button" class="btn btn-quiet" id="whatif-share">Share these answers</button>
+        </div>
+      </div>
+
+      <h2 class="ax-h2">Your twelve axes</h2>
+      <figure class="ax-radar-wrap">
+        <svg class="ax-radar" id="radar" viewBox="0 0 640 470" role="img" aria-labelledby="radar-cap"></svg>
+        <figcaption class="hint" id="radar-cap">Each spoke is labeled with the first pole of its axis. The
+          further out the point, the larger your share for that pole; the center is the opposite pole,
+          and the middle ring is 50%.</figcaption>
+      </figure>
+      <ol class="ax-bars" id="bars"></ol>
+
+      <h2 class="ax-h2">Closest ideologies</h2>
+      <p class="hint">Matched on four reference dimensions from the 12axes source: economic equality
+        (Economy axis), security (Power axis), globalist trade (Trade axis), and social progress
+        (Culture axis). Similarity is 100% for an exact match and 0% for the farthest possible point.</p>
+      <ol class="ax-matches" id="ideologies"></ol>
+
+      <h2 class="ax-h2">Closest thinkers</h2>
+      <ol class="ax-matches" id="thinkers"></ol>
+      <h2 class="ax-h2">Closest historical countries</h2>
+      <ol class="ax-matches" id="countries"></ol>
+      <p class="hint">Thinker and country positions are illustrative editorial estimates on the same
+        four dimensions, not measurements. Positions use present-day standards, the same scale as
+        your own scores, not the standards of each figure's time.</p>
+      <details class="ax-library">
+        <summary>Browse the full library</summary>
+        <div class="ax-filter" role="group" aria-label="Show">
+          <button type="button" class="btn btn-quiet" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="btn btn-quiet" data-filter="thinker" aria-pressed="false">Thinkers</button>
+          <button type="button" class="btn btn-quiet" data-filter="country" aria-pressed="false">Countries</button>
+        </div>
+        <ol class="ax-matches" id="library"></ol>
+      </details>
+
+      <h2 class="ax-h2">Why you got these scores</h2>
+      <p class="hint" id="evidence-help"></p>
+      <div id="evidence"></div>
+
+      <h2 class="ax-h2" id="share-title">Share</h2>
+      <p class="hint">The link holds your result after the # sign, which browsers never send to a server.</p>
+      <div class="ax-share">
+        <input class="ax-input" id="share-link" type="text" readonly aria-labelledby="share-title">
+        <button type="button" class="btn" id="copy">Copy link</button>
+      </div>
+      <p class="game-status" id="copy-status" role="status"></p>
+
+      <h2 class="ax-h2" id="compare-title">Compare with a friend</h2>
+      <p class="hint">Paste a friend's share link to see both results side by side.</p>
+      <div class="ax-share">
+        <input class="ax-input" id="friend-link" type="text" placeholder="https://conradgelber.com/12axes/#r=..." aria-labelledby="compare-title" autocomplete="off" spellcheck="false">
+        <button type="button" class="btn" id="compare">Compare</button>
+      </div>
+      <p class="game-status" id="compare-status" role="status"></p>
+
+      <div class="end-actions ax-end">
+        <button type="button" class="btn btn-quiet" id="again">Back to the start</button>
+      </div>
+      <p class="ax-note">This is an educational tool. It has not been independently validated, and
+        the results describe these answers at this time, not a fixed identity.</p>
+    </section>
+
+    <section class="screen" id="screen-compare" hidden aria-labelledby="compare-heading">
+      <h1 class="game-title" id="compare-heading" tabindex="-1">Comparison</h1>
+      <p class="game-intro" id="compare-meta"></p>
+      <ul class="ax-legend" id="compare-legend"></ul>
+      <figure class="ax-radar-wrap">
+        <svg class="ax-radar" id="compare-radar" viewBox="0 0 640 470" role="img" aria-labelledby="compare-cap"></svg>
+        <figcaption class="hint" id="compare-cap">Both results on the same spokes. Each spoke is labeled
+          with the first pole of its axis; further out means a larger share for that pole.</figcaption>
+      </figure>
+      <div class="ax-two">
+        <div>
+          <h2 class="ax-h2">Biggest gaps</h2>
+          <ol class="ax-plain" id="gaps"></ol>
+        </div>
+        <div>
+          <h2 class="ax-h2">Most agreement</h2>
+          <ol class="ax-plain" id="agree"></ol>
+        </div>
+      </div>
+      <h2 class="ax-h2">Axis by axis</h2>
+      <table class="rounds ax-diff">
+        <thead><tr><th scope="col">Axis</th><th scope="col" id="col-a">A</th><th scope="col" id="col-b">B</th><th scope="col" class="num">Gap</th></tr></thead>
+        <tbody id="diff"></tbody>
+      </table>
+      <div class="ax-share">
+        <input class="ax-input" id="compare-link" type="text" readonly aria-label="Link to this comparison">
+        <button type="button" class="btn" id="copy-compare">Copy link</button>
+      </div>
+      <p class="game-status" id="copy-compare-status" role="status"></p>
+      <div class="end-actions ax-end">
+        <button type="button" class="btn btn-quiet" id="compare-back">Back</button>
+      </div>
+      <p class="ax-note">This is an educational tool. It has not been independently validated, and
+        the results describe these answers at this time, not a fixed identity.</p>
+    </section>
+
+    <p class="game-status" id="load-status" role="status"></p>
+    <p class="visually-hidden" id="announce" aria-live="polite"></p>
+
+    <section class="about" id="about-axes" aria-labelledby="about-title">
+      <h2 class="about-title" id="about-title">About the axes</h2>
+      <p>Each axis runs between two poles. Neither end is better; they are
+        different answers to the same question. Your score is the share of
+        your answers that pointed toward each pole, so the two always add up
+        to 100%.</p>
+      <dl class="ax-about" id="about-list"></dl>
+      <h3 class="about-sub">How scoring works</h3>
+      <p>Every statement leans toward one pole of its axis. Agreeing moves you
+        toward that pole and disagreeing moves you away from it; strong answers
+        count twice as much as plain ones, and Neutral counts for nothing. Each
+        axis is then scaled against the most your own statements could have
+        moved it, so a Short run and an Extreme run land on the same 0 to 100
+        scale. Statements are drawn at random each time, with some leaning each
+        way on every axis.</p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p class="colophon">Question set and scoring model adapted from
+      <a href="https://github.com/politicaltests/politicaltests.github.io/tree/5a508de557cc88eb7e9a44d89f45501dbe912d61/12axes">politicaltests/12axes</a>
+      under the <a href="/12axes/LICENSE-12axes.txt">MIT License</a>.
+      <a href="/accessibility/">Accessibility</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
