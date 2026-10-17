@@ -1,0 +1,386 @@
+{
+ "source": "https://github.com/politicaltests/politicaltests.github.io/tree/5a508de557cc88eb7e9a44d89f45501dbe912d61/12axes",
+ "license": "MIT, Copyright (c) 2020 8values (SapplyValues); see /12axes/LICENSE-12axes.txt",
+ "ideologies": [
+  {
+   "name": "Anarcho-Communism",
+   "link": "https://en.wikipedia.org/wiki/Anarcho-communism",
+   "stats": {
+    "econ": 90,
+    "govt": 5,
+    "dipl": 50,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Libertarian Socialism",
+   "link": "https://en.wikipedia.org/wiki/Libertarian_socialism",
+   "stats": {
+    "econ": 80,
+    "govt": 20,
+    "dipl": 80,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Trotskyism",
+   "link": "https://en.wikipedia.org/wiki/Trotskyism",
+   "stats": {
+    "econ": 100,
+    "govt": 40,
+    "dipl": 100,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Marxism",
+   "link": "https://en.wikipedia.org/wiki/Marxism",
+   "stats": {
+    "econ": 100,
+    "govt": 40,
+    "dipl": 70,
+    "scty": 50
+   }
+  },
+  {
+   "name": "De Leonism",
+   "link": "https://en.wikipedia.org/wiki/De_Leonism",
+   "stats": {
+    "econ": 100,
+    "govt": 70,
+    "dipl": 30,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Leninism",
+   "link": "https://en.wikipedia.org/wiki/Leninism",
+   "stats": {
+    "econ": 100,
+    "govt": 80,
+    "dipl": 40,
+    "scty": 60
+   }
+  },
+  {
+   "name": "Stalinism",
+   "link": "https://en.wikipedia.org/wiki/Stalinism",
+   "stats": {
+    "econ": 100,
+    "govt": 100,
+    "dipl": 20,
+    "scty": 40
+   }
+  },
+  {
+   "name": "State Socialism",
+   "link": "https://en.wikipedia.org/wiki/State_Socialism",
+   "stats": {
+    "econ": 80,
+    "govt": 70,
+    "dipl": 30,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Democratic Socialism",
+   "link": "https://en.wikipedia.org/wiki/Democratic_socialism",
+   "stats": {
+    "econ": 80,
+    "govt": 60,
+    "dipl": 50,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Revolutionary Socialism",
+   "link": "https://en.wikipedia.org/wiki/Revolutionary_socialism",
+   "stats": {
+    "econ": 80,
+    "govt": 50,
+    "dipl": 20,
+    "scty": 70
+   }
+  },
+  {
+   "name": "Anarcho-Syndicalism",
+   "link": "https://en.wikipedia.org/wiki/Anarcho-syndicalism",
+   "stats": {
+    "econ": 80,
+    "govt": 0,
+    "dipl": 50,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Left-Wing Populism",
+   "link": "https://en.wikipedia.org/wiki/Left-wing_populism",
+   "stats": {
+    "econ": 60,
+    "govt": 70,
+    "dipl": 40,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Distributism",
+   "link": "https://en.wikipedia.org/wiki/Distributism",
+   "stats": {
+    "econ": 60,
+    "govt": 50,
+    "dipl": 50,
+    "scty": 30
+   }
+  },
+  {
+   "name": "Social Liberalism",
+   "link": "https://en.wikipedia.org/wiki/Social_liberalism",
+   "stats": {
+    "econ": 60,
+    "govt": 40,
+    "dipl": 60,
+    "scty": 80
+   }
+  },
+  {
+   "name": "Christian Democracy",
+   "link": "https://en.wikipedia.org/wiki/Christian_Democracy",
+   "stats": {
+    "econ": 60,
+    "govt": 50,
+    "dipl": 60,
+    "scty": 30
+   }
+  },
+  {
+   "name": "Social Democracy",
+   "link": "https://en.wikipedia.org/wiki/Social_Democracy",
+   "stats": {
+    "econ": 60,
+    "govt": 40,
+    "dipl": 70,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Progressivism",
+   "link": "https://en.wikipedia.org/wiki/Progressivism",
+   "stats": {
+    "econ": 60,
+    "govt": 40,
+    "dipl": 80,
+    "scty": 100
+   }
+  },
+  {
+   "name": "Anarcho-Mutualism",
+   "link": "https://en.wikipedia.org/wiki/Mutualism_(economic_theory)",
+   "stats": {
+    "econ": 60,
+    "govt": 0,
+    "dipl": 50,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Technocracy",
+   "link": "https://en.wikipedia.org/wiki/Technocracy",
+   "stats": {
+    "econ": 60,
+    "govt": 80,
+    "dipl": 60,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Centrism",
+   "link": "https://en.wikipedia.org/wiki/Centrism",
+   "stats": {
+    "econ": 50,
+    "govt": 50,
+    "dipl": 50,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Liberalism",
+   "link": "https://en.wikipedia.org/wiki/Liberalism",
+   "stats": {
+    "econ": 50,
+    "govt": 40,
+    "dipl": 60,
+    "scty": 60
+   }
+  },
+  {
+   "name": "Religious Anarchism",
+   "link": "https://en.wikipedia.org/wiki/Anarchism_and_religion",
+   "stats": {
+    "econ": 50,
+    "govt": 0,
+    "dipl": 50,
+    "scty": 30
+   }
+  },
+  {
+   "name": "Right-Wing Populism",
+   "link": "https://en.wikipedia.org/wiki/Right-wing_populism",
+   "stats": {
+    "econ": 40,
+    "govt": 70,
+    "dipl": 30,
+    "scty": 40
+   }
+  },
+  {
+   "name": "Moderate Conservatism",
+   "link": "https://en.wikipedia.org/wiki/Centre-right_politics",
+   "stats": {
+    "econ": 40,
+    "govt": 50,
+    "dipl": 40,
+    "scty": 40
+   }
+  },
+  {
+   "name": "Reactionary",
+   "link": "https://en.wikipedia.org/wiki/Reactionary",
+   "stats": {
+    "econ": 40,
+    "govt": 60,
+    "dipl": 40,
+    "scty": 10
+   }
+  },
+  {
+   "name": "Social Libertarianism",
+   "link": "https://en.wikipedia.org/wiki/Left-libertarianism",
+   "stats": {
+    "econ": 60,
+    "govt": 20,
+    "dipl": 70,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Right-Libertarianism",
+   "link": "https://en.wikipedia.org/wiki/Right-libertarianism",
+   "stats": {
+    "econ": 40,
+    "govt": 20,
+    "dipl": 60,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Anarcho-Egoism",
+   "link": "https://en.wikipedia.org/wiki/Egoism",
+   "stats": {
+    "econ": 40,
+    "govt": 0,
+    "dipl": 50,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Fascism",
+   "link": "https://en.wikipedia.org/wiki/Fascism",
+   "stats": {
+    "econ": 40,
+    "govt": 90,
+    "dipl": 10,
+    "scty": 10
+   }
+  },
+  {
+   "name": "Conservatism",
+   "link": "https://en.wikipedia.org/wiki/Conservatism",
+   "stats": {
+    "econ": 30,
+    "govt": 60,
+    "dipl": 40,
+    "scty": 30
+   }
+  },
+  {
+   "name": "Neoliberalism",
+   "link": "https://en.wikipedia.org/wiki/Neoliberalism",
+   "stats": {
+    "econ": 30,
+    "govt": 50,
+    "dipl": 30,
+    "scty": 60
+   }
+  },
+  {
+   "name": "Classical Liberalism",
+   "link": "https://en.wikipedia.org/wiki/Classical_Liberalism",
+   "stats": {
+    "econ": 30,
+    "govt": 40,
+    "dipl": 60,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Authoritarian Capitalism",
+   "link": "https://en.wikipedia.org/wiki/Authoritarian_capitalism",
+   "stats": {
+    "econ": 20,
+    "govt": 90,
+    "dipl": 30,
+    "scty": 50
+   }
+  },
+  {
+   "name": "State Capitalism",
+   "link": "https://en.wikipedia.org/wiki/State_Capitalism",
+   "stats": {
+    "econ": 30,
+    "govt": 80,
+    "dipl": 50,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Neoconservatism",
+   "link": "https://en.wikipedia.org/wiki/Neoconservatism",
+   "stats": {
+    "econ": 20,
+    "govt": 60,
+    "dipl": 20,
+    "scty": 20
+   }
+  },
+  {
+   "name": "Objectivism",
+   "link": "https://en.wikipedia.org/wiki/Objectivism",
+   "stats": {
+    "econ": 20,
+    "govt": 10,
+    "dipl": 50,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Voluntaryism",
+   "link": "https://en.wikipedia.org/wiki/Objectivism",
+   "stats": {
+    "econ": 20,
+    "govt": 5,
+    "dipl": 50,
+    "scty": 50
+   }
+  },
+  {
+   "name": "Anarcho-Capitalism",
+   "link": "https://en.wikipedia.org/wiki/Anarcho-Capitalism",
+   "stats": {
+    "econ": 10,
+    "govt": 0,
+    "dipl": 50,
+    "scty": 50
+   }
+  }
+ ]
+}
