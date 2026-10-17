@@ -152,6 +152,12 @@
    "stats": { "econ": 95, "govt": 100, "dipl": 15, "scty": 25 }
   },
   {
+   "kind": "country", "name": "Ireland under de Valera", "when": "1932-1948", "where": "Ireland",
+   "summary": "Eamon de Valera's Fianna Fáil governments, returned in repeated elections, raised tariffs to build up home industry and fought a trade dispute with Britain through most of the 1930s. The 1937 Constitution gave the Catholic Church a special position, banned divorce, and described women's place as in the home. Ireland stayed neutral in the Second World War, under emergency powers that included strict press censorship.",
+   "source": "https://www.britannica.com/biography/Eamon-de-Valera",
+   "stats": { "econ": 45, "govt": 60, "dipl": 10, "scty": 10 }
+  },
+  {
    "kind": "country", "name": "Spain under Franco", "when": "1940s", "where": "Spain",
    "summary": "After the civil war, a military dictatorship ruled with a single legal party and close ties to the Catholic Church. Economic policy aimed at self-sufficiency, and public life followed strict traditional norms.",
    "source": "https://www.britannica.com/biography/Francisco-Franco",
