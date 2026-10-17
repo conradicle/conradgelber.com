@@ -104,6 +104,12 @@
    "stats": { "econ": 5, "govt": 10, "dipl": 90, "scty": 65 }
   },
   {
+   "kind": "thinker", "name": "Michael Oakeshott", "when": "1901-1990", "where": "England",
+   "summary": "Philosopher who criticized \"rationalism in politics,\" the attempt to remake society from a plan or ideology. He described a conservative disposition that prefers the familiar, and saw government as an umpire keeping general rules rather than a manager pursuing shared goals.",
+   "source": "https://plato.stanford.edu/entries/oakeshott/",
+   "stats": { "econ": 30, "govt": 35, "dipl": 60, "scty": 30 }
+  },
+  {
    "kind": "country", "name": "Athens", "when": "5th century BCE", "where": "Greece",
    "summary": "Adult male citizens voted directly in the assembly and many offices were filled by lot. Women, enslaved people, and foreign residents were excluded. The city grew rich on sea trade and led an alliance of other Greek states.",
    "source": "https://www.britannica.com/place/Athens/History",
@@ -158,6 +164,12 @@
    "stats": { "econ": 70, "govt": 75, "dipl": 15, "scty": 40 }
   },
   {
+   "kind": "country", "name": "West Germany under Adenauer", "when": "1950s", "where": "Federal Republic of Germany",
+   "summary": "A new parliamentary democracy led by Christian Democrats built a \"social market economy\": free markets alongside social insurance and worker representation on company boards. It joined the European Coal and Steel Community and the European Economic Community, banned the Communist Party in 1956, and kept laws criminalizing homosexuality.",
+   "source": "https://www.britannica.com/biography/Konrad-Adenauer",
+   "stats": { "econ": 45, "govt": 55, "dipl": 70, "scty": 25 }
+  },
+  {
    "kind": "country", "name": "Sweden", "when": "1970s", "where": "Sweden",
    "summary": "Social Democratic governments, including Olof Palme's, ran one of the world's largest welfare states, funded by high taxes, within an export-oriented market economy. The country was neutral in foreign policy and socially liberal.",
    "source": "https://www.britannica.com/biography/Olof-Palme",
@@ -174,6 +186,18 @@
    "summary": "A British colony with an appointed government, low taxes, and almost no tariffs. Officials followed a policy of minimal intervention in business, while the government built large amounts of public housing.",
    "source": "https://www.britannica.com/place/Hong-Kong",
    "stats": { "econ": 15, "govt": 55, "dipl": 100, "scty": 35 }
+  },
+  {
+   "kind": "country", "name": "Britain", "when": "1980s", "where": "United Kingdom",
+   "summary": "Conservative governments under Margaret Thatcher sold state-owned industries, cut income tax rates, curbed trade union power, and ended controls on moving capital abroad, while the National Health Service stayed public. Britain signed the Single European Act, and in 1988 passed a law barring councils from promoting homosexuality.",
+   "source": "https://www.britannica.com/topic/Thatcherism",
+   "stats": { "econ": 25, "govt": 50, "dipl": 85, "scty": 40 }
+  },
+  {
+   "kind": "country", "name": "Switzerland", "when": "1990s", "where": "Switzerland",
+   "summary": "A federal state where citizens vote directly on many laws through referendums and initiatives, governed by a multiparty council. Taxes were low and health insurance became compulsory in 1996. Voters rejected joining the European Economic Area in 1992, and farming stayed heavily protected.",
+   "source": "https://www.britannica.com/place/Switzerland/Government-and-society",
+   "stats": { "econ": 35, "govt": 30, "dipl": 55, "scty": 45 }
   }
  ]
 }
