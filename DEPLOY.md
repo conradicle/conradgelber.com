@@ -153,7 +153,7 @@ Every line should show a count of 9. The same goes for the head (font
 preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
 `/play/`, `/flight-path/`, `/pool/`, `/cambio/` and `/poker/` do not get the tab bar.
-`/play/`, `/flight-path/`, `/pool/`, `/borderline/` and `/historybowl/` have a single "← Games" link in
+`/play/`, `/flight-path/`, `/pool/`, `/borderline/`, `/historybowl/` and `/12axes/` have a single "← Games" link in
 their header instead. During a game on a screen narrower than 600 px,
 `/pool/` hides that header and shows a round back button in its players bar,
 so the table can fill the screen; the skip link and the footer stay.
@@ -603,6 +603,54 @@ Local development serves a copy of the site's files (with the production
 ```bash
 npm --prefix historybowl-worker run dev
 ```
+
+## The /12axes/ page
+
+12 Axes, a political values test. Static, no Worker, nothing stored on a
+server: `12axes/` is what Pages serves (`index.html`, `12axes.css`, the
+bundled `12axes.js`, and `LICENSE-12axes.txt`). The page also loads
+`/play/play.css`. Bump `?v=` on the `12axes.js` or `12axes.css` link
+whenever either changes.
+
+The question bank and scoring model come from the MIT-licensed
+[politicaltests/12axes](https://github.com/politicaltests/politicaltests.github.io/tree/5a508de557cc88eb7e9a44d89f45501dbe912d61/12axes),
+pinned to commit `5a508de`. Its license is `12axes/LICENSE-12axes.txt`, and
+the page footer credits it. Nothing from 12axes.net is used: every axis
+explanation, ideology description and library entry here was written for
+this site.
+
+Source, in `play-src/`:
+
+- `src/12axes/`: `axes.js` (the twelve axes and display order),
+  `score.js` (answer weights and the normalized 0-100 score), `select.js`
+  (per-mode picking, balanced across both poles, and the order that never
+  puts two statements on one axis in a row), `match.js` (distance on the four
+  reference dimensions), `share.js` (the `#r=` and `#c=` link format),
+  `radar.js`, `store.js` (one localStorage key, every access wrapped), and
+  `main.js` (the page).
+- `data/12axes/`: `questions.json` and `ideologies.json` are generated from
+  the pinned source; `axes.json`, `ideology-text.json` and `reference.json`
+  (thinkers and countries, with illustrative coordinates) are hand-written.
+- `scripts/12axes/import-source.mjs`: re-downloads the two source files,
+  checks their SHA-256 and rewrites the generated JSON:
+
+```bash
+npm --prefix play-src run 12axes:data
+```
+
+Question ids (0 to 287) are part of every share link, so never reorder
+`questions.json`; if the format of a link must change, bump `VERSION` in
+`share.js`. Rebuild the page bundle after any change:
+
+```bash
+npm --prefix play-src run build:12axes
+```
+
+Tests (`12axes.test.mjs`, run by `npm --prefix play-src test`): the bank's
+counts, scores at both poles and at Neutral in every mode, scores staying in
+0-100, per-mode counts and balance, no two statements on one axis in a row,
+the trade-dimension fix in matching, share links round-tripping, blocked
+storage, and checks over the hand-written text and library.
 
 ## After the first deploy
 

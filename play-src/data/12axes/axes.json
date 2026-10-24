@@ -1,0 +1,74 @@
+[
+ {
+  "key": "structure",
+  "about": "How power is split between a national government and regions such as states or provinces. The Federal end wants regions to keep real law-making power; the Unitary end wants one central government setting the rules for everyone. It does not measure how big or active government should be, only where its decisions are made.",
+  "leftReading": "You lean toward letting states, provinces, and towns make more of their own laws, even if rules then differ from place to place.",
+  "rightReading": "You lean toward one national government setting common rules, so the law is the same everywhere in the country."
+ },
+ {
+  "key": "representation",
+  "about": "Who should make public decisions. The Democratic end wants ordinary people to have the final say, through voting or direct votes on issues; the Autocratic end trusts a small group or a single leader to decide. It does not measure which policies those decision-makers should choose.",
+  "leftReading": "You lean toward giving voters more direct control, and you are wary of decisions made without broad consent.",
+  "rightReading": "You lean toward concentrated leadership, and you doubt that mass voting reliably produces good decisions."
+ },
+ {
+  "key": "intervention",
+  "about": "How much a country should involve itself with other nations and international bodies. The Internationalist end favors alliances, shared institutions, and concern for people abroad; the Nationalist end puts the nation's own interests and independence first. It does not measure attitudes toward war or trade, which have their own axes.",
+  "leftReading": "You lean toward working through alliances and international institutions and caring about people beyond your own borders.",
+  "rightReading": "You lean toward putting your own nation first and keeping it independent of outside bodies."
+ },
+ {
+  "key": "diplomacy",
+  "about": "How readily force should be used in dealing with other countries. The Militarist end sees a strong military and its use as necessary tools of policy; the Pacifist end wants war avoided in nearly every case. It does not measure whether a country should engage abroad at all, which is the Intervention axis.",
+  "leftReading": "You lean toward seeing military strength, and sometimes war, as a legitimate and useful part of foreign policy.",
+  "rightReading": "You lean toward avoiding war and settling disputes without force wherever possible."
+ },
+ {
+  "key": "power",
+  "about": "The trade-off between public order and personal liberty. The Security end accepts more state authority, surveillance, or limits on speech to keep society safe and stable; the Freedom end wants the state kept out of people's lives even at some cost to order. It does not measure economic policy or whether laws are made democratically.",
+  "leftReading": "You lean toward accepting a stronger state and tighter rules in exchange for order and safety.",
+  "rightReading": "You lean toward protecting individual liberty from the state, even when that makes order harder to keep."
+ },
+ {
+  "key": "economy",
+  "about": "Who should own wealth and productive property. The Equality end wants resources shared more evenly, through public or common ownership and redistribution; the Private property end wants individuals to keep what they own and earn. It does not measure how much the government should plan or regulate markets, which is the Control axis.",
+  "leftReading": "You lean toward sharing wealth more evenly, including through common or public ownership and taxes that redistribute income.",
+  "rightReading": "You lean toward strong private property rights and letting people keep what they earn."
+ },
+ {
+  "key": "religion",
+  "about": "What role religion should play in public life and law. The Secular end wants government and policy kept separate from religion; the Religious end wants faith and religious teaching to shape law and public life. It does not measure a person's own beliefs or how religious they are in private.",
+  "leftReading": "You lean toward keeping religion out of government and making public decisions on non-religious grounds.",
+  "rightReading": "You lean toward giving religion a larger role in law, schools, and public life."
+ },
+ {
+  "key": "culture",
+  "about": "Whether society's customs and social norms should change or be preserved. The Progressive end welcomes changing norms around family, gender, and social equality; the Traditional end values inherited customs and moves cautiously on social change. It does not measure economic views or religion, which have their own axes.",
+  "leftReading": "You lean toward changing social norms and customs where you see them as unfair or outdated.",
+  "rightReading": "You lean toward keeping inherited customs and being careful about rapid social change."
+ },
+ {
+  "key": "immigration",
+  "about": "How immigrants and minority cultures should relate to a nation's majority culture, and how open borders should be. The Assimilationist end expects newcomers to adopt the national culture, or limits immigration; the Multiculturalist end welcomes newcomers keeping their own cultures. It does not measure views on the economic effects of immigration or on foreign policy.",
+  "leftReading": "You lean toward a shared national culture that newcomers are expected to adopt, with tighter limits on who comes in.",
+  "rightReading": "You lean toward open doors and a society where many cultures live side by side."
+ },
+ {
+  "key": "control",
+  "about": "How much the government should direct the economy. The Planned end wants the state to set production, prices, or investment and to regulate heavily; the Laissez-faire end wants markets left to run with little interference. It does not measure who owns property, which is the Economy axis.",
+  "leftReading": "You lean toward the government planning and regulating economic activity rather than leaving it to markets.",
+  "rightReading": "You lean toward leaving the economy to markets with as little government direction as possible."
+ },
+ {
+  "key": "trade",
+  "about": "How open a country should be to trade with the rest of the world. The Protectionist end favors tariffs and buying domestic goods to shield local industry; the Globalist end favors free trade and open international markets. It does not measure views on immigration, alliances, or war.",
+  "leftReading": "You lean toward protecting domestic industry with tariffs and favoring goods made at home.",
+  "rightReading": "You lean toward free trade and open markets across borders."
+ },
+ {
+  "key": "technology",
+  "about": "How society should treat fast technological and scientific change. The Accelerationist end welcomes rapid progress, including genetic engineering and artificial intelligence; the Bioconservative end wants change slowed or limited to protect nature, human life, or traditional ways of living. It does not measure environmental policy alone or general optimism about the future.",
+  "leftReading": "You lean toward embracing new technology quickly and seeing it as the main path to a better life.",
+  "rightReading": "You lean toward slowing or limiting new technology to protect people, nature, or ways of life."
+ }
+]
