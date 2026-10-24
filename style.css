@@ -136,14 +136,13 @@ h1 a{border-bottom:none;padding-bottom:0}
 .tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
 
 /* Masthead grid: name and standfirst left, portrait right. The portrait is a
-   column bound by two edges: its top sits on the cap height of "Conrad"
-   (0.148em of the h1 size = (1.02 - (1.059 + 0.463)) / 2 + (1.059 - 0.660),
-   from Spectral's metrics) and its bottom ends where the grid row ends. The
-   2.4rem that used to be the stamp's margin-top is the text column's
-   padding-bottom, so the row ends with the text, and the stamp's .875rem
-   margin-top keeps the 2px rule a 14px step below the photo. The img is
-   absolutely positioned inside its column so the text sets the row height and
-   the photo follows it, never the other way round. */
+   circle whose top sits on the cap height of "Conrad" (0.148em of the h1
+   size = (1.02 - (1.059 + 0.463)) / 2 + (1.059 - 0.660), from Spectral's
+   metrics). It aligns to the top of its column so the text alone sets the row
+   height. The 2.4rem that used to be the stamp's margin-top is the text
+   column's padding-bottom, so the row ends with the text. The photo is
+   square, so object-position only matters if the box ever stops being one;
+   it keeps the face in frame if it does. */
 .mast-grid{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
@@ -151,8 +150,8 @@ h1 a{border-bottom:none;padding-bottom:0}
   align-items:stretch;
 }
 .mast-text{padding-bottom:2.4rem}
-.portrait{display:block;position:relative;width:220px;margin:calc(var(--h1-size) * .148) 0 0}
-.portrait img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+.portrait{display:block;align-self:start;width:220px;max-width:100%;margin:calc(var(--h1-size) * .148) 0 0}
+.portrait img{display:block;width:100%;height:auto;aspect-ratio:1 / 1;border-radius:50%;object-fit:cover;object-position:50% 30%}
 
 /* Photo band: sits under the section rule, on the column edges, 1.6rem clear
    above (the h2's margin) and below */
@@ -319,8 +318,7 @@ footer{
 @media (max-width:640px){
   body{font-size:16px}
   .mast-grid{grid-template-columns:1fr;row-gap:1.5rem}
-  .portrait{order:-1;position:static;width:160px;margin:0}
-  .portrait img{position:static;height:auto}
+  .portrait{order:-1;width:160px;margin:0}
   .stamp{margin-top:0}
   .entry{grid-template-columns:1fr;gap:.2rem}
   .when{padding-top:0;margin-bottom:.35rem}
