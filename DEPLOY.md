@@ -1,7 +1,8 @@
 # Deploying conradgelber.com
 
 Static site, no build step on deploy. Cloudflare Pages serves the repo root
-as-is. The generated files (`play/play.js`, `flight-path/flight-path.js`,
+as-is. The one dynamic part is the private hub (`/login/`, `/hub/`), which
+runs as Pages Functions from `functions/`; see [The private hub](#the-private-hub). The generated files (`play/play.js`, `flight-path/flight-path.js`,
 `flight-path/routes.json`, `pool/pool.js`, `borderline/borderline.js`,
 `borderline/data/` and `historybowl/historybowl.js`) are built locally and
 committed; see
@@ -651,6 +652,72 @@ counts, scores at both poles and at Neutral in every mode, scores staying in
 0-100, per-mode counts and balance, no two statements on one axis in a row,
 the trade-dimension fix in matching, share links round-tripping, blocked
 storage, and checks over the hand-written text and library.
+
+## The private hub
+
+`/login/` and everything under `/hub/` are Conrad's private area: a PIN
+login and a dashboard of tools. How to add a tool is in
+[ADDING_TOOLS.md](ADDING_TOOLS.md); this section is the deploy side.
+
+- **Entry.** The front page portrait links to `/login/` (`a.portrait` in
+  `index.html`), styled with no underline and no hand cursor so nothing
+  hints at it. `robots.txt` disallows `/login/` and `/hub/`; every response
+  there also sends `X-Robots-Tag: noindex, nofollow` and the pages carry a
+  robots meta tag. None of it is in `sitemap.xml`.
+- **Pages Functions.** `functions/login/index.js` (GET shows the static
+  `login/index.html` with an error message filled in by HTMLRewriter; POST
+  checks the PIN), `functions/logout.js`, `functions/hub/_middleware.js` (the
+  session check for every `/hub/` request, static files included) and
+  `functions/hub/api/store/` (the storage API). Shared code is in
+  `functions/_lib/`. Pages deploys these with every push, like the static
+  files. Pages also serves the `functions/` folder as plain files, which is
+  harmless: the same code is public on GitHub and holds no secrets.
+- **PIN check.** PBKDF2-SHA256, 100,000 iterations (the Workers WebCrypto
+  maximum), against the `PIN_SALT_B64` and `PIN_HASH_B64` secrets, compared in
+  constant time. Never on the client. To change the PIN, make a new salt and
+  hash (the `node -e` line in ADDING_TOOLS.md, with the new PIN) and put both
+  secrets again (below).
+- **Rate limit.** Per IPv4 address or IPv6 /64, in D1 (`login_attempts`):
+  five wrong PINs lock it for 15 minutes, then 30, 60 and so on up to 24
+  hours; a day with no attempts forgets past lockouts. If Conrad locks
+  himself out:
+
+  ```bash
+  npx wrangler@4.150.0 d1 execute conradgelber-hub --remote --command "DELETE FROM login_attempts"
+  ```
+
+- **Session.** A signed cookie, `__Host-hub` (HttpOnly, Secure,
+  SameSite=Strict, 30 days): expiry and a random nonce, HMAC-SHA256 with the
+  `SESSION_SECRET` secret. Log out clears the cookie on that device. To sign
+  out every device, put a new `SESSION_SECRET`.
+- **Headers.** `_headers` covers only static files Pages serves directly.
+  The Functions replace its CSP on `/login/` and `/hub/` responses with one
+  that also allows `form-action 'self'` (the login and logout forms) and
+  same-origin frames, and send `Cache-Control: private, no-store`. Still a
+  single CSP header, per the note above.
+- **Config.** `wrangler.jsonc` at the repo root binds the D1 database
+  `conradgelber-hub` as `DB`. Because it exists, Pages takes bindings from
+  it rather than the dashboard. Secrets are separate and are set with
+  wrangler:
+
+  ```bash
+  npx wrangler@4.150.0 pages secret put PIN_SALT_B64 --project-name conradgelber-com
+  npx wrangler@4.150.0 pages secret put PIN_HASH_B64 --project-name conradgelber-com
+  npx wrangler@4.150.0 pages secret put SESSION_SECRET --project-name conradgelber-com
+  ```
+
+  The Cloudflare login can see two accounts, so wrangler asks which one;
+  prefix commands with `CLOUDFLARE_ACCOUNT_ID=371108a86979f6f53d469d7250e1f924`
+  (Conrad's own account, which holds the Pages project and the database).
+  A secret change takes effect on the next deploy (push, or retry the latest
+  deployment in the dashboard). Preview deploys have no secrets, so the hub
+  stays shut there.
+- **Schema.** `db/migrations/`. Apply new ones with
+  `npx wrangler@4.150.0 d1 migrations apply conradgelber-hub --remote`.
+- **Tests.** `test/hub-flow.sh <base-url> [pin]` runs the whole sign-in flow
+  (signed-out blocks, wrong PIN, lockout, sign-in, storage API, logout).
+  Against the live site it locks out the IP it runs from; clear it with the
+  command above. `node --test test/*.test.mjs` tests the Daily tasks model.
 
 ## After the first deploy
 

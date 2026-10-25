@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily tasks &middot; Hub</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=10">
+<link rel="stylesheet" href="/hub/hub.css?v=1">
+<link rel="stylesheet" href="/hub/tools/daily-tasks/tasks.css?v=1">
+<script type="module" src="/hub/tools/daily-tasks/tasks.js?v=1"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="wrap">
+
+  <header class="mast-sub hub-bar">
+    <p class="site-name"><a href="/hub/">Hub</a></p>
+    <form method="post" action="/logout"><button type="submit" class="hub-quiet">Log out</button></form>
+  </header>
+
+  <main id="main" class="tasks">
+    <div class="tasks-head">
+      <div>
+        <h1 class="tasks-title">Daily tasks</h1>
+        <p class="tasks-date" id="today-label"></p>
+      </div>
+      <button type="button" class="hub-quiet" id="edit-toggle" aria-pressed="false">Edit</button>
+    </div>
+    <p class="tasks-status" id="status" role="status" aria-live="polite">Loading&hellip;</p>
+
+    <section class="tasks-section" aria-labelledby="daily-h">
+      <div class="tasks-section-head">
+        <h2 id="daily-h">Every day</h2>
+        <p class="tasks-count" id="daily-count"></p>
+      </div>
+      <ul class="task-list" id="daily"></ul>
+      <p class="hub-note" id="daily-empty" hidden>Nothing yet. Add something you want to do every day.</p>
+      <form class="task-add" id="add-daily">
+        <label for="add-daily-title" class="visually-hidden">New daily item</label>
+        <input id="add-daily-title" class="hub-input" maxlength="200" placeholder="Add a daily item" autocomplete="off" enterkeyhint="done">
+        <button type="submit" class="hub-btn">Add</button>
+      </form>
+      <p class="tasks-reset">Resets at midnight, New York time.</p>
+    </section>
+
+    <section class="tasks-section" aria-labelledby="todo-h">
+      <div class="tasks-section-head">
+        <h2 id="todo-h">To-dos</h2>
+      </div>
+      <div id="todos"></div>
+      <p class="hub-note" id="todo-empty" hidden>No to-dos.</p>
+      <form class="task-add task-add-todo" id="add-todo">
+        <label for="add-todo-title" class="visually-hidden">New to-do</label>
+        <input id="add-todo-title" class="hub-input" maxlength="200" placeholder="Add a to-do" autocomplete="off" enterkeyhint="done">
+        <label for="add-todo-due" class="visually-hidden">Due date (optional)</label>
+        <input id="add-todo-due" class="hub-input" type="date">
+        <button type="submit" class="hub-btn">Add</button>
+      </form>
+    </section>
+  </main>
+
+</div>
+</body>
+</html>

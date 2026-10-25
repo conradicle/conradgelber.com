@@ -1,0 +1,11 @@
+{
+  "tools": [
+    {
+      "id": "daily-tasks",
+      "name": "Daily tasks",
+      "description": "The daily checklist, with streaks, plus one-off to-dos by due date.",
+      "icon": "/hub/tools/daily-tasks/icon.svg",
+      "route": "/hub/tools/daily-tasks/"
+    }
+  ]
+}

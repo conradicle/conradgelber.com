@@ -151,6 +151,11 @@ h1 a{border-bottom:none;padding-bottom:0}
 }
 .mast-text{padding-bottom:2.4rem}
 .portrait{display:block;align-self:start;width:220px;max-width:100%;margin:calc(var(--h1-size) * .148) 0 0}
+/* The portrait links to /login/ with no visible hint (no underline, no
+   hand cursor); see DEPLOY.md, "The private hub". */
+a.portrait{border-bottom:none;padding-bottom:0;cursor:default}
+a.portrait:focus-visible{border-radius:50%}
+a.portrait picture{display:block}
 .portrait img{display:block;width:100%;height:auto;aspect-ratio:1 / 1;border-radius:50%;object-fit:cover;object-position:50% 30%}
 
 /* Photo band: sits under the section rule, on the column edges, 1.6rem clear
