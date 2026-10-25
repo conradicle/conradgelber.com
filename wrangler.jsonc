@@ -1,0 +1,18 @@
+// Pages Functions config for the site (the static files need none).
+// Only the private hub uses it: /login, /logout and /hub/* (see ADDING_TOOLS.md).
+// Pages serves this file publicly, like the rest of the repo: never put a
+// secret here. PIN_SALT_B64, PIN_HASH_B64 and SESSION_SECRET are Pages
+// secrets, set with `wrangler pages secret put`.
+{
+  "name": "conradgelber-com",
+  "pages_build_output_dir": ".",
+  "compatibility_date": "2026-09-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "conradgelber-hub",
+      "database_id": "f40b0995-51ed-4704-a02c-f4e626896a87",
+      "migrations_dir": "db/migrations"
+    }
+  ]
+}

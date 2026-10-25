@@ -1,0 +1,124 @@
+/* Daily tasks. Done = check mark + strikethrough + moved down.
+   Overdue = "!" mark + "Overdue" label + first group. Never colour alone. */
+
+.tasks{padding-bottom:3rem}
+.tasks-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding-top:1.8rem}
+.tasks-title{
+  font-family:Spectral,Georgia,serif;
+  font-weight:500;
+  font-size:clamp(1.75rem,4.4vw,2.1rem);
+  line-height:1.2;
+  letter-spacing:-0.012em;
+  margin:0;
+}
+.tasks-date{margin:.15rem 0 0;color:var(--ink-soft)}
+.tasks-status{margin:.4rem 0 0;min-height:1.4em;font-size:.83rem;color:var(--ink-soft)}
+
+.tasks-section{padding-top:1.8rem}
+.tasks-section-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:1rem;
+  border-bottom:1px solid var(--rule);
+  margin-bottom:.25rem;
+}
+.tasks-section-head h2{margin:0;padding-bottom:.45rem;border-bottom:none;font-size:1.35rem}
+.tasks-count{margin:0;font-size:.9rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.tasks-reset{margin:.5rem 0 0;font-size:.8rem;color:var(--ink-soft)}
+
+.task-list{list-style:none;margin:0;padding:0}
+.task{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  column-gap:.75rem;
+  border-bottom:1px solid var(--rule);
+}
+.check{
+  flex:1 1 14rem;
+  display:flex;
+  align-items:center;
+  gap:.8rem;
+  min-height:52px;
+  padding:.45rem 0;
+  font:inherit;
+  text-align:left;
+  color:var(--ink);
+  background:none;
+  border:0;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.check:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.check-icon{flex:0 0 auto;width:28px;height:28px}
+.check-icon rect{fill:#fff;stroke:var(--ink);stroke-width:1.6}
+.check-icon path{fill:none;stroke:var(--paper);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.is-done .check-icon rect{fill:var(--ink)}
+.check:hover .check-icon rect{stroke:var(--accent)}
+.is-done .task-title{text-decoration:line-through;text-decoration-thickness:1.5px;color:var(--ink-soft)}
+.task-meta{font-size:.82rem;color:var(--ink-soft);font-variant-numeric:tabular-nums;padding:0 0 .45rem 2.6rem;flex-basis:100%}
+@media (min-width:560px){
+  .task-meta{flex-basis:auto;padding:0;margin-left:auto;text-align:right}
+}
+
+/* To-do groups */
+.todo-group{margin-top:.9rem}
+.todo-group-h{
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+  margin:0;
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:.8rem;
+  font-weight:500;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.is-overdue .todo-group-h{color:var(--ink);font-weight:600}
+.flag{
+  display:inline-grid;
+  place-items:center;
+  flex:0 0 auto;
+  width:1.2rem;
+  height:1.2rem;
+  margin-right:.35rem;
+  border-radius:50%;
+  background:var(--ink);
+  color:var(--paper);
+  font-size:.75rem;
+  font-weight:600;
+  line-height:1;
+}
+.todo-group-h .flag{margin-right:0}
+.task.is-overdue .task-title{font-weight:500}
+.task.is-overdue .task-meta{color:var(--ink);font-weight:500;display:flex;align-items:center}
+@media (min-width:560px){
+  .task.is-overdue .task-meta{justify-content:flex-end}
+}
+
+/* Add forms */
+.task-add{display:flex;gap:.5rem;margin-top:.9rem}
+.task-add .hub-input:first-of-type{flex:1 1 auto}
+.task-add-todo{flex-wrap:wrap}
+.task-add-todo .hub-input:first-of-type{flex-basis:100%}
+.task-add-todo input[type="date"]{flex:1 1 auto}
+@media (min-width:560px){
+  .task-add-todo{flex-wrap:nowrap}
+  .task-add-todo .hub-input:first-of-type{flex-basis:auto}
+  .task-add-todo input[type="date"]{flex:0 0 auto}
+}
+
+/* Edit mode */
+.task-edit{gap:.5rem;padding:.5rem 0}
+.task-edit .hub-input:first-child{flex:1 1 6rem}
+.task-edit-todo .hub-input:first-child{flex-basis:100%}
+.task-edit-todo input[type="date"]{flex:1 1 auto}
+@media (min-width:560px){
+  .task-edit-todo .hub-input:first-child{flex-basis:6rem}
+  .task-edit-todo input[type="date"]{flex:0 0 auto}
+}
+.icon-btn{padding:0;font-size:1.1rem}
+.icon-btn:disabled{opacity:.35;cursor:default}
+.is-editing .task-add{display:none}

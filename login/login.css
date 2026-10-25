@@ -1,0 +1,31 @@
+/* /login/: one PIN field on the site's paper. Lives outside /hub/ because
+   everything under /hub/ needs a session. */
+.login{padding:clamp(3rem,12vw,6rem) 0 4rem}
+.login-form{display:grid;gap:.6rem;max-width:16rem}
+.login-form label{font-size:.9rem;color:var(--ink-soft)}
+.login-form input{
+  font:inherit;
+  font-size:1.25rem;
+  letter-spacing:.2em;
+  min-height:48px;
+  padding:.4rem .75rem;
+  color:var(--ink);
+  background:#fff;
+  border:1px solid var(--ink);
+  border-radius:2px;
+}
+.login-form input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.login-form button{
+  min-height:48px;
+  font:inherit;
+  font-weight:500;
+  color:var(--paper);
+  background:var(--ink);
+  border:1px solid var(--ink);
+  border-radius:2px;
+  cursor:pointer;
+}
+.login-form button:hover{background:var(--accent);border-color:var(--accent)}
+.login-form button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.login-msg{margin:.4rem 0 0;font-size:.95rem;font-weight:500}
+.login-msg::before{content:"! ";font-weight:600}

@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /login/
+Disallow: /hub/
 
 Sitemap: https://conradgelber.com/sitemap.xml
