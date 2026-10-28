@@ -1,51 +1,92 @@
-// Failed-PIN rate limit, one row per client in D1 (table login_attempts).
-// Five failures lock the client out for 15 minutes; each later lockout
-// doubles, up to a day. A day with no attempts forgets past lockouts.
+// Failed-PIN rate limit in D1 (table login_failures, one row per failure).
+// Two sliding windows, both checked before the PIN is:
+//   - per client: 5 failures in 15 minutes, then 429 until the oldest ages out;
+//   - everyone:   30 failures in 24 hours, then every login gets 429. There is
+//     one user, so this caps a guesser spread across many addresses.
 //
-// An attempt is reserved before the PIN is checked, in one atomic statement,
-// so a burst of parallel requests still gets only five guesses per window.
+// An attempt is reserved (its failure row written) before the PIN is
+// checked, in one statement that also checks both limits, so a burst of
+// parallel requests still gets only five guesses. A right PIN deletes the
+// client's rows.
 
-const MAX_FAILS = 5;
-const BASE_LOCK_MS = 15 * 60 * 1000;
-const MAX_LOCK_MS = 24 * 60 * 60 * 1000;
-const FORGET_MS = 24 * 60 * 60 * 1000;
+const IP_MAX = 5;
+const IP_WINDOW_MS = 15 * 60 * 1000;
+const ALL_MAX = 30;
+const ALL_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-// Returns { allowed: true, fails } or { allowed: false, retryMs }.
-export async function reserveAttempt(db, key, now = Date.now()) {
-  const row = await db
-    .prepare(
-      `INSERT INTO login_attempts (ip, fails, lockouts, locked_until, updated_at)
-       VALUES (?1, 1, 0, 0, ?2)
-       ON CONFLICT(ip) DO UPDATE SET
-         lockouts = CASE WHEN locked_until <= ?2 AND updated_at < ?2 - ?3 THEN 0 ELSE lockouts END,
-         fails = CASE WHEN locked_until > ?2 THEN fails
-                      WHEN updated_at < ?2 - ?3 THEN 1
-                      ELSE fails + 1 END,
-         updated_at = CASE WHEN locked_until > ?2 THEN updated_at ELSE ?2 END
-       RETURNING fails, locked_until`
-    )
-    .bind(key, now, FORGET_MS)
-    .first();
-  if (row.locked_until > now) return { allowed: false, retryMs: row.locked_until - now };
-  // Over the limit but not yet locked: a parallel request is about to lock it.
-  if (row.fails > MAX_FAILS) return { allowed: false, retryMs: BASE_LOCK_MS };
-  return { allowed: true, fails: row.fails };
+// Lockouts this isolate has already seen, so a client hammering away while
+// locked costs no D1 reads. Only ever shortcuts to "no"; D1 decides "yes".
+// Held for at most a minute, so clearing the table by hand takes effect soon.
+const CACHE_MS = 60 * 1000;
+// Each entry is { until, seen }: the real unlock time, trusted until seen + CACHE_MS.
+const lockedIps = new Map();
+let lockedAll = { until: 0, seen: 0 };
+
+function cachedUntil(entry, now) {
+  return entry && entry.seen + CACHE_MS > now && entry.until > now ? entry.until : 0;
 }
 
-// Called after a wrong PIN. Returns the lockout length if this one locked.
-export async function recordFailure(db, key, fails, now = Date.now()) {
-  if (fails < MAX_FAILS) return 0;
-  const row = await db
-    .prepare(
-      `UPDATE login_attempts SET lockouts = lockouts + 1, fails = 0,
-         locked_until = ?2 + MIN(?3 * (1 << lockouts), ?4), updated_at = ?2
-       WHERE ip = ?1 RETURNING locked_until`
-    )
-    .bind(key, now, BASE_LOCK_MS, MAX_LOCK_MS)
-    .first();
-  return row ? row.locked_until - now : BASE_LOCK_MS;
+const enc = new TextEncoder();
+
+// HMAC with the session secret, so the stored hashes can't be reversed by
+// hashing every IPv4 address.
+export async function hashClient(key, secret) {
+  const k = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", k, enc.encode("login-ip-v1." + key)));
+  return Array.from(sig, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export async function clearAttempts(db, key) {
-  await db.prepare("DELETE FROM login_attempts WHERE ip = ?1").bind(key).run();
+// Returns { allowed: true } with the attempt reserved, or
+// { allowed: false, retryMs } with nothing written.
+export async function reserveAttempt(db, ipHash, now = Date.now()) {
+  const cached = Math.max(cachedUntil(lockedAll, now), cachedUntil(lockedIps.get(ipHash), now));
+  if (cached > now) return { allowed: false, retryMs: cached - now };
+
+  const row = await db
+    .prepare(
+      `INSERT INTO login_failures (ip_hash, at)
+       SELECT ?1, ?2
+       WHERE (SELECT COUNT(*) FROM login_failures WHERE ip_hash = ?1 AND at > ?2 - ?3) < ?4
+         AND (SELECT COUNT(*) FROM login_failures WHERE at > ?2 - ?5) < ?6
+       RETURNING id`
+    )
+    .bind(ipHash, now, IP_WINDOW_MS, IP_MAX, ALL_WINDOW_MS, ALL_MAX)
+    .first();
+  if (row) return { allowed: true };
+
+  // Over a limit: work out when the window clears enough for one more try.
+  const w = await db
+    .prepare(
+      `SELECT
+         (SELECT COUNT(*) FROM login_failures WHERE ip_hash = ?1 AND at > ?2 - ?3) AS ip_n,
+         (SELECT MIN(at)  FROM login_failures WHERE ip_hash = ?1 AND at > ?2 - ?3) AS ip_oldest,
+         (SELECT COUNT(*) FROM login_failures WHERE at > ?2 - ?4) AS all_n,
+         (SELECT MIN(at)  FROM login_failures WHERE at > ?2 - ?4) AS all_oldest`
+    )
+    .bind(ipHash, now, IP_WINDOW_MS, ALL_WINDOW_MS)
+    .first();
+  let until = now + 1000;
+  if (w.ip_n >= IP_MAX) {
+    const ipUntil = w.ip_oldest + IP_WINDOW_MS;
+    lockedIps.set(ipHash, { until: ipUntil, seen: now });
+    until = Math.max(until, ipUntil);
+  }
+  if (w.all_n >= ALL_MAX) {
+    const allUntil = w.all_oldest + ALL_WINDOW_MS;
+    lockedAll = { until: allUntil, seen: now };
+    until = Math.max(until, allUntil);
+  }
+  if (lockedIps.size > 1000) lockedIps.clear();
+  return { allowed: false, retryMs: until - now };
+}
+
+// After a right PIN: the client's failures (and the reserved attempt) go.
+export async function clearAttempts(db, ipHash) {
+  lockedIps.delete(ipHash);
+  await db.prepare("DELETE FROM login_failures WHERE ip_hash = ?1").bind(ipHash).run();
+}
+
+// Rows older than both windows count for nothing.
+export async function pruneAttempts(db, now = Date.now()) {
+  await db.prepare("DELETE FROM login_failures WHERE at <= ?1").bind(now - ALL_WINDOW_MS).run();
 }
