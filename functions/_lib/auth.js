@@ -3,6 +3,8 @@
 // PIN_SALT_B64, PIN_HASH_B64 and SESSION_SECRET are Pages secrets, and the
 // DB binding is the D1 database named in wrangler.jsonc. See ADDING_TOOLS.md.
 
+import { isPagePath } from "./paths.js";
+
 export const COOKIE = "__Host-hub";
 const SESSION_DAYS = 30;
 const PBKDF2_ITERATIONS = 100000; // the Workers WebCrypto maximum
@@ -125,6 +127,13 @@ export function redirect(location, extra = {}) {
   const headers = privateHeaders(new Headers({ Location: location }));
   for (const [k, v] of Object.entries(extra)) headers.append(k, v);
   return new Response(null, { status: 303, headers });
+}
+
+// What a signed-out request into /hub gets: the login form for a page, a
+// 401 for a script, JSON, an icon or the storage API.
+export function signedOut(path) {
+  if (isPagePath(path)) return redirect("/login/");
+  return json({ error: "signed out" }, 401);
 }
 
 export function json(data, status = 200, extra = {}) {

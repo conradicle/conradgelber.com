@@ -10,9 +10,12 @@ all before starting.
 - **Hosting.** The site is Cloudflare Pages, Git-connected: a push to `main`
   deploys the repo root as-is, no build step. Server code is Pages Functions
   in `functions/`. Data is a D1 database bound as `DB` (see `wrangler.jsonc`).
-- **The gate.** `functions/hub/_middleware.js` runs before every request
-  under `/hub/`: pages, scripts, images, JSON, the API. No valid session
-  cookie means a redirect to `/login/` (or a 401 for `/hub/api/*`). So a file
+- **The gate.** `functions/_middleware.js` runs before every request to the
+  site and checks the session for anything whose canonical path is under
+  `/hub/` (however it is spelled: `//hub/`, `/hub%2f`, `/HUB/`), then
+  `functions/hub/_middleware.js` checks again. No valid session cookie means
+  a redirect to `/login/` for a page, or a 401 for anything else (scripts,
+  JSON, images, `/hub/api/*`). So a file
   you put anywhere under `hub/` is private on the site automatically.
   You never write auth code in a tool.
 - **But the repo is public.** `conradicle/conradgelber.com` is a public

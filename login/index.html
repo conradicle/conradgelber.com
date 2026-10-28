@@ -26,8 +26,8 @@
     <form method="post" action="/login/" class="login-form">
       <input type="text" name="username" autocomplete="username" value="conrad" hidden>
       <label for="pin">PIN</label>
-      <input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]*"
-        autocomplete="current-password" required autofocus maxlength="32"
+      <input id="pin" name="pin" type="password"
+        autocomplete="current-password" required autofocus minlength="8" maxlength="128"
         aria-describedby="login-msg">
       <button type="submit">Enter</button>
       <p id="login-msg" class="login-msg" role="alert" hidden></p>

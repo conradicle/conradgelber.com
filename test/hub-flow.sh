@@ -4,7 +4,8 @@
 #   test/hub-flow.sh http://127.0.0.1:8788 [right-pin]
 # Without a right PIN it checks only the signed-out and wrong-PIN paths.
 # It locks out the IP it runs from; clear that afterwards with
-#   wrangler d1 execute conradgelber-hub [--remote|--local] --command "DELETE FROM login_attempts"
+#   wrangler d1 execute conradgelber-hub [--remote|--local] --command "DELETE FROM login_failures"
+# (and, on the live site, it uses 6 of the 30 failures allowed a day).
 set -u
 BASE=${1:?base url}
 PIN=${2:-}
@@ -20,8 +21,9 @@ post_pin() { curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -c "$JAR" -b
 echo "-- signed out"
 check "/hub/ redirects to login"        "303 $BASE/login/" "$(code "$BASE/hub/")"
 check "tool page redirects to login"    "303 $BASE/login/" "$(code "$BASE/hub/tools/daily-tasks/")"
-check "tool script redirects to login"  "303 $BASE/login/" "$(code "$BASE/hub/tools/daily-tasks/tasks.js")"
-check "tools.json redirects to login"   "303 $BASE/login/" "$(code "$BASE/hub/tools.json")"
+check "tool script says 401"            "401 " "$(code "$BASE/hub/tools/daily-tasks/tasks.js")"
+check "tools.json says 401"             "401 " "$(code "$BASE/hub/tools.json")"
+check "//hub/ redirects to login"       "303 $BASE/login/" "$(code --path-as-is "$BASE//hub/")"
 check "storage API says 401"            "401 " "$(code "$BASE/hub/api/store/daily-tasks/state")"
 check "storage write says 401"          "401 " "$(code -X PUT -H "Origin: $BASE" -d '{}' "$BASE/hub/api/store/daily-tasks/state")"
 check "forged cookie rejected"          "401 " "$(code -b "__Host-hub=9999999999999.abc.def" "$BASE/hub/api/store/daily-tasks/state")"
@@ -30,12 +32,13 @@ check "login page has noindex header"   "1" "$(curl -sI "$BASE/login/" | grep -c
 check "cross-origin login post refused" "403 " "$(code -H "Origin: https://evil.example" -d pin=1 "$BASE/login/")"
 
 echo "-- wrong PIN and lockout"
-for i in 1 2 3 4; do
+check "short PIN refused"               "303 $BASE/login/?e=short" "$(post_pin 1234)"
+for i in 1 2 3 4 5; do
   check "wrong PIN $i rejected" "303 $BASE/login/?e=wrong" "$(post_pin 0000000000)"
 done
-check "wrong PIN 5 locks"               "303 $BASE/login/?e=locked&m=15" "$(post_pin 0000000000)"
+check "wrong PIN 6 gets 429"            "429 " "$(post_pin 0000000000)"
 if [ -n "$PIN" ]; then
-  check "right PIN refused while locked" "303 $BASE/login/?e=locked&m=15" "$(post_pin "$PIN")"
+  check "right PIN refused while locked" "429 " "$(post_pin "$PIN")"
 fi
 check "locked message shown" "1" "$(curl -s "$BASE/login/?e=locked&m=15" | grep -c 'Too many tries. Try again in 15 minutes.')"
 check "still no session" "401 " "$(code -b "$JAR" "$BASE/hub/api/store/daily-tasks/state")"

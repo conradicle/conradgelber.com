@@ -666,24 +666,42 @@ login and a dashboard of tools. How to add a tool is in
   robots meta tag. None of it is in `sitemap.xml`.
 - **Pages Functions.** `functions/login/index.js` (GET shows the static
   `login/index.html` with an error message filled in by HTMLRewriter; POST
-  checks the PIN), `functions/logout.js`, `functions/hub/_middleware.js` (the
-  session check for every `/hub/` request, static files included) and
-  `functions/hub/api/store/` (the storage API). Shared code is in
+  checks the PIN), `functions/logout.js`, `functions/_middleware.js` (the
+  hub gate: runs on every request to the site and requires a session for
+  anything whose canonical path is in `/hub`, see below),
+  `functions/hub/_middleware.js` (a second session check on canonical
+  `/hub/` requests, and marks them private) and `functions/hub/api/store/`
+  (the storage API). Shared code is in
   `functions/_lib/`. Pages deploys these with every push, like the static
   files. Pages also serves the `functions/` folder as plain files, which is
   harmless: the same code is public on GitHub and holds no secrets.
+- **Why the gate runs on every request.** Pages' static file server
+  normalizes paths before looking up a file, so `//hub/`, `/hub%2f` and
+  `/%68ub/` all serve `hub/index.html`, while the Functions router matches
+  the raw path and so never ran `functions/hub/_middleware.js` for them.
+  `_routes.json` (`"include": ["/*"]`, no excludes) makes Functions run
+  before the static files for every request, and `functions/_middleware.js`
+  decodes, collapses slashes, resolves `.`/`..` and ignores case
+  (`functions/_lib/paths.js`) before deciding. Never add an `exclude` to
+  `_routes.json`: excludes match the raw path too, so `/fonts/..%2fhub/`
+  could slip past. The cost is a Functions invocation per page view.
+  Signed out, a page gets a 303 to `/login/` and anything else (scripts,
+  JSON, icons, the API) a 401.
 - **PIN check.** PBKDF2-SHA256, 100,000 iterations (the Workers WebCrypto
   maximum), against the `PIN_SALT_B64` and `PIN_HASH_B64` secrets, compared in
-  constant time. Never on the client. To change the PIN, make a new salt and
-  hash (the `node -e` line in ADDING_TOOLS.md, with the new PIN) and put both
-  secrets again (below).
-- **Rate limit.** Per IPv4 address or IPv6 /64, in D1 (`login_attempts`):
-  five wrong PINs lock it for 15 minutes, then 30, 60 and so on up to 24
-  hours; a day with no attempts forgets past lockouts. If Conrad locks
-  himself out:
+  constant time. Never on the client. The server accepts 8 to 128
+  characters, any characters, so a passphrase works. To change it, run
+  `scripts/set-hub-pin.sh` (asks for the new PIN twice, puts both secrets),
+  then push or retry the latest deployment.
+- **Rate limit.** In D1, one row per failure (`login_failures`: an HMAC of
+  the IPv4 address or IPv6 /64, and a timestamp). Checked before the PIN:
+  five failures from one client in 15 minutes, or 30 from everyone in 24
+  hours, and logins get `429` with `Retry-After` until the window clears.
+  A right PIN clears that client's rows. If Conrad locks himself out (it
+  takes up to a minute to apply, as each isolate caches a lockout briefly):
 
   ```bash
-  npx wrangler@4.150.0 d1 execute conradgelber-hub --remote --command "DELETE FROM login_attempts"
+  npx wrangler@4.150.0 d1 execute conradgelber-hub --remote --command "DELETE FROM login_failures"
   ```
 
 - **Session.** A signed cookie, `__Host-hub` (HttpOnly, Secure,
@@ -717,7 +735,9 @@ login and a dashboard of tools. How to add a tool is in
 - **Tests.** `test/hub-flow.sh <base-url> [pin]` runs the whole sign-in flow
   (signed-out blocks, wrong PIN, lockout, sign-in, storage API, logout).
   Against the live site it locks out the IP it runs from; clear it with the
-  command above. `node --test test/*.test.mjs` tests the Daily tasks model.
+  command above. `test/hub-security.sh <base-url>` tries the odd `/hub`
+  spellings signed out (safe against the live site); add `--limit` on local
+  dev to check the 429. `node --test test/*.test.mjs` tests the Daily tasks model.
 
 ## After the first deploy
 
