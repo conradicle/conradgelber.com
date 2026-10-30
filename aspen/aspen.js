@@ -1,4 +1,4 @@
-import {mountains, getDifficulty} from './mountains.js?v=5';
+import {mountains, getDifficulty} from './mountains.js?v=6';
 
 const $ = id => document.getElementById(id);
 const format = n => n.toLocaleString('en-US');
@@ -7,6 +7,7 @@ let scene = null;
 let starting = null;
 let active = null;
 let entries = [];
+let restoringFocus = false;
 
 // Readout under the landing view.
 function preview(m) {
@@ -33,7 +34,7 @@ function start() {
   if (starting) return starting;
   $('error').hidden = true;
   status('Loading the Roaring Fork Valley…');
-  starting = import('./viewer.js?v=5')
+  starting = import('./viewer.js?v=6')
     .then(({createScene}) => createScene('cesium', mountains, {
       onHover: preview,
       onEnter: m => openMountain(m),
@@ -96,7 +97,10 @@ function backToValley() {
   const was = active;
   preview(null);
   scene?.overview();
+  // Return keyboard focus to the card without treating it as a hover.
+  restoringFocus = true;
   document.querySelector(`.mountain-card[data-mountain="${was}"]`)?.focus({preventScroll: true});
+  restoringFocus = false;
 }
 
 // Accessible cards under the 3D view; they mirror hover onto the terrain.
@@ -108,7 +112,7 @@ for (const m of mountains) {
   b.setAttribute('aria-label', `${m.name}, ${statsLine(m)}. Fly in to explore in 3D`);
   const hover = () => { preview(m); scene?.hover(m.id); };
   b.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') hover(); });
-  b.addEventListener('focus', hover);
+  b.addEventListener('focus', () => { if (!restoringFocus) hover(); });
   b.addEventListener('pointerleave', () => { if (active === m.id && !document.body.classList.contains('exploring')) { preview(null); scene?.hover(null); } });
   b.addEventListener('click', () => openMountain(m));
   $('mountain-cards').append(b);

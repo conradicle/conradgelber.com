@@ -1,7 +1,7 @@
 // One persistent 3D scene for the whole page: the real Roaring Fork Valley on the
 // landing screen, then a fly-in and orbit for each mountain. Keeping a single
 // viewer means one Google root-tile request per visit (Cesium Community quota).
-import {getDifficulty} from './mountains.js?v=5';
+import {getDifficulty} from './mountains.js?v=6';
 
 const CESIUM_ROOT = 'https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/';
 const FEET = 0.3048;
@@ -43,7 +43,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
   const C = await loadCesium();
   C.Ion.defaultAccessToken = token;
 
-  const footprints = await (await fetch('/aspen/data/footprints.json?v=5')).json();
+  const footprints = await (await fetch('/aspen/data/footprints.json?v=6')).json();
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const phone = matchMedia('(max-width:700px)').matches;
 
@@ -139,7 +139,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
   const runSources = {};
   async function loadRuns(m) {
     if (runSources[m.id]) return runSources[m.id];
-    const res = await fetch(`/aspen/data/${m.id}.geojson?v=5`);
+    const res = await fetch(`/aspen/data/${m.id}.geojson?v=6`);
     if (!res.ok) throw new Error('Trail data could not load. Please try again.');
     const data = await res.json();
     const source = new C.CustomDataSource(m.id);
