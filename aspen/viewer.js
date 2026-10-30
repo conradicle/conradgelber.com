@@ -36,7 +36,7 @@ export async function startExplorer(m,isCurrent,onCleanup){
  tileset=await C.createGooglePhotorealistic3DTileset({onlyUsingWithGoogleGeocoder:true},{maximumScreenSpaceError:matchMedia('(max-width:700px)').matches?24:16,cacheBytes:96*1024*1024,maximumCacheOverflowBytes:32*1024*1024,enableCollision:true});
  if(dead||!isCurrent()){tileset.destroy();cleanup();return;}
  viewer.scene.primitives.add(tileset);
- removes.push(tileset.tileLoadProgressEvent.addEventListener((pending,processing)=>{if(!isCurrent())return;$('status').hidden=pending+processing===0;$('status').textContent='Loading mountain detail…';}));
+ removes.push(tileset.loadProgress.addEventListener((pending,processing)=>{if(!isCurrent())return;$('status').hidden=pending+processing===0;$('status').textContent='Loading mountain detail…';}));
  removes.push(tileset.tileFailed.addEventListener(()=>{if(!isCurrent())return;$('status').hidden=false;$('status').textContent='Some tiles could not load. Check your connection or retry.';}));
  const dataResponse=await fetch(`/aspen/data/${m.id}.geojson`,{signal:controller.signal});if(!dataResponse.ok)throw new Error('Trail data could not load. Please try again.');const data=await dataResponse.json();if(dead||!isCurrent()){cleanup();return;}
  const entries=new Map();
@@ -50,5 +50,5 @@ export async function startExplorer(m,isCurrent,onCleanup){
  $('trail-select').onchange=()=>show(viewer.entities.getById($('trail-select').value));
  handler=new C.ScreenSpaceEventHandler(viewer.canvas);handler.setInputAction(e=>{const picked=viewer.scene.pick(e.position);if(picked?.id)show(picked.id)},C.ScreenSpaceEventType.LEFT_CLICK);
  viewer.scene.requestRender();return cleanup;
- }catch(e){cleanup();throw new Error(e.message?.includes('Trail data')?e.message:'The 3D view could not start. Check the Cesium token, Google 3D Tiles access, your connection, and WebGL support, then try again.');}
+ }catch(e){console.error('Aspen viewer initialization failed:', e);cleanup();throw new Error(e.message?.includes('Trail data')?e.message:'The 3D view could not start. Check the Cesium token, Google 3D Tiles access, your connection, and WebGL support, then try again.');}
 }
