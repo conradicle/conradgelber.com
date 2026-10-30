@@ -4,6 +4,11 @@
 import {getDifficulty} from './mountains.js?v=6';
 
 const CESIUM_ROOT = 'https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/';
+// SHA-384 of the two files above, so a changed copy on the CDN is refused rather
+// than run. Recompute both when CESIUM_ROOT moves to another release:
+// curl -s <url> | openssl dgst -sha384 -binary | base64
+const CESIUM_JS_SRI = 'sha384-T5EuhVQI1CIAbJfi4MgfK9AvHsM80n3qM7TADseY8WtjMVUfjh/wMSjC66NfosZh';
+const CESIUM_CSS_SRI = 'sha384-ghEeMdcWWzRv/BPeUcX835vcKDGrxvROXisl/Btpv3GeekBUXTSPVcFJpI1Tcrgp';
 const FEET = 0.3048;
 // Target sits east of the ski areas' middle so they frame to the right of the headline.
 const VALLEY = {lon: -106.858, lat: 39.168, height: 2500, range: 23000, pitch: -0.44};
@@ -19,9 +24,13 @@ function loadCesium() {
       window.CESIUM_BASE_URL = CESIUM_ROOT;
       const css = document.createElement('link');
       css.rel = 'stylesheet';
+      css.integrity = CESIUM_CSS_SRI;
+      css.crossOrigin = 'anonymous';
       css.href = CESIUM_ROOT + 'Widgets/widgets.css';
       document.head.append(css);
       const s = document.createElement('script');
+      s.integrity = CESIUM_JS_SRI;
+      s.crossOrigin = 'anonymous';
       s.src = CESIUM_ROOT + 'Cesium.js';
       s.onload = () => resolve(window.Cesium);
       s.onerror = () => {
