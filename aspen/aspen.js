@@ -34,7 +34,7 @@ function start() {
   if (starting) return starting;
   $('error').hidden = true;
   status('Loading the Roaring Fork Valley…');
-  starting = import('./viewer.js?v=6')
+  starting = import('./viewer.js?v=7')
     .then(({createScene}) => createScene('cesium', mountains, {
       onHover: preview,
       onEnter: m => openMountain(m),
