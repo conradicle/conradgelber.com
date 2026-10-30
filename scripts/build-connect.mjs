@@ -84,7 +84,7 @@ ${sharingImage ? `<meta name="twitter:image" content="${escape(sharingImage)}">
 <a class="skip" href="#main">Skip to main content</a>
 <div class="connect-wrap">
   <header class="connect-mast">
-    <span class="monogram" aria-label="${escape(p.name)}">${escape(p.initials)}</span>
+    <span class="monogram" aria-hidden="true">${escape(p.initials)}</span>
     <span class="mast-caption">A personal connection</span>
   </header>
   <main id="main" tabindex="-1">
