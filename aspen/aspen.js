@@ -1,4 +1,4 @@
-import {mountains, getDifficulty} from './mountains.js?v=6';
+import {mountains, getDifficulty} from './mountains.js?v=7';
 
 const $ = id => document.getElementById(id);
 const format = n => n.toLocaleString('en-US');
@@ -34,7 +34,7 @@ function start() {
   if (starting) return starting;
   $('error').hidden = true;
   status('Loading the Roaring Fork Valley…');
-  starting = import('./viewer.js?v=6')
+  starting = import('./viewer.js?v=7')
     .then(({createScene}) => createScene('cesium', mountains, {
       onHover: preview,
       onEnter: m => openMountain(m),
