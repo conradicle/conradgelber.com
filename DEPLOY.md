@@ -125,11 +125,41 @@ below), so check them on the live site.
 
 ## Pages and the tab bar
 
+### The NFC / QR connect page
+
+`/connect` resolves to the public static page at `/connect/`. Program
+**https://conradgelber.com/connect/** onto the NFC card and use the same URL
+for its QR code. No login, tracking script, or client-side JavaScript is
+required. It reuses the site's portrait, social preview, self-hosted fonts,
+and color palette; the hub's session gate does not cover this path.
+
+Edit **`connect/profile.mjs`** for the name, initials, bio, portrait, all four
+social/website URLs, production origin, and sharing metadata. Then run:
+
+```bash
+node scripts/build-connect.mjs
+node --test test/connect-page.test.mjs
+```
+
+Commit both the configuration and regenerated `connect/index.html`, then
+push as usual. There is still no build step on Cloudflare. A missing social
+URL should be `null`; it renders as a noninteractive “Not linked yet” row.
+Placeholder and unsafe URLs are also disabled. Set `image` to `null` to use
+initials. Keep images same-origin for the existing CSP, and use a new image
+filename when replacing an image because `/img/*` is immutable. The sharing
+image is independent of the portrait: update both when appropriate. Layout
+is in `connect/connect.css`; bump its `?v=` in `scripts/build-connect.mjs`
+after changing that stylesheet, then regenerate HTML.
+
+The details are populated from the existing homepage and owner-supplied
+Instagram and Substack URLs; no placeholders remain.
+
 Each section has its own page, a plain `index.html` in its own folder:
 
 | Page | File |
 | --- | --- |
 | `/` | `index.html` |
+| `/connect/` | `connect/index.html` |
 | `/work/` | `work/index.html` |
 | `/built/` | `built/index.html` |
 | `/writing/` | `writing/index.html` |
