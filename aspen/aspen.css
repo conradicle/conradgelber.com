@@ -1,3 +1,73 @@
-[hidden]{display:none!important}.explorer-header,.explorer-footer{display:flex;justify-content:space-between;gap:1rem;max-width:1400px;margin:auto;padding:1.4rem 3vw;font-size:.85rem}.explorer-header{border-bottom:1px solid var(--rule)}#valley{max-width:1300px;margin:auto;padding:3rem 3vw}.intro{position:relative;margin-bottom:2rem}.eyebrow{font-size:.7rem;letter-spacing:.16em;font-weight:500}.intro h1{font-size:clamp(2.5rem,5.5vw,4.8rem)}.intro .standfirst{max-width:36ch}.map-wrap{border:1px solid var(--rule);overflow:hidden;border-radius:4px}#map{width:100%;display:block}.map-label{font:12px 'IBM Plex Sans',sans-serif;letter-spacing:1px;fill:#425b60}.marker{cursor:pointer;outline:none}.marker .peak{fill:#647f76;stroke:#f6f7ef;stroke-width:2;transition:transform .2s,fill .2s}.marker:hover .peak,.marker.active .peak,.marker:focus .peak{transform:translateY(-9px);fill:#14675e}.marker text{font:500 17px 'IBM Plex Sans',sans-serif;fill:#13233c;paint-order:stroke;stroke:#e8eee9;stroke-width:5px;stroke-linejoin:round}.marker .hit{fill:transparent}.choose-heading{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-top:1.8rem}.choose-heading h2{font:500 1.7rem Spectral,serif}.choose-heading p{font-size:.8rem;color:var(--ink-soft)}.mountain-cards{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule)}button,select{font:inherit}button{cursor:pointer;border:1px solid var(--rule);background:var(--paper);color:var(--ink);padding:.65rem .9rem;border-radius:3px;min-height:44px}button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.mountain-card{text-align:left;border:0;border-radius:0;border-bottom:3px solid transparent;padding:1.4rem 1rem;background:transparent}.mountain-card.active,.mountain-card:hover,.mountain-card:focus-visible{background:#e0e7e4;border-bottom-color:var(--accent)}.mountain-card strong{display:block;font:500 1.4rem Spectral,serif}.card-stats{display:block;font-size:.78rem;margin:.6rem 0;color:var(--ink-soft)}.enter{font-size:.8rem;color:var(--accent)}#explorer{display:grid;grid-template-columns:minmax(0,1fr) 310px;min-height:78vh}.viewer-wrap{position:relative;min-height:650px;background:#15283a}#cesium{position:absolute;inset:0}.view-tools{position:absolute;top:16px;left:16px;right:16px;display:flex;flex-wrap:wrap;gap:8px;z-index:2;font-size:.8rem}.status{position:absolute;top:70px;left:16px;background:#eef0f3ed;padding:.4rem .7rem;font-size:.8rem;pointer-events:none;z-index:2}.error{position:absolute;top:28%;left:50%;transform:translateX(-50%);width:min(85%,440px);padding:1.5rem;background:var(--paper);z-index:3}.error h2{font:500 1.8rem Spectral,serif}.error p{font-size:.9rem}#panel{padding:1.5rem;max-height:85vh;overflow:auto}#panel h2{font:500 2.2rem/1.1 Spectral,serif;margin:.5rem 0}#panel h3{font-size:.9rem;margin:.5rem 0}#mountain-tag,.legend,.data-note{font-size:.8rem;color:var(--ink-soft)}.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:1rem 0;border-bottom:1px solid var(--rule)}.stats strong{display:block;font-size:1.05rem}.stats span{font-size:.65rem}.legend{padding:.8rem 0}#run-detail{padding:1rem;background:#e0e7e4;margin-bottom:1rem;font-size:.9rem}#panel label{display:block;font-size:.8rem}#trail-select{width:100%;font-size:.8rem;min-height:44px;margin:.5rem 0 1rem}.future-panel{border-top:1px solid var(--rule);padding:.7rem 0}.future-panel p{font-size:.75rem;color:var(--ink-soft);margin:0}.cesium-widget-credits{font-size:10px!important}.explorer-footer{border-top:1px solid var(--rule);flex-wrap:wrap} @media(max-width:700px){#valley{padding-top:2rem}.mountain-cards{grid-template-columns:1fr 1fr}.choose-heading{display:block}.choose-heading p{margin-top:-.6rem}.marker text{font-size:21px}#explorer{display:flex;flex-direction:column}.viewer-wrap{height:60svh;min-height:390px}#panel{max-height:none;border-radius:16px 16px 0 0;margin-top:-12px;position:relative;background:var(--paper);z-index:2}.view-tools{top:10px;left:10px;right:10px;font-size:.72rem;gap:4px}.view-tools button{padding:.5rem}.status{top:62px;font-size:.72rem}.explorer-footer{font-size:.7rem}.stats{max-width:400px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+[hidden]{display:none!important}
+.explorer-header,.explorer-footer{display:flex;justify-content:space-between;gap:1rem;max-width:1400px;margin:auto;padding:1.4rem 3vw;font-size:.85rem}
+.explorer-header{border-bottom:1px solid var(--rule)}
+.explorer-footer{border-top:1px solid var(--rule);flex-wrap:wrap}
+.eyebrow{font-size:.7rem;letter-spacing:.16em;font-weight:500}
 
-#map-detail{margin:0;padding:.8rem 1rem;min-height:3rem;font-size:.8rem;background:#e5eae7;border-top:1px solid var(--rule)}
+/* The 3D stage: the real valley on landing, a mountain once you fly in. */
+.explorer{display:grid;grid-template-columns:minmax(0,1fr)}
+body.exploring .explorer{grid-template-columns:minmax(0,1fr) 310px}
+.stage{position:relative;height:min(84vh,880px);min-height:560px;background:#15283a;overflow:hidden}
+#cesium{position:absolute;inset:0}
+.intro{position:absolute;inset:0 auto auto 0;z-index:2;max-width:640px;padding:3rem 3vw 5rem;color:#f6f2e6;pointer-events:none;background:radial-gradient(120% 110% at 0 0,#13233cd9 0,#13233c8c 45%,transparent 75%)}
+.intro h1{font-size:clamp(2.4rem,5vw,4.4rem);color:#f6f2e6;margin:.4rem 0 .8rem}
+.intro .standfirst{max-width:34ch;color:#e4e8e6}
+.readout{position:absolute;left:3vw;bottom:2rem;z-index:2;display:flex;flex-direction:column;gap:.2rem;max-width:420px;padding:.9rem 1.1rem;background:#eef0f3f0;border-left:4px solid var(--accent);pointer-events:none}
+.readout strong{font:500 1.5rem Spectral,serif}
+.readout span{font-size:.8rem;color:var(--ink-soft)}
+.view-tools{position:absolute;top:16px;left:16px;right:16px;display:flex;flex-wrap:wrap;gap:8px;z-index:2;font-size:.8rem}
+.status{position:absolute;top:16px;right:16px;background:#eef0f3ed;padding:.4rem .7rem;font-size:.8rem;pointer-events:none;z-index:2;margin:0}
+body.exploring .status{top:70px;left:16px;right:auto}
+.error{position:absolute;top:30%;left:50%;transform:translateX(-50%);width:min(85%,440px);padding:1.5rem;background:var(--paper);z-index:3}
+.error h2{font:500 1.8rem Spectral,serif}
+.error p{font-size:.9rem}
+.cesium-widget-credits{font-size:10px!important}
+
+button,select{font:inherit}
+button{cursor:pointer;border:1px solid var(--rule);background:var(--paper);color:var(--ink);padding:.65rem .9rem;border-radius:3px;min-height:44px}
+button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+/* Cards under the stage: the keyboard and screen-reader way in. */
+.choose{max-width:1300px;margin:auto;padding:1.6rem 3vw 3rem}
+.choose-heading{display:flex;align-items:baseline;justify-content:space-between;gap:1rem}
+.choose-heading h2{font:500 1.7rem Spectral,serif}
+.choose-heading p{font-size:.8rem;color:var(--ink-soft)}
+.mountain-cards{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule)}
+.mountain-card{text-align:left;border:0;border-radius:0;border-bottom:3px solid transparent;padding:1.4rem 1rem;background:transparent}
+.mountain-card.active,.mountain-card:hover,.mountain-card:focus-visible{background:#e0e7e4;border-bottom-color:var(--accent)}
+.mountain-card strong{display:block;font:500 1.4rem Spectral,serif}
+.card-stats{display:block;font-size:.78rem;margin:.6rem 0;color:var(--ink-soft)}
+.enter{font-size:.8rem;color:var(--accent)}
+
+/* Mountain panel. */
+#panel{padding:1.5rem;max-height:min(84vh,880px);overflow:auto}
+#panel h2{font:500 2.2rem/1.1 Spectral,serif;margin:.5rem 0}
+#panel h3{font-size:.9rem;margin:.5rem 0}
+#mountain-tag,.legend,.data-note{font-size:.8rem;color:var(--ink-soft)}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:1rem 0;border-bottom:1px solid var(--rule)}
+.stats strong{display:block;font-size:1.05rem}
+.stats span{font-size:.65rem}
+.legend{padding:.8rem 0}
+#run-detail{padding:1rem;background:#e0e7e4;margin-bottom:1rem;font-size:.9rem}
+#panel label{display:block;font-size:.8rem}
+#trail-select{width:100%;font-size:.8rem;min-height:44px;margin:.5rem 0 1rem}
+.future-panel{border-top:1px solid var(--rule);padding:.7rem 0}
+.future-panel p{font-size:.75rem;color:var(--ink-soft);margin:0}
+
+@media(max-width:700px){
+ .stage{height:70svh;min-height:440px}
+ body.exploring .explorer{display:flex;flex-direction:column}
+ body.exploring .stage{height:60svh;min-height:390px}
+ .intro{padding:1.6rem 16px 4rem;max-width:none}
+ .intro .standfirst{font-size:.9rem}
+ .readout{left:16px;right:16px;bottom:1rem;max-width:none}
+ .readout strong{font-size:1.2rem}
+ .mountain-cards{grid-template-columns:1fr 1fr}
+ .choose{padding:1.2rem 16px 2rem}
+ .choose-heading{display:block}
+ #panel{max-height:none;border-radius:16px 16px 0 0;margin-top:-12px;position:relative;background:var(--paper);z-index:2}
+ .view-tools{top:10px;left:10px;right:10px;font-size:.72rem;gap:4px}
+ .view-tools button{padding:.5rem}
+ .explorer-footer{font-size:.7rem}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}

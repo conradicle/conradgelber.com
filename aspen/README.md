@@ -1,8 +1,8 @@
 # Aspen explorer
 
 Static HTML/CSS/ES modules on the existing Cloudflare Pages project. No build
-step, paid hosting, or new service is needed. `viewer.js` and Cesium are loaded
-only after mountain selection. The public token comes from a Pages Function.
+step, paid hosting, or new service is needed. The landing page is the real valley in 3D,
+so Cesium loads on arrival. The public token comes from a Pages Function.
 
 ## Activate 3D (no Terminal)
 
@@ -29,10 +29,11 @@ unlimited free imagery. No Google Cloud billing account is needed for ion access
 ## Architecture
 
 - `mountains.js`: resort statistics, mid-mountain camera targets, difficulty signs.
-- `aspen.js`: valley, selection, and future panel registry.
-- `viewer.js`: lazily loaded renderer, 180-second orbit, six-second idle pause,
+- `aspen.js`: landing readout, mountain cards, selection, and future panel registry.
+- `viewer.js`: one persistent Cesium scene for the real valley landing and each mountain (one Google root request per visit), 180-second orbit, six-second idle pause,
   reduced-motion default, 30 fps cap, mobile resolution/cache limits, cleanup.
 - `data/*.geojson`: checked-in OSM snapshots; no runtime Overpass calls.
+- `data/footprints.json`: ski-area outlines built from those runs and lifts by `../scripts/build-aspen-footprints.py`.
 - `../scripts/fetch-aspen.py`: explicit maintenance-only data refresh.
 - `../functions/aspen/config.js`: runtime env configuration (no-store).
 - `../functions/aspen/_middleware.js`: explorer-scoped CSP; rest of site unchanged.

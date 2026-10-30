@@ -18,3 +18,7 @@ test('difficulty remains distinguishable without color and unknown is honest',()
 test('every mountain has valid static runs and lifts',async()=>{
  for(const m of mountains){const data=JSON.parse(await readFile(new URL(`../aspen/data/${m.id}.geojson`,import.meta.url)));assert.equal(data.type,'FeatureCollection');assert.ok(data.features.some(f=>f.properties['piste:type']==='downhill'),m.id+' runs');assert.ok(data.features.some(f=>f.properties.aerialway),m.id+' lifts');const ids=new Set();for(const f of data.features){assert.ok(!ids.has(f.id));ids.add(f.id);assert.equal(f.geometry.type,'LineString');assert.ok(f.geometry.coordinates.length>1);for(const [lon,lat] of f.geometry.coordinates){assert.ok(lon>-107.1&&lon<-106.7&&lat>39.05&&lat<39.3);}}}
 });
+test('every mountain has a footprint on the real terrain around its runs',async()=>{
+ const fp=JSON.parse(await readFile(new URL('../aspen/data/footprints.json',import.meta.url)));
+ for(const m of mountains){const f=fp[m.id];assert.ok(f,m.id+' footprint');assert.ok(f.ring.length>=8,m.id+' ring');for(const [lon,lat] of f.ring){assert.ok(lon>-107.1&&lon<-106.7&&lat>39.05&&lat<39.3);}const [cx,cy]=f.center;assert.ok(Math.abs(cx-m.lon)<0.03&&Math.abs(cy-m.lat)<0.03,m.id+' center near camera target');}
+});
