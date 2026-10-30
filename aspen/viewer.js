@@ -1,11 +1,12 @@
 // One persistent 3D scene for the whole page: the real Roaring Fork Valley on the
 // landing screen, then a fly-in and orbit for each mountain. Keeping a single
 // viewer means one Google root-tile request per visit (Cesium Community quota).
-import {getDifficulty} from './mountains.js?v=4';
+import {getDifficulty} from './mountains.js?v=5';
 
 const CESIUM_ROOT = 'https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/';
 const FEET = 0.3048;
-const VALLEY = {lon: -106.888, lat: 39.172, height: 2500, range: 21500, pitch: -0.42};
+// Target sits east of the ski areas' middle so they frame to the right of the headline.
+const VALLEY = {lon: -106.858, lat: 39.168, height: 2500, range: 23000, pitch: -0.44};
 const SWAY_PERIOD = 60; // seconds for one sway left and back on the landing view
 const ORBIT_PERIOD = 180; // seconds for a full turn around a mountain
 const IDLE_MS = 6000;
@@ -42,7 +43,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
   const C = await loadCesium();
   C.Ion.defaultAccessToken = token;
 
-  const footprints = await (await fetch('/aspen/data/footprints.json?v=4')).json();
+  const footprints = await (await fetch('/aspen/data/footprints.json?v=5')).json();
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const phone = matchMedia('(max-width:700px)').matches;
 
@@ -138,7 +139,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
   const runSources = {};
   async function loadRuns(m) {
     if (runSources[m.id]) return runSources[m.id];
-    const res = await fetch(`/aspen/data/${m.id}.geojson?v=4`);
+    const res = await fetch(`/aspen/data/${m.id}.geojson?v=5`);
     if (!res.ok) throw new Error('Trail data could not load. Please try again.');
     const data = await res.json();
     const source = new C.CustomDataSource(m.id);
@@ -238,17 +239,19 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
     [window, 'pointerup', () => { holding = false; idleUntil = performance.now() + IDLE_MS; }],
     [window, 'pointercancel', () => { holding = false; }],
     [canvas, 'wheel', interact],
+    [canvas, 'pointerleave', () => { if (mode === 'valley' && hovered) { hovered = null; paint(); onHover(null); } }],
   ];
   for (const [el, type, fn] of listeners) el.addEventListener(type, fn, {passive: true});
 
   const handler = new C.ScreenSpaceEventHandler(canvas);
   let pendingMove = null;
   handler.setInputAction(e => {
-    if (mode !== 'valley' || pendingMove) return;
+    if (mode !== 'valley' || flying || pendingMove) return;
     pendingMove = requestAnimationFrame(() => {
       pendingMove = null;
       const m = byEntity.get(viewer.scene.pick(e.endPosition)?.id?.id);
       const id = m?.id || null;
+      if (flying || mode !== 'valley') return;
       if (id !== hovered) { hovered = id; paint(); onHover(m || null); }
       canvas.style.cursor = id ? 'pointer' : '';
     });
@@ -256,6 +259,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
   handler.setInputAction(e => {
     const picked = viewer.scene.pick(e.position)?.id;
     if (mode === 'valley') {
+      if (flying) return;
       const m = byEntity.get(picked?.id);
       if (!m) return;
       // On touch, the first tap previews a mountain and the second enters it.
