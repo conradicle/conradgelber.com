@@ -12,7 +12,7 @@ const ORBIT_PERIOD = 180; // seconds for a full turn around a mountain
 const IDLE_MS = 6000;
 
 let library;
-function loadCesium() {
+export function loadCesium() {
   if (window.Cesium) return Promise.resolve(window.Cesium);
   if (!library) {
     library = new Promise((resolve, reject) => {
