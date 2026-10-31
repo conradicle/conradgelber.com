@@ -4,10 +4,16 @@ import {MIAMI,COLORS,level} from './model.js';
 export async function createScene(container) {
  const C=await loadCesium(),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const phone=matchMedia('(max-width:700px)').matches;
- // Cesium's bundled Natural Earth imagery covers the entire Atlantic without a
- // new map library, token, or costly photorealistic tiles over open ocean.
- const viewer=new C.Viewer(container,{baseLayer:new C.ImageryLayer(await C.TileMapServiceImageryProvider.fromUrl(C.buildModuleUrl('Assets/Textures/NaturalEarthII'))),geocoder:false,animation:false,timeline:false,baseLayerPicker:false,sceneModePicker:false,navigationHelpButton:false,homeButton:false,fullscreenButton:false,selectionIndicator:false,infoBox:false,requestRenderMode:true,maximumRenderTimeChange:Infinity,msaaSamples:phone?1:4,useBrowserRecommendedResolution:phone});
- viewer.resolutionScale=phone?1:Math.min(1,2/(devicePixelRatio||1));
+ // Stream detailed satellite tiles as the camera approaches the coast.
+ // Cesium preserves the service's source attribution in its credit display.
+ const imagery=await C.ArcGisMapServerImageryProvider.fromUrl(
+  'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+  {enablePickFeatures:false,maximumLevel:19},
+ );
+ const viewer=new C.Viewer(container,{baseLayer:new C.ImageryLayer(imagery),geocoder:false,animation:false,timeline:false,baseLayerPicker:false,sceneModePicker:false,navigationHelpButton:false,homeButton:false,fullscreenButton:false,selectionIndicator:false,infoBox:false,requestRenderMode:true,maximumRenderTimeChange:Infinity,msaaSamples:4,useBrowserRecommendedResolution:false});
+ viewer.resolutionScale=Math.min(1,(phone?1.5:2)/(devicePixelRatio||1));
+ viewer.scene.globe.maximumScreenSpaceError=phone?1.5:1;
+ viewer.scene.globe.tileCacheSize=phone?150:400;
  viewer.targetFrameRate=phone?30:60;
  viewer.scene.screenSpaceCameraController.minimumZoomDistance=10000;
  viewer.scene.screenSpaceCameraController.maximumZoomDistance=30000000;

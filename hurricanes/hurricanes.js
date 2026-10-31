@@ -1,5 +1,5 @@
 import {COLORS,label,distance,sample} from './model.js';
-import {createScene} from './viewer.js';
+import {createScene} from './viewer.js?v=2';
 const $=id=>document.getElementById(id);
 const utc=t=>new Date(t).toISOString().replace('T',' ').slice(0,16)+' UTC';
 const name=s=>`${s.displayName||s.name} · ${s.year}`;
