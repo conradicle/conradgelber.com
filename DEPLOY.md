@@ -185,7 +185,8 @@ preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
 `/play/`, `/flight-path/`, `/pool/`, `/cambio/` and `/poker/` do not get the tab bar.
 `/play/`, `/flight-path/`, `/pool/`, `/borderline/`, `/historybowl/` and `/12axes/` have a single "← Games" link in
-their header instead. During a game on a screen narrower than 600 px,
+their header instead. `/observatory/` (an early-iteration project page) has
+no tab bar either; its header has a single "← Built" link. During a game on a screen narrower than 600 px,
 `/pool/` hides that header and shows a round back button in its players bar,
 so the table can fill the screen; the skip link and the footer stay.
 

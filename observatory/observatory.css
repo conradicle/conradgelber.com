@@ -1,0 +1,116 @@
+/* /observatory/: early-iteration project page, linked from /built/ */
+
+/* Header with a back link to /built/, same shape as the games' .playhead */
+.obs-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:1rem;
+  padding:clamp(1.6rem,5vw,2.6rem) 0 .7rem;
+  border-bottom:2px solid var(--ink);
+}
+.obs-head a:first-child{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:1.25rem;
+  letter-spacing:-0.01em;
+  border-bottom:none;
+}
+/* The vertical padding makes a 44px tap target without growing the header */
+.obs-head .back{
+  padding:.65rem 0;
+  margin:-.65rem 0;
+  font-size:.93rem;
+  color:var(--ink-soft);
+  border-bottom:none;
+  text-decoration:underline;
+  text-decoration-color:var(--accent);
+  text-underline-offset:4px;
+}
+.obs-head .back:hover{color:var(--accent)}
+
+.obs-top{padding-top:2.6rem}
+.obs-kicker{
+  margin:0 0 .5rem;
+  font-size:.82rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--accent);
+}
+.obs-status{
+  padding:.85rem 1rem;
+  border-left:3px solid var(--accent);
+  background:#E3E8EE;
+}
+.obs-status strong{font-weight:500}
+.obs-note{margin:0 0 1.2rem;max-width:var(--measure);font-size:.93rem;color:var(--ink-soft)}
+.obs-table-wrap + .obs-note{margin-top:1.2rem}
+
+/* Law tracker table; scrolls sideways inside its own box on narrow screens */
+.obs-table-wrap{overflow-x:auto}
+.obs-table-wrap:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.obs-table{width:100%;min-width:34rem;border-collapse:collapse;font-size:.95rem}
+.obs-table caption{
+  text-align:left;
+  font-size:.88rem;
+  color:var(--ink-soft);
+  padding-bottom:.5rem;
+}
+.obs-table th,
+.obs-table td{
+  text-align:left;
+  vertical-align:baseline;
+  padding:.6rem 1rem .6rem 0;
+  border-bottom:1px solid var(--rule);
+}
+.obs-table thead th{
+  font-size:.82rem;
+  font-weight:500;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  border-bottom:2px solid var(--ink);
+}
+.obs-table tbody th{font-weight:500}
+.obs-table td:nth-child(3){font-variant-numeric:tabular-nums}
+.obs-table td:last-child{color:var(--ink-soft)}
+
+/* Status tags: text stays dark ink on a pale fill for AA contrast */
+.tag{
+  display:inline-block;
+  padding:.05rem .5rem;
+  border:1px solid currentColor;
+  border-radius:3px;
+  font-size:.8rem;
+  line-height:1.5;
+  white-space:nowrap;
+}
+.tag-law{color:var(--accent);background:#DCEBE8}
+.tag-bill{color:var(--ink);background:#E3E8EE}
+.tag-now{color:var(--accent);background:#DCEBE8}
+.tag-next{color:var(--ink);background:#E3E8EE}
+.tag-later{color:var(--ink-soft);background:transparent}
+
+/* Layer headings are h3s under the section h2 */
+.what h3{
+  font-family:Spectral,Georgia,serif;
+  font-weight:600;
+  font-size:1.17rem;
+  line-height:1.35;
+  margin:0 0 .3rem;
+}
+
+.obs-rules{margin:0;padding-left:1.2rem;max-width:var(--measure)}
+.obs-rules li{margin:0 0 .6rem}
+
+/* Phones: each table row stacks as state, then stage and year, then registry */
+@media (max-width:560px){
+  .obs-table{min-width:0}
+  .obs-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .obs-table tr{display:block;padding:.7rem 0;border-bottom:1px solid var(--rule)}
+  .obs-table tbody th,
+  .obs-table td{display:inline;padding:0;border-bottom:none}
+  .obs-table tbody th{display:block;margin-bottom:.2rem}
+  .obs-table td:nth-child(3){margin-left:.5rem}
+  .obs-table td:last-child{display:block;margin-top:.2rem;font-size:.9rem}
+}
