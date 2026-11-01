@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State Foreign Influence Observatory &middot; Conrad Gelber</title>
+<meta name="description" content="An early iteration of a nonpartisan tracker for foreign government influence in American state and local government: the new state foreign agent laws, federal FARA filings that name state officials, and the build plan.">
+<link rel="canonical" href="https://conradgelber.com/observatory/">
+<meta name="theme-color" content="#13233C">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/spectral-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=10">
+<link rel="stylesheet" href="/observatory/observatory.css?v=1">
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="wrap">
+
+  <header class="obs-head">
+    <a href="/">Conrad Gelber</a>
+    <a class="back" href="/built/">&larr; Built</a>
+  </header>
+
+  <main id="main">
+  <section class="obs-top">
+    <p class="obs-kicker">Early iteration &middot; working name</p>
+    <h1 class="page-title">State Foreign Influence Observatory</h1>
+    <div class="prose">
+      <p>A nonpartisan tracker for foreign government influence in
+        American state and local government. It will pull together the
+        new state foreign agent registries, mine federal FARA filings
+        for contacts with governors, mayors, and state legislators, and
+        make all of it searchable, with every claim linked to its
+        source document.</p>
+      <p class="obs-status"><strong>Where it stands, November 2026:</strong>
+        the plan and the first layer, a tracker of the new state laws.
+        The registry and filing pipelines are not built yet, so nothing
+        below is drawn from them.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="gap">
+    <h2 id="gap">The gap</h2>
+    <div class="prose">
+      <p>Until 2025, no state had lobbying rules aimed specifically at
+        people who represent foreign governments. Then Texas, Nebraska,
+        Louisiana, Arkansas, and Oklahoma passed their own foreign agent
+        registration laws, often called "baby FARA" laws, and five more
+        states introduced bills in early 2026. Each one sets up its own
+        registry with its own definitions and exemptions, and so far no
+        one is collecting them in one place.</p>
+      <p>The federal backstop is getting weaker at the same time. A 2024
+        Justice Department advisory opinion suggested for the first time
+        that contacts with state officials might fall outside federal
+        FARA registration, and in 2025 the FBI's Foreign Influence Task
+        Force, which worked with state and local authorities, was
+        disbanded.</p>
+      <p>The federal filings that do mention state officials are hard to
+        use. Much of the FARA record sits in scanned attachments, and the
+        existing trackers focus on Washington. Reading those documents at
+        scale is the part that needs AI.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="laws">
+    <h2 id="laws">State law tracker</h2>
+    <p class="obs-note">Status as of October 2026. Bill outcomes for the
+      2026 sessions have not been checked yet and are marked that way.</p>
+    <div class="obs-table-wrap" role="region" aria-labelledby="laws-caption" tabindex="0">
+      <table class="obs-table">
+        <caption id="laws-caption">State foreign agent registration laws and bills</caption>
+        <thead>
+          <tr>
+            <th scope="col">State</th>
+            <th scope="col">Stage</th>
+            <th scope="col">Year</th>
+            <th scope="col">Registry</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Arkansas</th>
+            <td><span class="tag tag-law">Enacted</span></td>
+            <td>2025</td>
+            <td>In effect by Dec. 1, 2025; not yet inventoried</td>
+          </tr>
+          <tr>
+            <th scope="row">Louisiana</th>
+            <td><span class="tag tag-law">Enacted</span></td>
+            <td>2025</td>
+            <td>In effect by Dec. 1, 2025; not yet inventoried</td>
+          </tr>
+          <tr>
+            <th scope="row">Nebraska</th>
+            <td><span class="tag tag-law">Enacted</span></td>
+            <td>2025</td>
+            <td>In effect by Dec. 1, 2025; not yet inventoried</td>
+          </tr>
+          <tr>
+            <th scope="row">Oklahoma</th>
+            <td><span class="tag tag-law">Enacted</span></td>
+            <td>2025</td>
+            <td>In effect by Dec. 1, 2025; not yet inventoried</td>
+          </tr>
+          <tr>
+            <th scope="row">Texas</th>
+            <td><span class="tag tag-law">Enacted</span></td>
+            <td>2025</td>
+            <td>In effect by Dec. 1, 2025; not yet inventoried</td>
+          </tr>
+          <tr>
+            <th scope="row">Alabama</th>
+            <td><span class="tag tag-bill">Bill introduced</span></td>
+            <td>2026</td>
+            <td>Outcome not yet checked</td>
+          </tr>
+          <tr>
+            <th scope="row">Florida</th>
+            <td><span class="tag tag-bill">Bill introduced</span></td>
+            <td>2026</td>
+            <td>Outcome not yet checked</td>
+          </tr>
+          <tr>
+            <th scope="row">Iowa</th>
+            <td><span class="tag tag-bill">Bill introduced</span></td>
+            <td>2026</td>
+            <td>Outcome not yet checked</td>
+          </tr>
+          <tr>
+            <th scope="row">Missouri</th>
+            <td><span class="tag tag-bill">Bill introduced</span></td>
+            <td>2026</td>
+            <td>Outcome not yet checked</td>
+          </tr>
+          <tr>
+            <th scope="row">West Virginia</th>
+            <td><span class="tag tag-bill">Bill introduced</span></td>
+            <td>2026</td>
+            <td>Outcome not yet checked</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="obs-note">Sources:
+      <a href="https://www.foley.com/insights/publications/2026/02/a-new-year-and-a-renewed-focus-on-foreign-influence-laws/">Foley</a>,
+      <a href="https://www.cov.com/-/media/files/corporate/publications/2026/01/state-baby-fara-laws-create-compliance-maze-for-businesses.pdf">Covington (PDF)</a>,
+      <a href="https://thefai.org/posts/federal-and-state-transparency-reforms-to-expose-malign-foreign-influence-part-ii">FAI</a>.
+      These laws face open questions about federal preemption and the
+      First Amendment
+      (<a href="https://www.skadden.com/insights/publications/2025/11/do-states-have-the-authority-to-regulate-foreign-influence">Skadden</a>,
+      <a href="https://www.globalpolicywatch.com/2026/04/state-fara-laws-pose-unique-constitutional-challenges">Global Policy Watch</a>),
+      and the tracker will cover the challenges alongside the laws.</p>
+  </section>
+
+  <section aria-labelledby="layers">
+    <h2 id="layers">What gets built</h2>
+
+    <div class="entry">
+      <div class="when"><span class="tag tag-now">Started</span></div>
+      <div class="what">
+        <h3>Law tracker</h3>
+        <p class="note">Every state foreign agent bill, its status, and its
+          legal challenges, with critics of the laws documented as carefully
+          as their supporters. The table above is its first version.</p>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="when"><span class="tag tag-next">Next</span></div>
+      <div class="what">
+        <h3>Federal filings, read for state and local contacts</h3>
+        <p class="note">Pull FARA registration and supplemental statements,
+          have Claude extract every contact with a non-federal official, and
+          spot-check the results by hand. This is the layer most likely to
+          turn up something new, so it gets tested first.</p>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="when"><span class="tag tag-later">Planned</span></div>
+      <div class="what">
+        <h3>State registry tracker</h3>
+        <p class="note">Ingest each state registry as it comes online and
+          normalize the filings into one format. Early filings will be
+          sparse, and who is not registering is a finding too.</p>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="when"><span class="tag tag-later">Planned</span></div>
+      <div class="what">
+        <h3>Other public traces</h3>
+        <p class="note">Foreign-paid travel for state legislators,
+          sister-city agreements and memorandums of understanding, and
+          foreign trade office activity, wherever states require
+          disclosure.</p>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="when"><span class="tag tag-later">Planned</span></div>
+      <div class="what">
+        <h3>Search and questions</h3>
+        <p class="note">Country and state pages, plain search, and a
+          Claude-powered way to ask "which foreign governments have lobbied
+          Florida officials?" and get a sourced answer. An MCP server will
+          expose the same data to other tools.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rules">
+    <h2 id="rules">Ground rules</h2>
+    <ul class="obs-rules">
+      <li>Every foreign principal is tracked the same way, allies and
+        adversaries alike.</li>
+      <li>Every claim links to its source document.</li>
+      <li>One methodology for every country and every state.</li>
+      <li>Critics of the new state laws get the same care as their
+        supporters.</li>
+      <li>Corrections are public. Spot an error? Email
+        <a href="mailto:conrad@conradgelber.com">conrad@conradgelber.com</a>.</li>
+    </ul>
+  </section>
+  </main>
+
+  <footer>
+    <div class="contact">
+      <span><a href="mailto:conrad@conradgelber.com">conrad@conradgelber.com</a></span>
+      <span><a href="https://www.linkedin.com/in/conradgelber">LinkedIn</a></span>
+      <span><a href="https://github.com/conradicle">GitHub</a></span>
+      <span><a href="/accessibility/">Accessibility</a></span>
+    </div>
+    <p class="colophon">Miami Beach, Florida. Views here are my own
+      and not those of any organization named on this page.</p>
+  </footer>
+
+</div>
+</body>
+</html>
