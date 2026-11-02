@@ -1,7 +1,7 @@
 // One persistent 3D scene for the whole page: the real Roaring Fork Valley on the
 // landing screen, then a fly-in and orbit for each mountain. Keeping a single
 // viewer means one Google root-tile request per visit (Cesium Community quota).
-import {getDifficulty} from './mountains.js?v=6';
+import {getDifficulty} from './mountains.js?v=7';
 
 const CESIUM_ROOT = 'https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/';
 // SHA-384 of the two files above, so a changed copy on the CDN is refused rather
@@ -17,7 +17,7 @@ const ORBIT_PERIOD = 180; // seconds for a full turn around a mountain
 const IDLE_MS = 6000;
 
 let library;
-function loadCesium() {
+export function loadCesium() {
   if (window.Cesium) return Promise.resolve(window.Cesium);
   if (!library) {
     library = new Promise((resolve, reject) => {
@@ -44,7 +44,7 @@ function loadCesium() {
   return library;
 }
 
-export async function createScene(container, mountains, {onHover, onEnter, onRun, onStatus}) {
+export async function createScene(container, mountains, {onHover, onEnter, onRun, onStatus, onFatal, onSource}) {
   const response = await fetch('/aspen/config');
   if (!response.ok) throw new Error('The 3D view is missing its Cesium access token.');
   const {token} = await response.json();
@@ -52,18 +52,68 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
   const C = await loadCesium();
   C.Ion.defaultAccessToken = token;
 
-  const footprints = await (await fetch('/aspen/data/footprints.json?v=6')).json();
+  const footprintsResponse = await fetch('/aspen/data/footprints.json?v=8');
+  if (!footprintsResponse.ok) throw new Error('Mountain outlines could not load. Check your connection and try again.');
+  const footprints = await footprintsResponse.json();
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const phone = matchMedia('(max-width:700px)').matches;
 
-  const viewer = new C.Viewer(container, {
-    globe: false, baseLayer: false, geocoder: false, animation: false, timeline: false,
+  let viewer, handler, frame, pendingMove, tileset;
+  let dead = false;
+  const listeners = [];
+  const runController = new AbortController();
+  const cleanup = () => {
+    if (dead) return;
+    dead = true;
+    runController.abort();
+    cancelAnimationFrame(frame);
+    cancelAnimationFrame(pendingMove);
+    for (const [el, type, fn] of listeners) el.removeEventListener(type, fn);
+    if (handler && !handler.isDestroyed()) handler.destroy();
+    if (viewer && !viewer.isDestroyed()) viewer.destroy();
+    if (tileset && !tileset.isDestroyed()) tileset.destroy();
+  };
+  try {
+  let fallback = false, terrain, imagery;
+  try {
+    tileset = await C.createGooglePhotorealistic3DTileset(
+      {onlyUsingWithGoogleGeocoder: true},
+      {maximumScreenSpaceError: phone ? 16 : 6, cacheBytes: (phone ? 160 : 512) * 1024 * 1024,
+        maximumCacheOverflowBytes: 32 * 1024 * 1024, enableCollision: true},
+    );
+  } catch (error) {
+    console.warn('Aspen photorealistic imagery unavailable:', error);
+    if (error?.statusCode !== 429 && error?.response?.status !== 429) {
+      throw new Error('Mountain imagery could not start. Check your connection and try again.');
+    }
+    fallback = true;
+    try {
+      [terrain, imagery] = await Promise.all([
+        C.ArcGISTiledElevationTerrainProvider.fromUrl('https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer'),
+        C.ArcGisMapServerImageryProvider.fromUrl('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'),
+      ]);
+    } catch (fallbackError) {
+      console.error('Aspen alternate terrain unavailable:', fallbackError);
+      const limited = new Error('The mountain imagery service is temporarily unavailable. Please try again later.');
+      limited.code = 'RATE_LIMITED';
+      throw limited;
+    }
+  }
+  const groundType = fallback ? C.ClassificationType.TERRAIN : C.ClassificationType.CESIUM_3D_TILE;
+  const labelHeight = fallback ? C.HeightReference.CLAMP_TO_TERRAIN : C.HeightReference.CLAMP_TO_3D_TILE;
+  onSource(fallback ? 'esri' : 'google');
+  viewer = new C.Viewer(container, {
+    globe: fallback ? undefined : false, baseLayer: fallback ? new C.ImageryLayer(imagery) : false,
+    terrainProvider: terrain, geocoder: false, animation: false, timeline: false,
     baseLayerPicker: false, sceneModePicker: false, navigationHelpButton: false,
     homeButton: false, fullscreenButton: false, selectionIndicator: false, infoBox: false,
-    requestRenderMode: true, maximumRenderTimeChange: Infinity, msaaSamples: 1,
+    requestRenderMode: true, maximumRenderTimeChange: Infinity,
+    // Desktop renders at the screen's real pixel density with anti-aliasing;
+    // phones keep the lighter settings so they stay smooth.
+    msaaSamples: phone ? 1 : 4, useBrowserRecommendedResolution: phone,
   });
-  viewer.resolutionScale = Math.min(1, 1.5 / (window.devicePixelRatio || 1));
-  viewer.targetFrameRate = 30;
+  viewer.resolutionScale = phone ? 1 : Math.min(1, 2 / (window.devicePixelRatio || 1));
+  viewer.targetFrameRate = phone ? 30 : 60;
   viewer.scene.screenSpaceCameraController.minimumZoomDistance = 150;
   viewer.scene.screenSpaceCameraController.maximumZoomDistance = 60000;
   const render = () => viewer.scene.requestRender();
@@ -80,8 +130,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
   let heading = Math.PI;
   let clock = 0;
   let lastPointer = 'mouse';
-  let frame;
-  let dead = false;
+  let initialTerrainReady = false;
 
   // Ski-area footprints draped on the real terrain: a tint plus an outline.
   const byEntity = new Map();
@@ -101,7 +150,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
       polygon: {
         hierarchy: C.Cartesian3.fromDegreesArray(ring.flat()),
         material: new C.ColorMaterialProperty(new C.CallbackProperty(() => tint(m.id), false)),
-        classificationType: C.ClassificationType.CESIUM_3D_TILE,
+        classificationType: groundType,
       },
     });
     byEntity.set(fill.id, m);
@@ -109,7 +158,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
     const line = (width, color) => viewer.entities.add({
       polyline: {
         positions: C.Cartesian3.fromDegreesArray(closed), width, clampToGround: true,
-        classificationType: C.ClassificationType.CESIUM_3D_TILE,
+        classificationType: groundType,
         material: new C.ColorMaterialProperty(C.Color.fromCssColorString(color)),
       },
     });
@@ -146,11 +195,17 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
 
   // Runs and lifts for each mountain, loaded the first time it is opened.
   const runSources = {};
-  async function loadRuns(m) {
-    if (runSources[m.id]) return runSources[m.id];
-    const res = await fetch(`/aspen/data/${m.id}.geojson?v=6`);
+  const runRequests = {};
+  function loadRuns(m) {
+    if (runSources[m.id]) return Promise.resolve(runSources[m.id]);
+    if (!runRequests[m.id]) runRequests[m.id] = fetchRuns(m).finally(() => { delete runRequests[m.id]; });
+    return runRequests[m.id];
+  }
+  async function fetchRuns(m) {
+    const res = await fetch(`/aspen/data/${m.id}.geojson?v=7`, {signal: runController.signal});
     if (!res.ok) throw new Error('Trail data could not load. Please try again.');
     const data = await res.json();
+    if (dead) return null;
     const source = new C.CustomDataSource(m.id);
     const entries = [];
     source.entities.suspendEvents();
@@ -165,7 +220,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
         id: `run:${m.id}:${f.id}`,
         polyline: {
           positions: C.Cartesian3.fromDegreesArray(coords.flat()), width: lift ? 3 : 5,
-          clampToGround: true, classificationType: C.ClassificationType.CESIUM_3D_TILE,
+          clampToGround: true, classificationType: groundType,
           material: lift || d.dash
             ? new C.PolylineDashMaterialProperty({color, gapColor: C.Color.WHITE.withAlpha(0.5), dashLength: lift ? 16 : 10})
             : new C.PolylineOutlineMaterialProperty({color, outlineColor: C.Color.WHITE, outlineWidth: 1}),
@@ -174,7 +229,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
         label: {
           text: lift ? '↟' : d.symbol, font: 'bold 16px sans-serif', fillColor: color,
           outlineColor: C.Color.WHITE, outlineWidth: 3, style: C.LabelStyle.FILL_AND_OUTLINE,
-          heightReference: C.HeightReference.CLAMP_TO_3D_TILE, showBackground: true,
+          heightReference: labelHeight, showBackground: true,
           backgroundColor: C.Color.WHITE.withAlpha(0.8),
           distanceDisplayCondition: new C.DistanceDisplayCondition(0, 2600),
           pixelOffset: new C.Cartesian2(0, -9), scale: 0.85,
@@ -186,6 +241,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
     source.entities.resumeEvents();
     source.show = false;
     await viewer.dataSources.add(source);
+    if (dead) return null;
     runSources[m.id] = {source, entries};
     return runSources[m.id];
   }
@@ -208,7 +264,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
     if (dead) return;
     const dt = Math.min((now - (loop.last || now)) / 1000, 0.1);
     loop.last = now;
-    const free = !document.hidden && !paused && !holding && !flying && now > idleUntil;
+    const free = initialTerrainReady && !document.hidden && !paused && !holding && !flying && now > idleUntil;
     if (free) {
       if (mode === 'valley') {
         if (recenter) {
@@ -243,17 +299,21 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
     if (flying) { viewer.camera.cancelFlight(); flying = false; }
   };
   const canvas = viewer.canvas;
-  const listeners = [
+  listeners.push(
     [canvas, 'pointerdown', e => { lastPointer = e.pointerType; holding = true; interact(); }],
     [window, 'pointerup', () => { holding = false; idleUntil = performance.now() + IDLE_MS; }],
     [window, 'pointercancel', () => { holding = false; }],
     [canvas, 'wheel', interact],
     [canvas, 'pointerleave', () => { if (mode === 'valley' && hovered) { hovered = null; paint(); onHover(null); } }],
-  ];
-  for (const [el, type, fn] of listeners) el.addEventListener(type, fn, {passive: true});
+    [canvas, 'webglcontextlost', e => {
+      e.preventDefault();
+      cleanup();
+      onFatal(new Error('The 3D graphics context was lost. Close other graphics-heavy tabs and try again.'));
+    }],
+  );
+  for (const [el, type, fn] of listeners) el.addEventListener(type, fn, {passive: type !== 'webglcontextlost'});
 
-  const handler = new C.ScreenSpaceEventHandler(canvas);
-  let pendingMove = null;
+  handler = new C.ScreenSpaceEventHandler(canvas);
   handler.setInputAction(e => {
     if (mode !== 'valley' || flying || pendingMove) return;
     pendingMove = requestAnimationFrame(() => {
@@ -281,17 +341,44 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
   }, C.ScreenSpaceEventType.LEFT_CLICK);
 
   // The real terrain: Google Photorealistic 3D Tiles.
-  const tileset = await C.createGooglePhotorealistic3DTileset(
-    {onlyUsingWithGoogleGeocoder: true},
-    {maximumScreenSpaceError: phone ? 24 : 16, cacheBytes: 128 * 1024 * 1024,
-      maximumCacheOverflowBytes: 32 * 1024 * 1024, enableCollision: true},
-  );
-  viewer.scene.primitives.add(tileset);
-  tileset.loadProgress.addEventListener((pending, processing) => onStatus(pending + processing > 0 ? 'Loading terrain…' : ''));
-  tileset.tileFailed.addEventListener(() => onStatus('Some terrain could not load. Check your connection.'));
-
+  // Set the destination before adding the tileset, so initial requests target Aspen.
   viewer.camera.lookAt(valleyTarget, new C.HeadingPitchRange(swayHeading(), VALLEY.pitch, VALLEY.range));
   viewer.camera.lookAtTransform(C.Matrix4.IDENTITY);
+  if (fallback) {
+    viewer.scene.globe.tileLoadProgressEvent.addEventListener(remaining => {
+      if (dead) return;
+      if (remaining === 0) { initialTerrainReady = true; onStatus(''); }
+      else if (!initialTerrainReady) onStatus('Loading terrain…');
+    });
+  } else {
+  viewer.scene.primitives.add(tileset);
+  let tileFailure = false;
+  tileset.loadProgress.addEventListener((pending, processing) => {
+    if (dead) return;
+    if (pending + processing > 0 && !initialTerrainReady) onStatus('Loading terrain…');
+    else if (initialTerrainReady) onStatus(tileFailure ? 'Some terrain could not load. Check your connection.' : '');
+  });
+  tileset.initialTilesLoaded.addEventListener(() => {
+    if (dead) return;
+    initialTerrainReady = true;
+    onStatus(tileFailure ? 'Some terrain could not load. Check your connection.' : '');
+  });
+  tileset.tileFailed.addEventListener(error => {
+    console.warn('Aspen terrain tile failed:', error);
+    tileFailure = true;
+    initialTerrainReady = true;
+    onStatus('Some terrain could not load. Check your connection.');
+  });
+  }
+  viewer.scene.renderError.addEventListener((scene, error) => {
+    if (dead) return;
+    console.error('Aspen rendering failed:', error);
+    queueMicrotask(() => {
+      if (dead) return;
+      cleanup();
+      onFatal(new Error('The 3D view stopped rendering. Please try again.'));
+    });
+  });
   paint();
   frame = requestAnimationFrame(loop);
 
@@ -320,7 +407,7 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
       paint();
       flyTo(targetOf(m), new C.HeadingPitchRange(heading, -0.48, m.range), 3);
       const runs = await loadRuns(m);
-      if (focused !== m.id) return null;
+      if (dead || !runs || mode !== 'mountain' || focused !== m.id) return null;
       for (const id in runSources) runSources[id].source.show = id === m.id;
       render();
       return runs.entries;
@@ -341,12 +428,10 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
       return paused;
     },
     get paused() { return paused; },
-    destroy() {
-      dead = true;
-      cancelAnimationFrame(frame);
-      for (const [el, type, fn] of listeners) el.removeEventListener(type, fn);
-      if (!handler.isDestroyed()) handler.destroy();
-      if (!viewer.isDestroyed()) viewer.destroy();
-    },
+    destroy: cleanup,
   };
+  } catch (error) {
+    cleanup();
+    throw error;
+  }
 }
