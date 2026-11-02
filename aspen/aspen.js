@@ -8,6 +8,8 @@ let starting = null;
 let active = null;
 let entries = [];
 let restoringFocus = false;
+let selectionVersion = 0;
+let retryAfter = 0;
 
 // Readout under the landing view.
 function preview(m) {
@@ -32,17 +34,29 @@ function fail(error) {
 function start() {
   if (scene) return Promise.resolve(scene);
   if (starting) return starting;
+  if (Date.now() < retryAfter) return Promise.reject(new Error('The mountain imagery service is temporarily limiting requests. Please try again later.'));
   $('error').hidden = true;
   status('Loading the Roaring Fork Valley…');
-  starting = import('./viewer.js?v=7')
+  starting = import('./viewer.js?v=9')
     .then(({createScene}) => createScene('cesium', mountains, {
       onHover: preview,
       onEnter: m => openMountain(m),
       onRun: showRunDetail,
       onStatus: status,
+      onSource: source => { $('terrain-credit').textContent = source === 'esri' ? 'Terrain and imagery © Esri and contributors' : 'Terrain © Google'; },
+      onFatal: error => { scene = null; starting = null; fail(error); },
     }))
     .then(s => { scene = s; return s; })
-    .catch(e => { starting = null; fail(e); throw e; });
+    .catch(e => {
+      starting = null;
+      if (e.code === 'RATE_LIMITED') {
+        retryAfter = Date.now() + 60_000;
+        $('retry').disabled = true;
+        setTimeout(() => { $('retry').disabled = false; }, 60_000);
+      }
+      fail(e);
+      throw e;
+    });
   return starting;
 }
 
@@ -56,6 +70,7 @@ function showRunDetail(entity) {
 }
 
 async function openMountain(m) {
+  const version = ++selectionVersion;
   preview(m);
   document.body.classList.add('exploring');
   $('explorer-tools').hidden = false;
@@ -73,8 +88,10 @@ async function openMountain(m) {
   $('mountain-name').focus({preventScroll: true});
   try {
     const s = await start();
-    entries = (await s.focus(m)) || [];
-    if (active !== m.id) return;
+    if (version !== selectionVersion) return;
+    const loaded = await s.focus(m);
+    if (version !== selectionVersion || !loaded) return;
+    entries = loaded;
     const sorted = [...entries].sort((a, b) => (a.trail.name || '').localeCompare(b.trail.name || ''));
     for (const e of sorted) {
       const p = e.trail;
@@ -82,12 +99,13 @@ async function openMountain(m) {
       $('trail-select').add(new Option(`${p.aerialway ? '↟' : d.symbol} ${p.name || p['piste:name'] || 'Unnamed'} · ${p.aerialway ? 'Lift' : d.label}`, e.id));
     }
   } catch (e) {
-    if (!scene) return;
+    if (version !== selectionVersion || !scene) return;
     fail(e);
   }
 }
 
 function backToValley() {
+  selectionVersion++;
   document.body.classList.remove('exploring');
   $('explorer-tools').hidden = true;
   $('intro').hidden = false;
