@@ -47,6 +47,10 @@ if [ "$LIMIT" = "--limit" ]; then
     http://127.0.0.1*|http://localhost*) ;;
     *) echo "refusing --limit against $BASE (local dev only)"; exit 1 ;;
   esac
+  # The test PIN is never committed: HUB_TEST_PIN from the environment, or from
+  # the git-ignored .dev.vars at the repo root.
+  TEST_PIN=${HUB_TEST_PIN:-$(sed -n 's/^HUB_TEST_PIN=//p' "$(dirname "$0")/../.dev.vars" 2>/dev/null)}
+  [ -n "$TEST_PIN" ] || { echo "set HUB_TEST_PIN or add it to .dev.vars (see ADDING_TOOLS.md)"; exit 1; }
   npx -y wrangler@4.150.0 d1 execute conradgelber-hub --local \
     --command "DELETE FROM login_failures" >/dev/null 2>&1
   IP="198.51.100.$((RANDOM % 250 + 1))"
@@ -64,7 +68,7 @@ if [ "$LIMIT" = "--limit" ]; then
   else
     echo "FAIL  wrong PIN 6 -> $st, Retry-After: ${ra:-missing}"; fail=1
   fi
-  st=$(post "${HUB_TEST_PIN:-2468013579}" | head -1 | awk '{print $2}')
+  st=$(post "$TEST_PIN" | head -1 | awk '{print $2}')
   if [ "$st" = 429 ]; then echo "ok    right PIN refused while locked -> 429"; else echo "FAIL  right PIN while locked -> $st"; fail=1; fi
   loc=$(curl -s -o /dev/null -w '%{redirect_url}' -H "Origin: $BASE" -H "CF-Connecting-IP: 198.51.100.254" --data-urlencode "pin=1234" "$BASE/login/")
   case "$loc" in *e=short) echo "ok    PIN under 8 characters refused" ;; *) echo "FAIL  short PIN -> $loc"; fail=1 ;; esac
