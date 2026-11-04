@@ -234,9 +234,9 @@ Local secrets come from `.dev.vars` (git-ignored), with a test PIN rather
 than the real one:
 
 ```bash
-node -e 'const c=require("crypto"),s=c.randomBytes(16);console.log("PIN_SALT_B64="+s.toString("base64")+"\nPIN_HASH_B64="+c.pbkdf2Sync(process.argv[1],s,100000,32,"sha256").toString("base64")+"\nSESSION_SECRET="+c.randomBytes(32).toString("base64url"))' 2468013579 > .dev.vars
+node -e 'const c=require("crypto"),p=c.randomBytes(15).toString("base64url"),s=c.randomBytes(16);console.log("HUB_TEST_PIN="+p+"\nPIN_SALT_B64="+s.toString("base64")+"\nPIN_HASH_B64="+c.pbkdf2Sync(p,s,100000,32,"sha256").toString("base64")+"\nSESSION_SECRET="+c.randomBytes(32).toString("base64url"))' > .dev.vars
 ```
 
-Then sign in at <http://127.0.0.1:8788/login/> with that test PIN.
+Then sign in at <http://127.0.0.1:8788/login/> with the `HUB_TEST_PIN` value from `.dev.vars`.
 `test/hub-flow.sh` checks the whole sign-in flow (see the comment at its top),
 and `node --test test/*.test.mjs` runs the Daily tasks model tests.

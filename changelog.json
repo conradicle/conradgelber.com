@@ -1,0 +1,205 @@
+[
+  {
+    "version": "1.15.0",
+    "date": "2026-11-04",
+    "title": "Changelog",
+    "bullets": [
+      "Added this page, which lists what has changed on the site, newest first.",
+      "Linked it from the footer."
+    ]
+  },
+  {
+    "version": "1.14.0",
+    "date": "2026-10-30",
+    "title": "Miami hurricane replay",
+    "bullets": [
+      "Added a 3D globe that replays Atlantic hurricane tracks with Miami at the center, using NOAA's historical archive.",
+      "Follow each storm's strength, landfalls and closest approach through time.",
+      "Uses satellite imagery for a sharper globe."
+    ]
+  },
+  {
+    "version": "1.13.0",
+    "date": "2026-10-30",
+    "title": "Aspen mountain explorer",
+    "bullets": [
+      "Added a 3D view of the four Aspen Snowmass mountains, with their ski runs and lifts on the real terrain.",
+      "Trail symbols and line patterns show difficulty without relying on color.",
+      "Works on phones, with sharper terrain on desktop."
+    ]
+  },
+  {
+    "version": "1.12.0",
+    "date": "2026-10-29",
+    "title": "Connect page",
+    "bullets": [
+      "Added a short page for NFC cards and QR codes, with links to my Instagram, LinkedIn, Substack and this site."
+    ]
+  },
+  {
+    "version": "1.11.1",
+    "date": "2026-10-28",
+    "title": "Maintenance",
+    "bullets": [
+      "Maintenance and fixes."
+    ]
+  },
+  {
+    "version": "1.11.0",
+    "date": "2026-10-24",
+    "title": "Private area",
+    "bullets": [
+      "Added a private personal area."
+    ]
+  },
+  {
+    "version": "1.10.1",
+    "date": "2026-10-24",
+    "title": "New portrait",
+    "bullets": [
+      "Replaced the front page portrait with a closer crop, shown as a circle.",
+      "Added a matching image for link previews on social media."
+    ]
+  },
+  {
+    "version": "1.10.0",
+    "date": "2026-10-16",
+    "title": "12 Axes",
+    "bullets": [
+      "Added a free political values test that scores you on twelve separate axes.",
+      "See the ideologies, thinkers and historical countries closest to your answers, and compare results with a friend.",
+      "Your answers stay in your browser."
+    ]
+  },
+  {
+    "version": "1.9.1",
+    "date": "2026-10-13",
+    "title": "Welcome cable",
+    "bullets": [
+      "Added a welcome to the front page written like an old diplomatic telegram, with redacted lines you can reveal.",
+      "Added Costa Rica to the travel list.",
+      "Updated the accessibility page to cover the cable and the newer games."
+    ]
+  },
+  {
+    "version": "1.9.0",
+    "date": "2026-10-12",
+    "title": "History Bowl Study",
+    "bullets": [
+      "Added practice for the National History Bowl: Practice tossups read one word at a time, with a buzzer.",
+      "Missed clues become flashcards on a review schedule, and stats track how early you buzz by category, era and region.",
+      "Added a four-quarter match simulator against the computer."
+    ]
+  },
+  {
+    "version": "1.8.0",
+    "date": "2026-10-01",
+    "title": "Borderline",
+    "bullets": [
+      "Added a game with five old political maps and the dates torn off: guess each year from the borders and country names.",
+      "New maps every day."
+    ]
+  },
+  {
+    "version": "1.7.0",
+    "date": "2026-09-27",
+    "title": "Poker",
+    "bullets": [
+      "Added No-Limit Texas Hold'em for two to eight players.",
+      "One person starts a room, friends join with the code, and bots can fill the empty seats."
+    ]
+  },
+  {
+    "version": "1.6.0",
+    "date": "2026-09-26",
+    "title": "Pool",
+    "bullets": [
+      "Added 8-ball and 9-ball on a top-down table.",
+      "Play the computer at three levels, or start a room and send a friend the code.",
+      "Brought the front page summaries up to date."
+    ]
+  },
+  {
+    "version": "1.5.0",
+    "date": "2026-09-25",
+    "title": "Flight Path",
+    "bullets": [
+      "Added a geography game: given two cities and the shortest route between them, name every country the plane passes over.",
+      "Countries you miss come up more often until you learn them."
+    ]
+  },
+  {
+    "version": "1.4.2",
+    "date": "2026-09-25",
+    "title": "Off the clock photos",
+    "bullets": [
+      "Turned the fishing photo on Off the clock into a four-photo carousel, with skiing and travel shots.",
+      "Added a paragraph on travel."
+    ]
+  },
+  {
+    "version": "1.4.1",
+    "date": "2026-09-24",
+    "title": "New photo and content updates",
+    "bullets": [
+      "Added a new front page portrait and link preview photo.",
+      "Linked Beyond Partisan from the Work page and added skiing, hiking, ping pong and billiards to Off the clock.",
+      "Maintenance and fixes."
+    ]
+  },
+  {
+    "version": "1.4.0",
+    "date": "2026-09-24",
+    "title": "Accessibility page",
+    "bullets": [
+      "Added a page with the accessibility standard the site aims for, its known limitations and how to report a problem.",
+      "Added a skip link to every page and screen reader announcements to Pin drop."
+    ]
+  },
+  {
+    "version": "1.3.0",
+    "date": "2026-09-24",
+    "title": "Section pages and Games tab",
+    "bullets": [
+      "Gave each front page section its own page, with a tab bar to move between them.",
+      "Added a Games page for Pin drop and Cambio."
+    ]
+  },
+  {
+    "version": "1.2.0",
+    "date": "2026-09-23",
+    "title": "Cambio",
+    "bullets": [
+      "Added a browser version of Cambio, the card game I play with friends at lunch.",
+      "One person starts a game and the others join it."
+    ]
+  },
+  {
+    "version": "1.1.0",
+    "date": "2026-09-23",
+    "title": "Pin drop",
+    "bullets": [
+      "Added a geography game on a globe with no labels: find each place, drop a pin and score points for landing close.",
+      "Pick a tier first: Capitals, Second cities or Edge of the map."
+    ]
+  },
+  {
+    "version": "1.0.1",
+    "date": "2026-09-22",
+    "title": "Work and writing updates",
+    "bullets": [
+      "Rewrote the work entries and added education and the Brechner Report coverage.",
+      "Added a section on things I've built.",
+      "Renamed Research and writing to Writing."
+    ]
+  },
+  {
+    "version": "1.0.0",
+    "date": "2026-09-20",
+    "title": "First public launch",
+    "bullets": [
+      "Launched a one-page site covering my work, research and writing, where I'm headed, and life off the clock.",
+      "Added a portrait and a fishing photo."
+    ]
+  }
+]
