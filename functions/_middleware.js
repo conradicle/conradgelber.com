@@ -4,12 +4,16 @@
 // functions/_lib/paths.js for why the hub middleware alone isn't enough.
 
 import { hasSession, redirect, signedOut } from "./_lib/auth.js";
-import { resolvePath, isHubPath, hubCanonical } from "./_lib/paths.js";
+import { resolvePath, isHubPath, isBlockedPath, hubCanonical } from "./_lib/paths.js";
 
 export async function onRequest({ request, env, next }) {
   const url = new URL(request.url);
   const resolved = resolvePath(url.pathname);
-  if (!isHubPath(resolved)) return next();
+  if (!isHubPath(resolved)) {
+    if (!isBlockedPath(resolved)) return next();
+    // Ask for a path that doesn't exist, so the answer is the site's own 404.
+    return env.ASSETS.fetch(new URL("/__not_found__", url));
+  }
 
   if (!(await hasSession(request, env))) return signedOut(resolved);
 

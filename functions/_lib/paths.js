@@ -44,6 +44,23 @@ export function hubCanonical(resolved) {
   return "/" + ["hub", ...rest].join("/");
 }
 
+// The deploy serves the repo root, so docs, config and source that no page
+// needs have to be turned away here. Same spelling rules as isHubPath: any
+// case, and a name followed by a character that can't be part of it still
+// counts ("DEPLOY.md;x"). Takes a path from resolvePath.
+const BLOCKED_FIRST =
+  /^(play-src|pool-worker|historybowl-worker|floorplan|graphify-out|node_modules|functions|scripts|test|db|wrangler\.jsonc|_headers|_routes\.json)(?![a-z0-9_-])/i;
+const BLOCKED_ANY_DEPTH = /\.md(?![a-z0-9_-])/i;
+const DOTFILE = /^\.(?!well-known$)/i;
+
+export function isBlockedPath(resolved) {
+  const segments = resolved.split("/").filter(Boolean);
+  if (segments.length === 0) return false;
+  if (BLOCKED_FIRST.test(segments[0])) return true;
+  if (segments[0].toLowerCase() === "connect" && segments[1]?.toLowerCase() === "profile.mjs") return true;
+  return segments.some((s) => BLOCKED_ANY_DEPTH.test(s) || DOTFILE.test(s));
+}
+
 // A page gets sent to the login form; anything else (a script, JSON, an icon,
 // the storage API) gets a bare 401, which hub.js and lib/store.js turn into
 // a trip to /login/.

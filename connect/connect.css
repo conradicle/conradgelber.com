@@ -27,6 +27,7 @@
 .is-unavailable{background:transparent;border-style:dashed}
 .connect-note{margin:22px 0 30px;text-align:center;color:var(--ink-soft);font-family:Spectral,Georgia,serif;font-size:15px;line-height:1.5}
 .connect-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0;padding:19px 0 26px;border-top:1px solid var(--rule);font-size:12px;line-height:1.5;color:var(--ink-soft)}
+.connect-footer-links{display:flex;gap:16px}
 .connect-footer a{display:flex;align-items:center;min-height:44px;color:var(--ink-soft);border:0;text-decoration:underline;text-underline-offset:3px}
 @media (hover:hover){
   a.connect-link:hover{border-color:var(--accent);background:#FFF;color:var(--accent)}
