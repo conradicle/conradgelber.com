@@ -1,0 +1,6 @@
+/* /changelog/: the entries reuse the docket styles from style.css. */
+.changelog-status{margin:1.6rem 0 0;color:var(--ink-soft)}
+.changelog-status:empty{display:none}
+#changelog{margin-top:1.2rem}
+#changelog ul{margin:0;padding-left:1.15rem;max-width:58ch;color:var(--ink-soft)}
+#changelog li+li{margin-top:.3rem}

@@ -78,7 +78,7 @@ ${sharingImage ? `<meta name="twitter:image" content="${escape(sharingImage)}">
 <link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css?v=10">
-<link rel="stylesheet" href="/connect/connect.css?v=1">
+<link rel="stylesheet" href="/connect/connect.css?v=2">
 </head>
 <body class="connect-page">
 <a class="skip" href="#main">Skip to main content</a>
@@ -106,7 +106,7 @@ ${links}
   </main>
   <footer class="connect-footer">
     <span>${escape(p.name)}</span>
-    <a href="/accessibility/">Accessibility</a>
+    <span class="connect-footer-links"><a href="/accessibility/">Accessibility</a><a href="/changelog/">Changelog</a></span>
   </footer>
 </div>
 </body>

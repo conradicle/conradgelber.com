@@ -89,7 +89,7 @@ below), so check them on the live site.
 ## Notes
 
 - **HSTS.** `_headers` sends `Strict-Transport-Security: max-age=63072000; includeSubDomains` (two years, no preload). Browsers that have seen it will only use HTTPS for conradgelber.com **and every subdomain** for two years, so any new subdomain must serve HTTPS from day one. Proxied records get Cloudflare's wildcard certificate automatically; a DNS-only record pointing elsewhere needs its own certificate. Checked 2026-09-24: only the apex and www resolve, and both serve valid HTTPS. The `cambio` Worker sends the same header.
-- `_headers` also sends `Permissions-Policy` (every browser feature the site does not use is turned off) and `Cross-Origin-Opener-Policy: same-origin` on every path, and serves `/.well-known/security.txt` as plain text. Update its `Expires` line before 2027-09-24. Every page starts with a "Skip to main content" link to `<main id="main">`, and every footer links `/accessibility/`; keep both when adding a page.
+- `_headers` also sends `Permissions-Policy` (every browser feature the site does not use is turned off) and `Cross-Origin-Opener-Policy: same-origin` on every path, and serves `/.well-known/security.txt` as plain text. Update its `Expires` line before 2027-09-24. Every page starts with a "Skip to main content" link to `<main id="main">`, and every footer links `/accessibility/` and `/changelog/`; keep them when adding a page.
 - `_headers` applies to every path (`/*`). The CSP is
   `default-src 'none'` with `script-src`, `connect-src`, `style-src`,
   `font-src`, `img-src` and `manifest-src` set to `'self'`. Only
@@ -119,6 +119,7 @@ below), so check them on the live site.
   (`/style.css?v=5` -> `?v=6`) whenever `style.css` changes, in every page
   that links it (see the list under [Pages and the tab bar](#pages-and-the-tab-bar));
   it is harmless to keep doing so afterwards.
+- **Files the site won't serve.** The output directory is the repo root, so every tracked file would otherwise be public. `functions/_middleware.js` answers with the site's 404 for anything `isBlockedPath` (in `functions/_lib/paths.js`) matches: any `.md` file, dotfiles except `.well-known`, `wrangler.jsonc`, `connect/profile.mjs`, and the source folders. When adding a top-level folder or config file that visitors don't need, add it there and to `test/blocked-paths.test.mjs`.
 - Every deploy is a plain git push to `main`; Cloudflare builds it within a
   minute or two. Preview deploys for other branches are on by default and
   get their own `*.pages.dev` URL.
@@ -167,11 +168,12 @@ Each section has its own page, a plain `index.html` in its own folder:
 | `/off-the-clock/` | `off-the-clock/index.html` |
 | `/games/` | `games/index.html` |
 | `/accessibility/` | `accessibility/index.html` |
+| `/changelog/` | `changelog/index.html` |
 | any missing path | `404.html` |
 
-All nine carry the same `<nav class="tabs" aria-label="Site">` block under
+All but `/connect/` carry the same `<nav class="tabs" aria-label="Site">` block under
 the masthead. There is no build step and no include, so **a change to the tab
-bar (a label, a new tab, a reordering) has to be made by hand in all eight
+bar (a label, a new tab, a reordering) has to be made by hand in all ten
 files**, identically. The one difference between copies is
 `aria-current="page"`, which sits on the current page's tab (the front page
 and the 404 page have none). After editing, check that the copies still match:
@@ -180,7 +182,7 @@ and the 404 page have none). After editing, check that the copies still match:
 grep -h --no-group-separator -A7 '<nav class="tabs"' index.html 404.html */index.html | sed 's/ aria-current="page"//' | sort | uniq -c
 ```
 
-Every line should show a count of 9. The same goes for the head (font
+Every line should show a count of 10. The same goes for the head (font
 preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
 `/play/`, `/flight-path/`, `/pool/`, `/cambio/` and `/poker/` do not get the tab bar.
