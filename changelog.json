@@ -1,11 +1,29 @@
 [
   {
-    "version": "1.15.0",
+    "version": "1.16.0",
     "date": "2026-11-04",
     "title": "Changelog",
     "bullets": [
       "Added this page, which lists what has changed on the site, newest first.",
       "Linked it from the footer."
+    ]
+  },
+  {
+    "version": "1.15.1",
+    "date": "2026-11-01",
+    "title": "Front page and Aspen fixes",
+    "bullets": [
+      "Removed the welcome cable from the front page.",
+      "The Aspen explorer now switches to a backup map when its main 3D service hits its usage limit."
+    ]
+  },
+  {
+    "version": "1.15.0",
+    "date": "2026-11-01",
+    "title": "State Foreign Influence Observatory",
+    "bullets": [
+      "Added an early version of the State Foreign Influence Observatory.",
+      "See where foreign agent laws and bills stand in ten states, the sources behind them, and the plan for what gets built next."
     ]
   },
   {
