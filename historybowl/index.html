@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>History Bowl Study &middot; Conrad Gelber</title>
-<meta name="description" content="Practice for the National History Bowl: pyramidal tossups read one word at a time, a buzzer, answer checking, buzz-point stats, and flashcards made from the clues you missed.">
+<meta name="description" content="Practice with National History Bowl regional A, B and C packets: tossups, four-quarter matches, buzz-point stats, and flashcards from the clues you missed.">
 <link rel="canonical" href="https://conradgelber.com/historybowl/">
 <meta name="theme-color" content="#13233C">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="/style.css?v=10">
 <link rel="stylesheet" href="/play/play.css?v=4">
 <link rel="stylesheet" href="/historybowl/historybowl.css?v=5">
-<script src="/historybowl/historybowl.js?v=6" defer></script>
+<script src="/historybowl/historybowl.js?v=7" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -33,7 +33,7 @@
 
     <section class="screen" id="screen-home" aria-labelledby="home-title">
       <h1 class="game-title" id="home-title" tabindex="-1">History Bowl Study</h1>
-      <p class="game-intro">Practice for the National History Bowl. Tossups are
+      <p class="game-intro">Practice with National History Bowl regional packets. Tossups are
         read one word at a time, hardest clue first. Buzz as soon as you know
         it, type the answer, then turn any clue you missed into a flashcard.
         The earlier you buzz right, the better.</p>
@@ -77,9 +77,8 @@
         <form class="settings-form" id="settings-form">
           <fieldset>
             <legend>Sources</legend>
-            <label class="check"><input type="checkbox" name="src" value="bee"> IAC History Bee Nationals (2015 to 2022), via QB Reader</label>
+            <label class="check"><input type="checkbox" name="src" value="iac"> IAC History Bowl regionals, A/B/C sets (2014–2022; team passcode below)</label>
             <label class="check"><input type="checkbox" name="src" value="qb"> High school quizbowl sets on QB Reader</label>
-            <label class="check"><input type="checkbox" name="src" value="iac" disabled> IAC regional packets (team passcode below)</label>
           </fieldset>
           <fieldset>
             <legend>Categories</legend>
@@ -251,7 +250,7 @@
         <label class="check"><input type="radio" name="bounce-rule" value="in-person"> In person: the other team gets every unanswered question as a list after the 60 seconds</label>
         <label class="check"><input type="radio" name="bounce-rule" value="online"> Online rules: each missed question bounces at once</label>
       </fieldset>
-      <p class="hint">Questions follow your source and level settings. The first two quarters use the last sentences of longer tossups, marked "shortened". The fourth quarter uses the IAC Bee's full pyramids when that source is on, and counts in your stats.</p>
+      <p class="hint">Regional matches use the packet's original four quarters, including paired bonuses and lightning categories. Unlock the packets in Question settings. If you choose QB Reader instead, the first two quarters use shortened tossups.</p>
       <div class="end-actions">
         <button type="button" class="btn btn-lamp" id="sim-start">Start the match</button>
         <button type="button" class="btn btn-quiet" id="sim-setup-back">Back</button>
@@ -436,9 +435,10 @@
       <p>Built for my Rho Kappa team's practice. The National
         History Bowl is run by International Academic Competitions; this page
         is not affiliated with them.</p>
-      <p>Questions come live from <a href="https://www.qbreader.org/">QB Reader</a>,
-        a free quizbowl database, including the IAC History Bee national
-        finals it hosts. Each question shows its source. Answers are checked
+      <p>Regional questions come from the A, B and C sets in
+        <a href="https://www.iacompetitions.com/resources-national-history-bowl/">IAC's past History Bowl packets</a>,
+        available here with the team passcode. Optional extra practice comes from
+        <a href="https://www.qbreader.org/">QB Reader</a>. Each question shows its source. Answers are checked
         with QB Reader's checker, or a simpler one built in here when that
         is out of reach, and you can always overrule it.</p>
     </section>
@@ -446,7 +446,7 @@
   </main>
 
   <footer>
-    <p class="colophon">Questions from QB Reader. <a href="/accessibility/">Accessibility</a> &middot; <a href="/changelog/">Changelog</a></p>
+    <p class="colophon">Questions from IAC regional packets and QB Reader. <a href="/accessibility/">Accessibility</a> &middot; <a href="/changelog/">Changelog</a></p>
   </footer>
 
 </div>

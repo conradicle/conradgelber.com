@@ -55,7 +55,19 @@ for (const file of inputs(args)) {
     report.push(`${basename(file)}: could not read (${e.message})`);
     continue;
   }
+  // Archive filenames are stable even when a PDF's running header omits
+  // its year or uses a hyphenated "B-Set". Keep A/B/C identities distinct.
+  const name = basename(file);
+  const year = name.match(/(20\d\d-20\d\d)/)?.[1];
+  const set = name.match(/-([ABC])-Set\./i)?.[1];
+  const round = name.match(/-Round-(\d+)-/i)?.[1];
+  if (year) parsed.meta.year = year;
+  if (set) parsed.meta.set = set.toUpperCase();
+  if (round) parsed.meta.round = Number(round);
   const pk = fromPacket(parsed);
+  // A damaged extra-question section must not enter sudden death. The
+  // packet's four complete quarters can still be used safely.
+  if (parsed.extra.some((q) => !q.text || !q.answer)) pk.extra = [];
   let id = pk.id;
   for (let n = 2; seen.has(id); n++) id = `${pk.id}-${n}`;
   seen.add(id);

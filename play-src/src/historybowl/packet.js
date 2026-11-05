@@ -51,6 +51,7 @@ function isHeaderish(text) {
 export function repeatedLines(lines, min = 3) {
   const count = new Map();
   for (const l of lines) {
+    if (quarterOf(l.text) !== null || /^(?:answer|bonus|tossup)\b|^\(?\d{1,2}\s*[.)]/i.test(l.text)) continue;
     const k = cleanLine(l.text).replace(/\d+/g, '#');
     if (k.length > 0 && k.length < 120) count.set(k, (count.get(k) || 0) + 1);
   }
@@ -81,12 +82,13 @@ export function parsePacket(rawLines, { file = '' } = {}) {
   let field = null;
   let cur = null;
   let category = null;
+  let categoryMenu = false;
   const problem = (msg, text) => out.problems.push(text ? `${msg}: ${text.slice(0, 120)}` : msg);
 
   const takeMeta = (text) => {
     const y = text.match(/\b(20\d\d)\s*[-\u2013\/]\s*(\d{2,4})\b/);
     if (y && !out.meta.year) out.meta.year = `${y[1]}-${y[2].length === 2 ? '20' + y[2] : y[2]}`;
-    const s = text.match(/\b(?:set\s+([A-E])|([A-E])\s+set)\b/i);
+    const s = text.match(/\b(?:set[\s-]+([A-E])|([A-E])[\s-]+set)\b/i);
     if (s && !out.meta.set) out.meta.set = (s[1] || s[2]).toUpperCase();
     const r = text.match(/\bround\s+(\d{1,2})\b/i);
     if (r && out.meta.round === null) out.meta.round = Number(r[1]);
@@ -96,16 +98,19 @@ export function parsePacket(rawLines, { file = '' } = {}) {
   const listFor = (q) => (q === 'extra' ? out.extra : out[`q${q}`]);
 
   for (const { text, html } of lines) {
-    if (repeated.has(text.replace(/\d+/g, '#')) || isHeaderish(text)) {
-      takeMeta(text);
-      continue;
-    }
+    // "Quarter 1" through "Quarter 4" share the same digit-normalized
+    // text, but are section headings rather than repeated running headers.
     const q = quarterOf(text);
     if (q !== null) {
       quarter = q;
       field = null;
       cur = null;
       category = null;
+      categoryMenu = false;
+      continue;
+    }
+    if (repeated.has(text.replace(/\d+/g, '#')) || isHeaderish(text)) {
+      takeMeta(text);
       continue;
     }
     if (quarter === null) {
@@ -133,7 +138,13 @@ export function parsePacket(rawLines, { file = '' } = {}) {
       continue;
     }
 
+    if (quarter === 3 && /\bcategor(?:y|ies) (?:is|are)\b/i.test(text)) {
+      categoryMenu = /(?:are|is)\s*(?::|\.\s*\.\s*\.)\s*$/i.test(text);
+      continue;
+    }
     m = text.match(QUESTION) || text.match(TOSSUP);
+    if (quarter === 3 && categoryMenu && m) continue;
+    if (quarter === 3 && categoryMenu) categoryMenu = false;
     if (m) {
       const n = Number(m[1] || m[2]) || null;
       const body = m[3] !== undefined ? m[3] : m[2] || '';
@@ -146,6 +157,7 @@ export function parsePacket(rawLines, { file = '' } = {}) {
         continue;
       }
       const item = { n: n || listCount(quarter, category) + 1, text: body, answer: '', answerHtml: '' };
+      if (quarter === 3 && category?.leadin) item.text = `${category.category}. ${category.leadin} ${body}`;
       if (quarter === 2) item.bonus = null;
       if (quarter === 3) {
         if (!category) {
@@ -163,9 +175,15 @@ export function parsePacket(rawLines, { file = '' } = {}) {
     }
 
     // The lightning round's opening line lists the categories; the titles come later.
-    if (quarter === 3 && /\bcategor(?:y|ies) (?:is|are)\b/i.test(text)) continue;
+    // A lightning category often has a shared stem ("Which Roman emperor...").
+    // Keep it with every question, rather than losing the context or
+    // mistaking the stem for a second category heading.
+    if (quarter === 3 && category && !category.questions.length) {
+      category.leadin = category.leadin ? `${category.leadin} ${text}` : text;
+      continue;
+    }
     // A line on its own in the lightning round, between questions: a category title.
-    if (quarter === 3 && looksLikeCategory(text) && !openBracket(field) && (!field || field.key !== 'text' || (cur && cur.answer))) {
+    if (quarter === 3 && looksLikeCategory(text) && !openBracket(field) && (!category || category.questions.length >= EXPECTED.q3each) && (!field || field.key !== 'text' || (cur && cur.answer))) {
       category = { category: text.replace(/^category\s*\d*\s*[:.)-]?\s*/i, ''), questions: [] };
       out.q3.push(category);
       field = null;
@@ -230,5 +248,9 @@ export function looksLikeCategory(text) {
 
 /** True when a packet has everything a match needs. */
 export function packetComplete(p) {
-  return p.q1.length >= EXPECTED.q1 && p.q2.length >= EXPECTED.q2 && p.q3.length >= 2 && p.q3.every((c) => c.questions.length >= EXPECTED.q3each) && p.q4.length >= EXPECTED.q4;
+  const valid = (q) => Boolean(q.text && q.answer);
+  return p.q1.length === EXPECTED.q1 && p.q1.every(valid)
+    && p.q2.length === EXPECTED.q2 && p.q2.every((q) => valid(q) && q.bonus && valid(q.bonus))
+    && p.q3.length >= 2 && p.q3.every((c) => c.questions.length >= EXPECTED.q3each && c.questions.every(valid))
+    && p.q4.length === EXPECTED.q4 && p.q4.every(valid);
 }

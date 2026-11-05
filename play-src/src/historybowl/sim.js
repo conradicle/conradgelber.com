@@ -863,12 +863,11 @@ export function initSim(ctx) {
 
   function prefetch() {
     const s = ctx.settings();
+    const regional = s.sources.includes('iac');
     const offer = offerCategories();
     const lightning = new Map();
-    for (const c of offer) lightning.set(c.label, lightningQuestions(c).catch(() => []));
-    // The fourth quarter prefers the Bee's full pyramids when that source is on.
-    const q4src = s.sources.includes('bee') ? { sources: ['bee'] } : {};
-    const qbOnly = { sources: s.sources.filter((x) => x === 'bee' || x === 'qb').length ? s.sources.filter((x) => x === 'bee' || x === 'qb') : ['bee', 'qb'] };
+    if (!regional) for (const c of offer) lightning.set(c.label, lightningQuestions(c).catch(() => []));
+    const matchSources = { sources: regional ? ['iac'] : ['qb'] };
     const later = (make) => {
       let p = null;
       return () => (p = p || make());
@@ -876,14 +875,13 @@ export function initSim(ctx) {
     const pool = {
       offer,
       lightning,
-      packet: s.teamPass ? iacPacket(s.teamPass, ctx.packetsUsed()).catch(() => null) : Promise.resolve(null),
-      q1: later(() => getTossups(QUARTERS[0].tossups, qbOnly)),
-      q2: later(() => getTossups(QUARTERS[1].tossups, qbOnly)),
-      q2b: later(() => fetchBonuses({ cat: 'History', level: s.level, n: QUARTERS[1].tossups }).catch(() => [])),
-      q4: later(() => getTossups(QUARTERS[3].tossups + TIEBREAK_TOSSUPS, { ...qbOnly, ...q4src })),
+      packet: regional && s.teamPass ? iacPacket(s.teamPass, ctx.packetsUsed()).catch(() => null) : Promise.resolve(null),
+      q1: later(() => getTossups(QUARTERS[0].tossups, matchSources)),
+      q2: later(() => getTossups(QUARTERS[1].tossups, matchSources)),
+      q2b: later(() => regional ? [] : fetchBonuses({ cat: 'History', level: s.level, n: QUARTERS[1].tossups }).catch(() => [])),
+      q4: later(() => getTossups(QUARTERS[3].tossups + TIEBREAK_TOSSUPS, matchSources)),
     };
     // Without a packet the stand-ins are needed at once.
-    if (!s.teamPass) for (const k of ['q1', 'q2', 'q2b', 'q4']) pool[k]();
     return pool;
   }
 
@@ -892,6 +890,7 @@ export function initSim(ctx) {
     // An IAC packet (team passcode) supplies every quarter it has in full.
     const pk = await pool.packet;
     alive(id);
+    if (ctx.settings().sources.includes('iac') && !pk) throw new Error('No regional packet available. Check the team passcode in Question settings and try again.');
     const fix = (q) => withFix(q, ctx.fixes());
     const use = {
       q1: pk && pk.q1.length >= QUARTERS[0].tossups ? pk.q1.map(fix) : null,
@@ -899,6 +898,7 @@ export function initSim(ctx) {
       q3: pk && pk.q3.length >= 2 && pk.q3.every((c) => c.questions.length >= LIGHTNING.questions) ? pk.q3 : null,
       q4: pk && pk.q4.length >= QUARTERS[3].tossups ? pk.q4.map(fix) : null,
     };
+    if (ctx.settings().sources.includes('iac') && Object.values(use).some((q) => !q)) throw new Error('This regional packet is incomplete. Try another match.');
     usedPacket = pk && (use.q1 || use.q2 || use.q3 || use.q4) ? pk : null;
     if (usedPacket) ctx.usePacket(pk.id);
     // Quarters 1 and 2.
@@ -1005,7 +1005,9 @@ export function initSim(ctx) {
       console.error('historybowl match', e);
       show('screen-sim');
       resetStage();
-      status('Could not reach the question database. Check your connection and start again.');
+      status(ctx.settings().sources.includes('iac')
+        ? ctx.settings().teamPass ? e.message : 'Unlock the regional packets in Question settings with your team passcode.'
+        : 'Could not reach the question database. Check your connection and start again.');
       $('s-quit').focus();
     }
   }

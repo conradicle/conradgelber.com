@@ -62,9 +62,18 @@ export async function handleIac(route, request, env, url, { json, fail }) {
     // Long tossups (second and fourth quarters) or short ones (first quarter) from a few random packets.
     const fmt = url.searchParams.get('fmt') === 'short' ? 'short' : 'long';
     const n = Math.min(12, Math.max(1, Number(url.searchParams.get('n')) || 8));
-    const list = shuffle((await index(env)).slice()).slice(0, 3);
-    const packets = (await Promise.all(list.map((p) => packet(env, p.id)))).filter(Boolean);
-    const pool = packets.flatMap((p) => (fmt === 'short' ? p.q1 : [...p.q2.map((x) => x.tossup), ...p.q4]));
+    const cats = (url.searchParams.get('cats') || '').split(',').filter(Boolean);
+    const subs = (url.searchParams.get('subs') || '').split(',').filter(Boolean);
+    const list = shuffle((await index(env)).filter((p) => p.complete));
+    const pool = [];
+    // Scan shuffled packets until the chosen filters have enough matches.
+    for (const entry of list) {
+      const p = await packet(env, entry.id);
+      if (!p) continue;
+      const qs = fmt === 'short' ? p.q1 : [...p.q2.map((x) => x.tossup), ...p.q4];
+      pool.push(...qs.filter((q) => q.text && q.answerHtml && (!cats.length || cats.includes(q.category)) && (!subs.length || subs.includes(q.subcategory))));
+      if (pool.length >= n * 3) break;
+    }
     return json(200, { tossups: shuffle(pool).slice(0, n) });
   }
   return fail(404, 'Not found');

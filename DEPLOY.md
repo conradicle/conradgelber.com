@@ -551,6 +551,24 @@ lockout reveals nothing.
 
 ### IAC packets (team only)
 
+Regional A/B/C packets are the default source for both practice and matches.
+Existing devices migrate from the former Bee nationals mix without changing
+their records, cards or reading preferences. QB Reader is optional; regional
+matches require a complete packet and never silently substitute nationals.
+
+Download the regional archive (PDFs and its source manifest are git-ignored):
+
+```bash
+node play-src/scripts/historybowl/fetch-regionals.mjs
+node play-src/scripts/historybowl/import-packets.mjs play-src/data/historybowl/iac/raw
+```
+
+The importer reports incomplete packets; the service uses complete packets
+only. Review `play-src/data/historybowl/iac/report.txt` before uploading.
+Numeric quarter headings, hyphenated set names, lightning category menus and
+shared lightning stems are handled by the parser. Filenames supply stable
+year/set/round identities when PDF headers omit them.
+
 IAC's past questions are not ours to publish, and this repo is public, so
 packet text never enters git. The pipeline:
 
@@ -586,7 +604,7 @@ packet text never enters git. The pipeline:
 The page's settings take the passcode once per device (kept in
 `historybowl:team`, never exported). With it, the simulator plays a whole
 packet (real short tossups, bonuses, lightning categories and long tossups;
-QB Reader fills any quarter a packet lacks), and the reader can mix packet
+only complete regional packets are selected), and the reader can mix packet
 tossups in. Packet questions carry no categories: their subcategory is a
 guess from the text, flagged so the weakest-areas ranking ignores it until
 corrected. Real first-quarter tossups count in stats as their own source

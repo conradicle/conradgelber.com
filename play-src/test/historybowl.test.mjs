@@ -121,7 +121,7 @@ test('store survives empty, blocked and corrupt storage', () => {
   assert.deepEqual(loadRecords(null), []);
   assert.deepEqual(loadRecords(blocked), []);
   assert.equal(saveRecords(blocked, [rec('1')]), false);
-  assert.deepEqual(loadSettings(blocked).sources, ['bee', 'qb']);
+  assert.deepEqual(loadSettings(blocked).sources, ['iac']);
   const s = memoryStorage();
   s.setItem(KEYS.records, '{not json');
   assert.deepEqual(loadRecords(s), []);
