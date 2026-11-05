@@ -168,7 +168,8 @@ export function addSeen(storage, seen, qid) {
 }
 
 export const DEFAULT_SETTINGS = {
-  sources: ['bee', 'qb'],
+  sources: ['iac'],
+  regionalSources: true,
   cats: ['History', 'Geography', 'Fine Arts', 'Literature'],
   subs: [],
   level: 'regional',
@@ -184,7 +185,12 @@ export function loadSettings(storage) {
   const v = readJSON(storage, KEYS.settings, {});
   const s = { ...DEFAULT_SETTINGS };
   if (v && typeof v === 'object') {
-    if (Array.isArray(v.sources) && v.sources.every(isStr) && v.sources.length) s.sources = v.sources;
+    // Switch existing devices off the old Bee nationals mix once. Preserve
+    // later source choices, along with every record, card and reading setting.
+    if (v.regionalSources === true && Array.isArray(v.sources)) {
+      const sources = [...new Set(v.sources.filter((x) => ['iac', 'qb'].includes(x)))];
+      if (sources.length) s.sources = sources;
+    }
     if (Array.isArray(v.cats) && v.cats.every(isStr) && v.cats.length) s.cats = v.cats;
     if (Array.isArray(v.subs) && v.subs.every(isStr)) s.subs = v.subs;
     if (['regional', 'harder', 'all'].includes(v.level)) s.level = v.level;

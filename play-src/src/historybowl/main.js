@@ -156,8 +156,8 @@ function buildSettings() {
 function showTeam() {
   const on = Boolean(settings.teamPass);
   const box = form$('src', 'iac');
-  box.disabled = !on;
-  box.checked = on && settings.sources.includes('iac');
+  box.disabled = false;
+  box.checked = settings.sources.includes('iac');
   $('team-forget').hidden = !on;
   if (on && !$('team-status').textContent) $('team-status').textContent = 'IAC packets unlocked on this device.';
 }
@@ -171,12 +171,13 @@ async function unlockTeam(e) {
   status.textContent = 'Checking...';
   try {
     const r = await iacCheck(pass);
-    settings = { ...settings, teamPass: pass, sources: settings.sources.includes('iac') ? settings.sources : [...settings.sources, 'iac'] };
+    settings = { ...settings, teamPass: pass, sources: ['iac'] };
     writeJSON(storage, KEYS.team, pass);
     const { teamPass, ...toSave } = settings;
     saveSettings(storage, toSave);
     $('team-pass').value = '';
-    status.textContent = `Unlocked: ${plural(r.packets, 'packet')}${r.packets ? `, ${r.complete} complete` : ', none uploaded yet'}. Matches use them first.`;
+    status.textContent = `Unlocked: ${plural(r.packets, 'regional packet')}${r.packets ? `, ${r.complete} complete` : ', none uploaded yet'}. Practice and matches now use regionals.`;
+    for (const i of $('settings-form').querySelectorAll('input[name=src]')) i.checked = settings.sources.includes(i.value);
     queue = [];
     writeJSON(storage, KEYS.queue, []);
   } catch (err) {
@@ -186,8 +187,7 @@ async function unlockTeam(e) {
 }
 
 function forgetTeam() {
-  const left = settings.sources.filter((s) => s !== 'iac');
-  settings = { ...settings, teamPass: '', sources: left.length ? left : ['bee', 'qb'] };
+  settings = { ...settings, teamPass: '' };
   try {
     storage.removeItem(KEYS.team);
   } catch (e) {
@@ -273,7 +273,10 @@ async function nextQuestion() {
   if (!queue.length && !focus) {
     // Offline: questions fetched last time are kept on the device.
     const saved = readJSON(storage, KEYS.queue, []);
-    if (Array.isArray(saved) && saved.length) queue = saved.filter((q) => q && q.id && q.text && q.answerHtml);
+    if (Array.isArray(saved) && saved.length) queue = saved.filter((q) => q && q.id && q.text && q.answerHtml && (
+      (settings.sources.includes('iac') && ['iac-packet', 'iac-packet-short'].includes(q.source)) ||
+      (settings.sources.includes('qb') && q.source === 'qbreader')
+    ));
   }
   for (let i = 0; i < 4 && !queue.length; i++) {
     try {
@@ -324,7 +327,9 @@ async function startTossup() {
     q = null;
   }
   if (!q) {
-    $('read-status').textContent = 'Could not reach the question database. Check your connection and try again.';
+    $('read-status').textContent = settings.sources.includes('iac') && !settings.teamPass
+      ? 'Unlock the regional packets in Question settings with your team passcode.'
+      : 'No questions available. Check your connection, team passcode and question filters, then try again.';
     const retry = el('button', 'btn btn-lamp', 'Try again');
     retry.type = 'button';
     retry.addEventListener('click', startTossup);

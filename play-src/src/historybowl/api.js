@@ -25,11 +25,12 @@ async function call(path, init = {}, timeoutMs = 10000) {
  * from their own endpoint and make up about a third of a mixed batch.
  */
 export async function fetchTossups(settings, n) {
-  const qbSources = settings.sources.filter((s) => s === 'bee' || s === 'qb');
+  const qbSources = settings.sources.filter((s) => s === 'qb');
   const pass = settings.sources.includes('iac') ? settings.teamPass : '';
   const fromIac = pass ? (qbSources.length ? Math.max(1, Math.round(n / 3)) : n) : 0;
+  if (settings.sources.includes('iac') && !pass) throw new Error('Unlock the regional packets in Question settings with your team passcode.');
   const [iac, rest] = await Promise.all([
-    fromIac ? iacTossups(pass, fromIac).catch(() => []) : [],
+    fromIac ? iacTossups(pass, fromIac, 'long', settings) : [],
     qbSources.length ? fetchQb({ ...settings, sources: qbSources }, n - fromIac) : [],
   ]);
   const all = [...iac, ...rest];
@@ -85,7 +86,8 @@ export async function iacPacket(pass, not = []) {
   return data.packet || null;
 }
 
-export async function iacTossups(pass, n, fmt = 'long') {
-  const data = await call(`/iac/tossups?n=${n}&fmt=${fmt}`, team(pass), 15000);
+export async function iacTossups(pass, n, fmt = 'long', settings = {}) {
+  const params = new URLSearchParams({ n: String(n), fmt, cats: (settings.cats || []).join(','), subs: (settings.subs || []).join(',') });
+  const data = await call(`/iac/tossups?${params}`, team(pass), 15000);
   return Array.isArray(data.tossups) ? data.tossups : [];
 }
