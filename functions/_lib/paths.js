@@ -1,4 +1,4 @@
-// Path canonicalization for the hub gate. Pages' static asset server
+// Path canonicalization for the private-area gate. Pages' static asset server
 // normalizes a path before it looks up a file ("//hub/", "/hub%2f" and
 // "/%68ub/" all serve hub/index.html), but the Functions router matches the
 // raw path, so functions/hub/_middleware.js alone never sees those requests.
@@ -27,25 +27,29 @@ export function resolvePath(raw) {
   return "/" + out.join("/") + (trailing ? "/" : "");
 }
 
-// True for anything that could land in /hub: a first segment of "hub" in any
-// case, or "hub" followed by a character that is not part of a normal name
-// ("hub;x", "hub.html", "hub "). "/hubble" is not hub.
-export function isHubPath(resolved) {
-  const first = resolved.split("/")[1] || "";
-  return /^hub(?![a-z0-9_-])/i.test(first);
+// True for anything that could land in a private folder: a first segment of
+// one of these names in any case, or the name followed by a character that is
+// not part of a normal name ("hub;x", "hub.html", "hub "). "/hubble" is not
+// hub.
+const GATED = ["hub", "hurricanes", "observatory"];
+const GATED_FIRST = new RegExp(`^(${GATED.join("|")})(?![a-z0-9_-])`, "i");
+
+export function isGatedPath(resolved) {
+  return GATED_FIRST.test(resolved.split("/")[1] || "");
 }
 
-// The one spelling the hub's own routes answer to: the resolved path with a
-// lowercase "/hub" prefix, or null when the first segment isn't exactly
-// "hub" (e.g. "/hub.html"), which has no hub route.
-export function hubCanonical(resolved) {
+// The one spelling a private folder's own routes answer to: the resolved path
+// with a lowercase folder name, or null when the first segment isn't exactly
+// one of the names (e.g. "/hub.html"), which has no route.
+export function gatedCanonical(resolved) {
   const [, first = "", ...rest] = resolved.split("/");
-  if (first.toLowerCase() !== "hub") return null;
-  return "/" + ["hub", ...rest].join("/");
+  const folder = first.toLowerCase();
+  if (!GATED.includes(folder)) return null;
+  return "/" + [folder, ...rest].join("/");
 }
 
 // The deploy serves the repo root, so docs, config and source that no page
-// needs have to be turned away here. Same spelling rules as isHubPath: any
+// needs have to be turned away here. Same spelling rules as isGatedPath: any
 // case, and a name followed by a character that can't be part of it still
 // counts ("DEPLOY.md;x"). Takes a path from resolvePath.
 const BLOCKED_FIRST =

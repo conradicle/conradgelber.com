@@ -116,9 +116,9 @@ const BASE_HEADERS = {
 export const PRIVATE_CSP =
   "default-src 'none'; script-src 'self'; connect-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-src 'self'; frame-ancestors 'self'";
 
-export function privateHeaders(headers) {
+export function privateHeaders(headers, csp = PRIVATE_CSP) {
   for (const [k, v] of Object.entries(BASE_HEADERS)) headers.set(k, v);
-  headers.set("Content-Security-Policy", PRIVATE_CSP);
+  headers.set("Content-Security-Policy", csp);
   headers.delete("Access-Control-Allow-Origin"); // Pages adds * to static files
   return headers;
 }
@@ -129,7 +129,7 @@ export function redirect(location, extra = {}) {
   return new Response(null, { status: 303, headers });
 }
 
-// What a signed-out request into /hub gets: the login form for a page, a
+// What a signed-out request into a private folder gets: the login form for a page, a
 // 401 for a script, JSON, an icon or the storage API.
 export function signedOut(path) {
   if (isPagePath(path)) return redirect("/login/");
@@ -142,8 +142,8 @@ export function json(data, status = 200, extra = {}) {
 }
 
 // Re-wrap a static response so its headers can be changed.
-export function privatize(response) {
+export function privatize(response, csp) {
   const res = new Response(response.body, response);
-  privateHeaders(res.headers);
+  privateHeaders(res.headers, csp);
   return res;
 }

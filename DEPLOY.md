@@ -187,8 +187,7 @@ preloads, favicon, `style.css?v=`) and the footer, which are also copied.
 
 `/play/`, `/flight-path/`, `/pool/`, `/cambio/` and `/poker/` do not get the tab bar.
 `/play/`, `/flight-path/`, `/pool/`, `/borderline/`, `/historybowl/` and `/12axes/` have a single "← Games" link in
-their header instead. `/observatory/` (an early-iteration project page) has
-no tab bar either; its header has a single "← Built" link. During a game on a screen narrower than 600 px,
+their header instead. During a game on a screen narrower than 600 px,
 `/pool/` hides that header and shows a round back button in its players bar,
 so the table can fill the screen; the skip link and the footer stay.
 
@@ -684,11 +683,16 @@ login and a dashboard of tools. How to add a tool is in
   hints at it. `robots.txt` disallows `/login/` and `/hub/`; every response
   there also sends `X-Robots-Tag: noindex, nofollow` and the pages carry a
   robots meta tag. None of it is in `sitemap.xml`.
+- **Other private folders.** `/hurricanes/` and `/observatory/` sit behind the
+  same gate as `/hub/` (`GATED` in `functions/_lib/paths.js`) and are opened
+  from hub tiles. Each has its own `functions/<folder>/_middleware.js`; the
+  hurricane one keeps Cesium's CSP. Their source stays readable in this public
+  repo.
 - **Pages Functions.** `functions/login/index.js` (GET shows the static
   `login/index.html` with an error message filled in by HTMLRewriter; POST
   checks the PIN), `functions/logout.js`, `functions/_middleware.js` (the
   hub gate: runs on every request to the site and requires a session for
-  anything whose canonical path is in `/hub`, see below),
+  anything whose canonical path is in a private folder, see below),
   `functions/hub/_middleware.js` (a second session check on canonical
   `/hub/` requests, and marks them private) and `functions/hub/api/store/`
   (the storage API). Shared code is in

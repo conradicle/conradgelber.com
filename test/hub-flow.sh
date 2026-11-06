@@ -27,6 +27,13 @@ check "//hub/ redirects to login"       "303 $BASE/login/" "$(code --path-as-is 
 check "storage API says 401"            "401 " "$(code "$BASE/hub/api/store/daily-tasks/state")"
 check "storage write says 401"          "401 " "$(code -X PUT -H "Origin: $BASE" -d '{}' "$BASE/hub/api/store/daily-tasks/state")"
 check "forged cookie rejected"          "401 " "$(code -b "__Host-hub=9999999999999.abc.def" "$BASE/hub/api/store/daily-tasks/state")"
+for name in hurricanes observatory; do
+  check "/$name/ redirects to login"    "303 $BASE/login/" "$(code "$BASE/$name/")"
+  check "//$name/ redirects to login"   "303 $BASE/login/" "$(code --path-as-is "$BASE//$name/")"
+  check "/$name/icon.svg says 401"      "401 " "$(code "$BASE/$name/icon.svg")"
+  check "/$name/ blocked has noindex"   "1" "$(curl -sI "$BASE/$name/" | grep -ci '^x-robots-tag: noindex')"
+done
+check "hurricane data says 401"         "401 " "$(code "$BASE/hurricanes/data/index.json")"
 check "login page is served"            "200 " "$(code "$BASE/login/")"
 check "login page has noindex header"   "1" "$(curl -sI "$BASE/login/" | grep -ci '^x-robots-tag: noindex')"
 check "cross-origin login post refused" "403 " "$(code -H "Origin: https://evil.example" -d pin=1 "$BASE/login/")"
@@ -51,6 +58,16 @@ check "right PIN signs in"              "303 $BASE/hub/" "$(post_pin "$PIN")"
 check "cookie flags" "1" "$(grep -c '#HttpOnly_.*__Host-hub' "$JAR")"
 check "hub loads with session"          "200 " "$(code -b "$JAR" "$BASE/hub/")"
 check "tool page loads"                 "200 " "$(code -b "$JAR" "$BASE/hub/tools/daily-tasks/")"
+for name in hurricanes observatory; do
+  check "/$name/ loads with session"    "200 " "$(code -b "$JAR" "$BASE/$name/")"
+  check "/$name/ has noindex header"    "1" "$(curl -sI -b "$JAR" "$BASE/$name/" | grep -ci '^x-robots-tag: noindex')"
+  check "/$name/ is no-store"           "1" "$(curl -sI -b "$JAR" "$BASE/$name/" | grep -ci '^cache-control: private, no-store')"
+  check "/$name/ odd spelling redirects" "303 $BASE/$name/" "$(code --path-as-is -b "$JAR" "$BASE//$name/")"
+done
+check "hurricane data loads"            "200 " "$(code -b "$JAR" "$BASE/hurricanes/data/index.json")"
+check "observatory stylesheet loads"    "200 " "$(code -b "$JAR" "$BASE/observatory/observatory.css")"
+check "hurricane page keeps Cesium CSP" "1" "$(curl -sI -b "$JAR" "$BASE/hurricanes/" | grep -ci '^content-security-policy:.*https://cesium.com')"
+check "hurricane README stays hidden"   "404 " "$(code -b "$JAR" "$BASE/hurricanes/README.md")"
 check "hub page is no-store" "1" "$(curl -sI -b "$JAR" "$BASE/hub/" | grep -ci '^cache-control: private, no-store')"
 check "/login/ bounces to hub when signed in" "303 $BASE/hub/" "$(code -b "$JAR" "$BASE/login/")"
 
@@ -68,6 +85,8 @@ check "delete" "204" "$(curl -s -o /dev/null -w '%{http_code}' -b "$JAR" -X DELE
 echo "-- logout"
 check "logout redirects to login" "303 $BASE/login/" "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -c "$JAR" -b "$JAR" -X POST -H "Origin: $BASE" "$BASE/logout")"
 check "hub blocked after logout" "303 $BASE/login/" "$(code -b "$JAR" "$BASE/hub/")"
+check "hurricanes blocked after logout" "303 $BASE/login/" "$(code -b "$JAR" "$BASE/hurricanes/")"
+check "observatory blocked after logout" "303 $BASE/login/" "$(code -b "$JAR" "$BASE/observatory/")"
 
 rm -f "$JAR"
 exit $fail

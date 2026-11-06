@@ -17,6 +17,8 @@ all before starting.
   a redirect to `/login/` for a page, or a 401 for anything else (scripts,
   JSON, images, `/hub/api/*`). So a file
   you put anywhere under `hub/` is private on the site automatically.
+  `/hurricanes/` and `/observatory/` are gated the same way (`GATED` in
+  `functions/_lib/paths.js`), with tiles in `hub/tools.json`.
   You never write auth code in a tool.
 - **But the repo is public.** `conradicle/conradgelber.com` is a public
   GitHub repo. A tool's *code* is visible there; only its *data* (in D1) and

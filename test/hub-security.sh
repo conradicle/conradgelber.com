@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Checks the two hub security fixes, with no session cookie:
-#   1. No spelling of a /hub path serves hub content (path normalization).
+#   1. No spelling of a private path serves its content (path normalization):
+#      /hub, /hurricanes and /observatory, assets and data included.
 #   2. The 6th wrong PIN from one client in 15 minutes gets 429 + Retry-After.
 # Usage:
 #   test/hub-security.sh <base-url>            # path checks only (safe on live)
@@ -14,15 +15,16 @@ LIMIT=${2:-}
 fail=0
 BODY=$(mktemp)
 
-# Text that appears only in hub files: tile list, tool registry, hub script.
-HUB_MARKERS='id="tiles"|"tools"\s*:|daily-tasks|toolStore|tools\.json'
+# Text that appears only in private files: tile list, tool registry, hub
+# script, hurricane page and data, Observatory page and stylesheet.
+HUB_MARKERS='id="tiles"|"tools"\s*:|daily-tasks|toolStore|tools\.json|A city in their path|createScene|HURDAT2|displayName|closestMiles|Foreign Influence|obs-head|obs-kicker'
 
 check_path() { # raw path
   local res code
   res=$(curl -s --path-as-is -o "$BODY" -w '%{http_code} %{redirect_url}' "$BASE$1")
   code=${res%% *}
-  if grep -qE "$HUB_MARKERS" "$BODY" || [ "$code" = 200 ]; then
-    echo "FAIL  $1 -> $res (hub content or 200)"; fail=1
+  if [ "$code" = 000 ] || grep -qE "$HUB_MARKERS" "$BODY" || [ "$code" = 200 ]; then
+    echo "FAIL  $1 -> $res (no answer, private content or 200)"; fail=1
   else
     echo "ok    $1 -> $res"
   fi
@@ -35,8 +37,31 @@ for p in /hub/ //hub/ /hub%2f /hub%2F /hub// /hub/./ /hub/x/../ ///hub/hub.js /H
   check_path "$p"
 done
 
+for f in hurricanes:hurricanes.js observatory:observatory.css; do
+  name=${f%%:*}; file=${f##*:}; first=$(printf '%s' "$name" | cut -c1)
+  rest=$(printf '%s' "$name" | cut -c2-); upper=$(printf '%s' "$name" | tr a-z A-Z)
+  hex=$(printf '%x' "'$first")
+  echo "-- signed-out $name"
+  for p in "/$name" "/$name/" "//$name/" "/$name%2f" "/$name%2F" "/$name//" "/$name/./" "/$name/x/../" \
+           "///$name/$file" "/$upper/" "/%$hex$rest/" "/$name%252f" "//$name/$file" "/$name%2f$file" \
+           "/$name/$file" "/$name/$file?v=2" "/$name/index.html" "/$name/icon.svg" "/$name.html" "/$name;x" \
+           "/$name\\" "/a/../$name/" "/fonts/..%2f$name/" "/$name/README.md"; do
+    check_path "$p"
+  done
+done
+for p in /hurricanes/hurricanes.css /hurricanes/model.js /hurricanes/viewer.js /hurricanes/data/index.json \
+         /hurricanes/data/source.json /hurricanes/data/AL011851.json /hurricanes%2fdata%2findex.json \
+         //hurricanes/data/AL011851.json; do
+  check_path "$p"
+done
+
+echo "-- public pages no longer link to them"
+for p in /built/ /games/ /work/ /next/ / /sitemap.xml; do
+  if curl -s "$BASE$p" | grep -qE '/hurricanes/|/observatory/'; then echo "FAIL  $p links a private folder"; fail=1; else echo "ok    $p"; fi
+done
+
 echo "-- public pages still public"
-for p in / /play/ /login/ /style.css; do
+for p in / /play/ /login/ /style.css /built/ /aspen/ /aspen/viewer.js; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE$p")
   if [ "$code" = 200 ]; then echo "ok    $p -> 200"; else echo "FAIL  $p -> $code"; fail=1; fi
 done

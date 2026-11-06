@@ -6,6 +6,20 @@
       "description": "The daily checklist, with streaks, plus one-off to-dos by due date.",
       "icon": "/hub/tools/daily-tasks/icon.svg",
       "route": "/hub/tools/daily-tasks/"
+    },
+    {
+      "id": "hurricanes",
+      "name": "Miami hurricane replay",
+      "description": "Replay Atlantic hurricane tracks on a 3D globe with Miami at the center.",
+      "icon": "/hurricanes/icon.svg",
+      "route": "/hurricanes/"
+    },
+    {
+      "id": "observatory",
+      "name": "State Foreign Influence Observatory",
+      "description": "Early tracker of state foreign agent laws, with sources and the build plan.",
+      "icon": "/observatory/icon.svg",
+      "route": "/observatory/"
     }
   ]
 }
