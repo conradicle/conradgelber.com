@@ -70,23 +70,36 @@ export function treesMesh(trees,detailed=false) {
 function naturalTrees(trees){
   const group=new T.Group(),dummy=new T.Object3D(),color=new T.Color();
   const palms=trees.filter(t=>t.palm),broadleaf=trees.filter(t=>!t.palm);
+  const frondsPerPalm=18;
+  const palmLength=h=>Math.max(3.4,Math.min(6.5,h*.38));
+  const palmCrownY=(h,ground)=>ground+h-palmLength(h)*.2;
   const trunks=new T.InstancedMesh(new T.CylinderGeometry(.55,1,1,7,3),new T.MeshStandardMaterial({color:'#a39172',roughness:1}),trees.length);
   const crowns=new T.InstancedMesh(new T.IcosahedronGeometry(1,1),new T.MeshStandardMaterial({color:'#4e724a',roughness:1}),broadleaf.length*3);
+  const palmCenters=new T.InstancedMesh(new T.SphereGeometry(1,8,6),new T.MeshStandardMaterial({color:'#3f6735',roughness:1}),palms.length);
   const points=[];
   for(let i=0;i<14;i++){
     const a=i/14,b=(i+1)/14;
-    const v=(t,side)=>[t,Math.sin(t*Math.PI)*.2-t*t*.26,.004*side];
+    const v=(t,side)=>[t,Math.sin(t*Math.PI)*.2-t*t*.26,(Math.sin(t*Math.PI)*.032+.008*(1-t))*side];
     points.push(...v(a,-1),...v(b,-1),...v(b,1),...v(a,-1),...v(b,1),...v(a,1));
   }
-  // Separate narrow leaflets make a feather palm silhouette, rather than
-  // the solid ribbons used for the first prototype.
-  for(let i=1;i<25;i++){const t=i/25,y=Math.sin(t*Math.PI)*.2-t*t*.26,reach=Math.sin(t*Math.PI)*.12;for(const side of [-1,1]){points.push(t-.004,y,0,t+.004,y,0,t-.045,y-.012,side*reach);}}
+  // A filled central blade keeps each frond readable at aerial distances;
+  // separated leaflets preserve the feathered outline when viewed close up.
+  for(let i=1;i<25;i++){const t=i/25,y=Math.sin(t*Math.PI)*.2-t*t*.26,reach=Math.sin(t*Math.PI)*.16;for(const side of [-1,1]){points.push(t-.014,y,0,t+.014,y,0,t-.045,y-.012,side*reach);}}
   const frondGeometry=new T.BufferGeometry();frondGeometry.setAttribute('position',new T.Float32BufferAttribute(points,3));frondGeometry.computeVertexNormals();
-  const leaves=new T.InstancedMesh(frondGeometry,new T.MeshStandardMaterial({color:'#4a7548',roughness:1,side:T.DoubleSide}),palms.length*10);
+  const leaves=new T.InstancedMesh(frondGeometry,new T.MeshStandardMaterial({color:'#507d4d',roughness:1,side:T.DoubleSide}),palms.length*frondsPerPalm);
   function set(mesh,index,position,scale,rotation=[0,0,0]){dummy.position.set(...position);dummy.scale.set(...scale);dummy.rotation.set(...rotation);dummy.updateMatrix();mesh.setMatrixAt(index,dummy.matrix);}
-  trees.forEach((t,i)=>{const h=t.height||(t.palm?11:8),ground=(t.ground??1)+1;set(trunks,i,[t.p[0],ground+h*.43,t.p[1]],[t.palm?.27:.48,h*.86,t.palm?.27:.48],[0,0,t.palm?Math.sin(t.p[0])*.025:0]);});
-  palms.forEach((t,i)=>{const h=t.height||11,ground=(t.ground??1)+1,length=Math.max(2.5,Math.min(5.5,h*.32));for(let j=0;j<10;j++){const angle=j*Math.PI*2/10+Math.sin(t.p[0]);set(leaves,i*10+j,[t.p[0],ground+h,t.p[1]],[length,length,length],[0,angle,(j%3-1)*.08]);color.setHSL(.22+(j%3)*.015,.26,.26+(j%4)*.025);leaves.setColorAt(i*10+j,color);}});
+  trees.forEach((t,i)=>{const h=t.height||(t.palm?11:8),ground=(t.ground??1)+1,trunkHeight=t.palm?palmCrownY(h,ground)-ground:h*.86;set(trunks,i,[t.p[0],ground+trunkHeight/2,t.p[1]],[t.palm?.32:.48,trunkHeight,t.palm?.32:.48]);});
+  palms.forEach((t,i)=>{
+    const h=t.height||11,ground=(t.ground??1)+1,length=palmLength(h),crownY=palmCrownY(h,ground);
+    set(palmCenters,i,[t.p[0],crownY-.1,t.p[1]],[.65,.8,.65]);
+    for(let j=0;j<frondsPerPalm;j++){
+      const lower=j>=12,index=lower?j-12:j,count=lower?6:12;
+      const angle=index*Math.PI*2/count+Math.sin(t.p[0])+(lower?.3:0),scale=length*(lower?.86:1);
+      set(leaves,i*frondsPerPalm+j,[t.p[0],crownY-(lower?.25:0),t.p[1]],[scale,scale,scale],[0,angle,lower?-.18:0]);
+      color.setHSL(.29+(j%3)*.01,.4,.3+(j%4)*.022);leaves.setColorAt(i*frondsPerPalm+j,color);
+    }
+  });
   broadleaf.forEach((t,i)=>{const h=t.height||8,ground=(t.ground??1)+1,r=Math.min(5,h*.3);for(let j=0;j<3;j++){const a=j*Math.PI*2/3;set(crowns,i*3+j,[t.p[0]+Math.cos(a)*r*.45,ground+h-r*.3+(j%2)*r*.3,t.p[1]+Math.sin(a)*r*.45],[r*.8,r*.75,r*.85]);color.setHSL(.22,.19,.3+(j%3)*.04);crowns.setColorAt(i*3+j,color);}});
-  group.add(trunks,crowns,leaves);return group;
+  group.add(trunks,crowns,palmCenters,leaves);return group;
 }
 export function dispose(object,materials=false) {object.traverse(o=>{o.geometry?.dispose();if(materials){for(const m of Array.isArray(o.material)?o.material:[o.material])m?.dispose();}});}
