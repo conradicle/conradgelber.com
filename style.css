@@ -95,6 +95,16 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius
   transition:opacity 1.8s ease;
 }
 .inkfield.is-live{opacity:1}
+.inkfield.is-quick{transition-duration:.7s}
+/* js/inkfield.js adds these classes only after WebGL has started, so the name
+   shows normally everywhere else. Opacity keeps it real, clickable text for
+   screen readers and search, and keyboard focus always brings it back. */
+.hero h1{transition:opacity .7s ease}
+.hero h1.ink-hidden{opacity:0;transition:opacity .2s ease}
+.hero h1.ink-intro{opacity:0;transition:none}
+.hero h1.ink-hidden a{color:var(--ink)}
+.hero h1.ink-hidden:focus-within,
+.hero h1.ink-intro:focus-within{opacity:1}
 @media (prefers-reduced-motion:reduce){
   .inkfield{transition:none}
 }

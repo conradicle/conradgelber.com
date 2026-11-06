@@ -38,7 +38,7 @@
   const DRIFT_Y = -0.003;
 
   // Particles
-  const PARTICLE_COUNT = 52000;     // Laptop and desktop screens
+  const PARTICLE_COUNT = 65000;     // Laptop and desktop screens
   const PARTICLE_COUNT_SMALL = 30000; // Screens narrower than SMALL_SCREEN_WIDTH
   const SMALL_SCREEN_WIDTH = 760;
   const FLOW_SPEED = 0.05;          // How fast particles ride the current.
@@ -75,8 +75,31 @@
   const ISLAND_MARGIN_FADE = 8;     // Soft fade at the margin's outer edge
   const ISLAND_FLOW_REACH = 220;    // How far out the current starts bending around the island
 
+  // The name in particles
+  const LETTER_SHARE = 0.4;         // Share of all particles that build the name
+  const INTRO_DURATION = 2.5;       // From load until the real headline fades in
+  const SPRING_STRENGTH = 40;       // Pull toward home. Bigger = snappier, tighter letters.
+  const SCATTER_STRENGTH = 0.22;    // How hard the cursor's motion throws particles
+  const REASSEMBLE_TIME = 2;        // From the cursor leaving until the real headline fades in
+  const SCATTER_RADIUS = 44;        // Width of the cursor's path through the letters
+  const SCATTER_MIN_PUSH = 0.12;    // Push from even a slow cursor, field units per second
+  const SCATTER_SPREAD = 1.1;       // Fan of throw directions around the cursor's path, radians
+  const LETTER_FREE_DAMPING = 1.4;  // How quickly a thrown particle slows into the current
+  const LETTER_MAX_SPEED = 1.8;     // Speed limit for letter particles, field units per second
+  const LETTER_INK = 0.26;          // How dark one letter dot prints
+  const LETTER_TRAIL_FADE = 0.07;   // Trail length for letter dots. Short keeps the letters crisp.
+  const INTRO_LANDING = 0.65;       // Share of the intro spent flying in. The rest is the settled name.
+  const LETTER_MAX_OPACITY = 0.96;  // Ceiling where letter dots overlap
+  const LETTER_SHIMMER = 0.45;      // How far settled particles wander from home
+  const LETTER_FLOW = 0.03;         // Share of the current settled particles still feel
+  const THIN_STROKE_BOOST = 1.1;    // Bigger = more particles on hairlines and serifs
+  const LETTER_FADE_IN = 0.07;      // Fade times for the letter ink
+  const LETTER_FADE_OUT = 0.35;
+  const FONT_WAIT = 1500;           // Milliseconds to wait for the web font before showing the headline
+  const INTRO_STORAGE_KEY = "inkfield-intro-played";
+
   // Finish
-  const GRAIN = 0.011;              // Paper grain strength. Keep this tiny.
+  const GRAIN = 0.011;             // Paper grain strength. Keep this tiny.
   const EDGE_FADE_SIDES = 0.13;     // Fade zones as a share of the hero's width or height
   const EDGE_FADE_TOP = 0.08;
   const EDGE_FADE_BOTTOM = 0.11;
@@ -174,16 +197,26 @@ float terrain(vec2 p, float t, int octaves){
 `;
 
   // Pass 1: move the particles. State is (x, y, life, seed), x and y in 0..1
-  // of the hero with y running down.
+  // of the hero with y running down. A letter particle uses the third channel
+  // for looseness instead of life: 0 is held at home, 1 is free in the current.
+  // Velocity is only used by letter particles. Home is (x, y, isLetter, unused)
+  // and never changes between layouts.
   const SIM_FS = HEADER + `
 uniform sampler2D uState;
+uniform sampler2D uVelocity;
+uniform sampler2D uHome;
+uniform float uHold;      // 1 keeps thrown particles loose while the cursor is in the headline
+uniform float uLooseTime; // Seconds for a loose particle to come back under the spring
+uniform vec4 uPushPath;   // Cursor's path this frame: start xy, end xy, field units
+uniform vec3 uPush;       // Cursor's direction xy and push strength; strength 0 = no push
 uniform vec2 uExtent;     // hero size in field units
 uniform vec2 uCursor;     // field units
 uniform float uCursorAmt;
 uniform float uTime;
 uniform float uDt;
 uniform int uFrame;
-out vec4 outState;
+layout(location = 0) out vec4 outState;
+layout(location = 1) out vec4 outVelocity;
 ${TERRAIN}
 uniform vec3 uIsland;     // photo center and radius in field units; radius 0 = no photo
 const float ISLAND_WALL = ${f((ISLAND_FRAME_WIDTH + ISLAND_MARGIN + ISLAND_MARGIN_FADE) / FIELD_SCALE)};
@@ -205,6 +238,13 @@ float potential(vec2 p){
   }
   return flow;
 }
+// Near the island's edge, cancel inward motion and keep the sideways part.
+vec2 slideOffIsland(vec2 vel, vec2 p){
+  if (uIsland.z <= 0.0) return vel;
+  vec2 away = p - uIsland.xy;
+  away /= max(length(away), 1e-4);
+  return vel - away * min(dot(vel, away), 0.0) * (1.0 - smoothstep(0.0, ISLAND_WALL, islandGap(p)));
+}
 void main(){
   ivec2 texel = ivec2(gl_FragCoord.xy);
   vec4 s = texelFetch(uState, texel, 0);
@@ -222,6 +262,48 @@ void main(){
   float dy = potential(p + vec2(0.0, E)) - potential(p - vec2(0.0, E));
   vec2 vel = vec2(dy, -dx) / (2.0 * E) * ${f(FLOW_SPEED)};
 
+  vec4 home = texelFetch(uHome, texel, 0);
+  if (home.z > 0.5){
+    vec2 v = texelFetch(uVelocity, texel, 0).xy;
+    float loose = s.z;
+
+    // The cursor throws particles along its own direction of travel, fanned
+    // out a little. Particles near its path also come loose from their home.
+    if (uPush.z > 0.0){
+      vec2 ab = uPushPath.zw - uPushPath.xy;
+      float along = clamp(dot(p - uPushPath.xy, ab) / max(dot(ab, ab), 1e-8), 0.0, 1.0);
+      vec2 off = (p - uPushPath.xy - ab * along) / ${f(SCATTER_RADIUS / FIELD_SCALE)};
+      float hit = exp(-dot(off, off));
+      float fan = (fract(seed * 53.71) - 0.5) * ${f(SCATTER_SPREAD)};
+      float c = cos(fan), n = sin(fan);
+      v += vec2(c * uPush.x - n * uPush.y, n * uPush.x + c * uPush.y) * uPush.z * hit * (0.5 + seed);
+      loose = max(loose, smoothstep(0.05, 0.45, hit));
+    }
+    if (uHold < 0.5) loose = max(0.0, loose - uDt / (uLooseTime * (0.55 + 0.45 * seed)));
+
+    // A spring toward home that strengthens as the particle comes back, plus
+    // the current, which settled particles barely feel. The small circle added
+    // to home is the shimmer.
+    float tight = (1.0 - loose) * (1.0 - loose);
+    float clock = uTime / ${f(EVOLVE_SPEED)};
+    vec2 target = home.xy * uExtent + vec2(sin(clock * (2.0 + seed * 3.0) + seed * 80.0),
+                                           cos(clock * (1.5 + seed * 3.0) + seed * 50.0))
+                                    * ${f(LETTER_SHIMMER / FIELD_SCALE)};
+    v += (target - p) * ${f(SPRING_STRENGTH)} * tight * uDt;
+    v *= exp(-mix(${f(2 * Math.sqrt(SPRING_STRENGTH))}, ${f(LETTER_FREE_DAMPING)}, loose) * uDt);
+    // Each particle has its own limit, mostly slow with a few fast. A shared limit
+    // lines thrown particles up into a hard-edged arc, and so does tying the limit
+    // to the throw angle above, so the two come from different digits of the seed.
+    float limit = fract(seed * 97.13);
+    v *= min(1.0, ${f(LETTER_MAX_SPEED)} * (0.12 + 0.88 * limit * limit) / max(length(v), 1e-4));
+
+    vec2 move = slideOffIsland(v + vel * mix(${f(LETTER_FLOW)}, 1.0, loose), p);
+    outState = vec4(clamp(pos + move * uDt / uExtent, -0.2, 1.2), loose, seed);
+    outVelocity = vec4(v, 0.0, 0.0);
+    return;
+  }
+  outVelocity = vec4(0.0);
+
   // Gather toward a ring around the cursor. The orbit is in potential().
   if (uCursorAmt > 0.001){
     vec2 toCursor = uCursor - p;
@@ -236,16 +318,9 @@ void main(){
   }
 
   // The cursor's pull isn't a curl, so it could still drag particles onto the
-  // island. Near the edge, cancel any inward motion and keep the sideways part.
-  bool onIsland = false;
-  if (uIsland.z > 0.0){
-    vec2 away = p - uIsland.xy;
-    away /= max(length(away), 1e-4);
-    float gap = islandGap(p);
-    onIsland = gap < 0.0;
-    float inward = min(dot(vel, away), 0.0);
-    vel -= away * inward * (1.0 - smoothstep(0.0, ISLAND_WALL, gap));
-  }
+  // island.
+  bool onIsland = uIsland.z > 0.0 && islandGap(p) < 0.0;
+  vel = slideOffIsland(vel, p);
 
   pos += vel * uDt / uExtent;
   float life = s.z - uDt / (${f(PARTICLE_LIFE)} * (0.6 + 0.8 * seed));
@@ -260,25 +335,35 @@ void main(){
   // Pass 2a: fade the trails.
   const FADE_FS = HEADER + `
 uniform sampler2D uTrail;
-uniform float uFade;
+uniform vec2 uFade;       // Red is the teal current, green is the letters.
 in vec2 vUv;
 out vec4 outColor;
-void main(){ outColor = texture(uTrail, vUv) * uFade; }`;
+void main(){ outColor = vec4(texture(uTrail, vUv).rg * uFade, 0.0, 1.0); }`;
 
   // Pass 2b: add the particles as dots. No vertex buffers: each point reads
-  // its position straight out of the state texture.
+  // its position straight out of the state texture. Current particles print
+  // teal into the red channel and letter particles print ink into the green.
   const POINTS_VS = HEADER + `
 uniform sampler2D uState;
+uniform sampler2D uHome;
+uniform float uLetterDeposit;
 uniform vec2 uSize;       // hero size in CSS pixels
 uniform vec2 uCursorPx;
 uniform float uCursorAmt;
 uniform float uPointPx;
 uniform float uDeposit;
-out float vInk;
+out vec2 vInk;
 void main(){
   int side = textureSize(uState, 0).x;
-  vec4 s = texelFetch(uState, ivec2(gl_VertexID % side, gl_VertexID / side), 0);
+  ivec2 texel = ivec2(gl_VertexID % side, gl_VertexID / side);
+  vec4 s = texelFetch(uState, texel, 0);
   float seed = s.w;
+  gl_PointSize = uPointPx * (0.8 + 0.5 * seed);
+  gl_Position = vec4(s.x * 2.0 - 1.0, 1.0 - s.y * 2.0, 0.0, 1.0);
+  if (texelFetch(uHome, texel, 0).z > 0.5){
+    vInk = vec2(0.0, uLetterDeposit * (0.7 + 0.6 * seed));
+    return;
+  }
   float born = smoothstep(0.0, 0.14, 1.0 - s.z);
   float dying = smoothstep(0.0, 0.14, s.z);
   // Most particles print faintly and a few print darker, so currents show
@@ -286,16 +371,14 @@ void main(){
   float tier = mix(0.2, 3.4, pow(seed, 7.0));
   vec2 d = (s.xy * uSize - uCursorPx) / ${f(PARTICLE_PULL_RADIUS * 0.8)};
   float near = uCursorAmt * exp(-dot(d, d));
-  vInk = uDeposit * tier * born * dying * (1.0 + near * ${f(CURSOR_GLOW_INK)});
-  gl_PointSize = uPointPx * (0.8 + 0.5 * seed);
-  gl_Position = vec4(s.x * 2.0 - 1.0, 1.0 - s.y * 2.0, 0.0, 1.0);
+  vInk = vec2(uDeposit * tier * born * dying * (1.0 + near * ${f(CURSOR_GLOW_INK)}), 0.0);
 }`;
   const POINTS_FS = HEADER + `
-in float vInk;
+in vec2 vInk;
 out vec4 outColor;
 void main(){
   float r = length(gl_PointCoord - 0.5) * 2.0;
-  outColor = vec4(vInk * (1.0 - smoothstep(0.35, 1.0, r)));
+  outColor = vec4(vInk * (1.0 - smoothstep(0.35, 1.0, r)), 0.0, 1.0);
 }`;
 
   // Pass 3: the chart.
@@ -314,6 +397,7 @@ uniform vec3 uAccent;
 uniform vec4 uQuiet[${QUIET_MAX}]; // text boxes: x0, y0, x1, y1 in CSS pixels
 uniform int uQuietCount;
 uniform vec3 uIsland;      // photo center and radius in CSS pixels; radius 0 = no photo
+uniform float uLetterInk;  // 0 hides the letter particles, 1 prints them in full
 in vec2 vUv;
 out vec4 outColor;
 ${TERRAIN}
@@ -374,8 +458,9 @@ void main(){
   float edge = edgeFade(css);
   float mask = edge * mix(1.0, ${f(TEXT_QUIET)}, textQuiet(css));
   // Clean paper around the photo: no lines, particles or cursor wash.
-  mask *= smoothstep(${f(ISLAND_FRAME_WIDTH + ISLAND_MARGIN)},
-                     ${f(ISLAND_FRAME_WIDTH + ISLAND_MARGIN + ISLAND_MARGIN_FADE)}, islandEdge);
+  float islandClear = smoothstep(${f(ISLAND_FRAME_WIDTH + ISLAND_MARGIN)},
+                                 ${f(ISLAND_FRAME_WIDTH + ISLAND_MARGIN + ISLAND_MARGIN_FADE)}, islandEdge);
+  mask *= islandClear;
   float strong = min(1.0, weight);
 
   vec3 lineInk = mix(uInk, uAccent, near * ${f(CURSOR_TINT)});
@@ -386,9 +471,18 @@ void main(){
   col = mix(col, lineInk, major * min(1.0, ${f(MAJOR_OPACITY)} * weight) * mask * strong);
 
   // Particles multiply onto what is printed, so they only ever darken.
-  float ink = (1.0 - exp(-texture(uTrail, vUv).r)) * ${f(PARTICLE_MAX_OPACITY)} * mask;
+  vec2 printed = texture(uTrail, vUv).rg;
+  float ink = (1.0 - exp(-printed.r)) * ${f(PARTICLE_MAX_OPACITY)} * mask;
   // Dividing by the paper means full ink on bare paper lands exactly on teal.
   col *= mix(vec3(1.0), uAccent / uPaper, ink);
+
+  // The name prints in ink. It skips the text and edge fades, since it has to
+  // show right where the headline sits, but it still keeps off the island and
+  // fades out just before the canvas ends.
+  vec2 fromEdge = min(css, uSize - css);
+  float letterInk = (1.0 - exp(-printed.g)) * ${f(LETTER_MAX_OPACITY)} * uLetterInk * islandClear
+                  * smoothstep(0.0, 12.0, min(fromEdge.x, fromEdge.y));
+  col *= mix(vec3(1.0), uInk / uPaper, letterInk);
 
   // Grain stays fixed to the page so it can't shimmer, and goes to nothing at
   // the edges so the canvas meets the page's paper with no seam.
@@ -400,7 +494,7 @@ void main(){
   /* --------------------------------------------------------------- GL STATE */
 
   let gl, programs, vao;
-  let stateTex, stateFbo, trailTex, trailFbo, particleCount, stateSide;
+  let stateTex, stateFbo, velocityTex, homeTex, trailTex, trailFbo, particleCount, stateSide;
   let colors;
 
   function compile(type, source) {
@@ -430,7 +524,7 @@ void main(){
     return { prog, uniforms };
   }
 
-  function makeTarget(width, height, internal, format, type, filter, data) {
+  function makeTexture(width, height, internal, format, type, filter, data) {
     const tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texImage2D(gl.TEXTURE_2D, 0, internal, width, height, 0, format, type, data || null);
@@ -438,6 +532,11 @@ void main(){
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return tex;
+  }
+
+  function makeTarget(width, height, internal, format, type, filter, data) {
+    const tex = makeTexture(width, height, internal, format, type, filter, data);
     const fbo = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
@@ -451,9 +550,18 @@ void main(){
     return makeTarget(width, height, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, gl.LINEAR);
   }
 
-  function deleteTarget(t) {
-    gl.deleteTexture(t.tex);
-    gl.deleteFramebuffer(t.fbo);
+  // A particle state target: position in attachment 0, velocity in attachment 1.
+  function makeState(data) {
+    const target = makeTarget(stateSide, stateSide, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, data);
+    const velocity = makeTexture(stateSide, stateSide, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, velocity, 0);
+    gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
+    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+      throw new Error("inkfield: render target unsupported");
+    }
+    target.velocity = velocity;
+    return target;
   }
 
   // Everything GPU-side. Throws if this device can't run the effect.
@@ -499,10 +607,17 @@ void main(){
       data[i * 4 + 2] = Math.random();
       data[i * 4 + 3] = Math.random();
     }
-    const a = makeTarget(stateSide, stateSide, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, data);
-    const b = makeTarget(stateSide, stateSide, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST);
+    const a = makeState(data);
+    const b = makeState();
     stateTex = [a.tex, b.tex];
     stateFbo = [a.fbo, b.fbo];
+    velocityTex = [a.velocity, b.velocity];
+    // All zeros means no letter particles until the name's shape is ready.
+    homeTex = makeTexture(stateSide, stateSide, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST);
+    lettersOn = false;
+    letterState = "off";
+    letterCount = 0;
+    letterInk = letterInkTarget = 0;
     trailTex = null;
     trailFbo = null;
   }
@@ -539,7 +654,7 @@ void main(){
       gl.bindFramebuffer(gl.FRAMEBUFFER, a.fbo);
       useProgram(programs.fade);
       bindTexture(0, trailTex[0], programs.fade.uniforms.uTrail);
-      gl.uniform1f(programs.fade.uniforms.uFade, 1);
+      gl.uniform2f(programs.fade.uniforms.uFade, 1, 1);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       gl.deleteTexture(trailTex[0]);
       gl.deleteTexture(trailTex[1]);
@@ -550,8 +665,6 @@ void main(){
     trailFbo = [a.fbo, b.fbo];
   }
 
-  // Measures the words themselves (a Range hugs the text, where the block
-  // box would run the full column width), so the quiet zones fit the text.
   // The island follows the photo wherever the layout puts it.
   let islandX = 0, islandY = 0, islandR = 0;
   function measureIsland() {
@@ -572,6 +685,8 @@ void main(){
     measureIsland();
   }
 
+  // Measures the words themselves (a Range hugs the text, where the block
+  // box would run the full column width), so the quiet zones fit the text.
   function measureQuiet() {
     const box = hero.getBoundingClientRect();
     const range = document.createRange();
@@ -618,6 +733,13 @@ void main(){
     gl.bindFramebuffer(gl.FRAMEBUFFER, stateFbo[1]);
     gl.viewport(0, 0, stateSide, stateSide);
     bindTexture(0, stateTex[0], su.uState);
+    bindTexture(1, homeTex, su.uHome);
+    bindTexture(2, velocityTex[0], su.uVelocity);
+    gl.uniform1f(su.uHold, letterState === "scattered" ? 1 : 0);
+    gl.uniform1f(su.uLooseTime, letterState === "intro" ? INTRO_DURATION * INTRO_LANDING : REASSEMBLE_TIME * 0.8);
+    gl.uniform4f(su.uPushPath, pushFromX / FIELD_SCALE, pushFromY / FIELD_SCALE, pushToX / FIELD_SCALE, pushToY / FIELD_SCALE);
+    gl.uniform3f(su.uPush, pushDirX, pushDirY, pushStrength);
+    pushStrength = 0;
     gl.uniform2f(su.uExtent, cssW / FIELD_SCALE, cssH / FIELD_SCALE);
     gl.uniform2f(su.uCursor, cursorX / FIELD_SCALE, cursorY / FIELD_SCALE);
     gl.uniform1f(su.uCursorAmt, cursorAmt);
@@ -628,6 +750,7 @@ void main(){
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     stateTex.reverse();
     stateFbo.reverse();
+    velocityTex.reverse();
 
     // Trails: fade the last frame...
     const fade = programs.fade;
@@ -635,16 +758,18 @@ void main(){
     gl.bindFramebuffer(gl.FRAMEBUFFER, trailFbo[1]);
     gl.viewport(0, 0, canvas.width, canvas.height);
     bindTexture(0, trailTex[0], fade.uniforms.uTrail);
-    gl.uniform1f(fade.uniforms.uFade, Math.exp(-dt / TRAIL_FADE));
+    gl.uniform2f(fade.uniforms.uFade, Math.exp(-dt / TRAIL_FADE), Math.exp(-dt / LETTER_TRAIL_FADE));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     // ...then add the dots. One dot's ink scales with the area per particle,
     // so a phone with fewer particles and a big screen look about the same,
     // and with the time step so the frame rate doesn't change the darkness.
     const pts = programs.points, pu = pts.uniforms;
-    const area = Math.min(1.6, (cssW * cssH) / particleCount / 14);
+    const area = Math.min(1.6, (cssW * cssH) / (particleCount - letterCount) / 14);
     useProgram(pts);
     bindTexture(0, stateTex[0], pu.uState);
+    bindTexture(1, homeTex, pu.uHome);
+    gl.uniform1f(pu.uLetterDeposit, LETTER_INK * dt * 60);
     gl.uniform2f(pu.uSize, cssW, cssH);
     gl.uniform2f(pu.uCursorPx, cursorX, cursorY);
     gl.uniform1f(pu.uCursorAmt, cursorAmt);
@@ -676,18 +801,26 @@ void main(){
     gl.uniform4fv(u.uQuiet, quiet);
     gl.uniform1i(u.uQuietCount, quietCount);
     gl.uniform3f(u.uIsland, islandX, islandY, islandR);
+    gl.uniform1f(u.uLetterInk, letterInk);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
   /* ----------------------------------------------------------------- CURSOR */
 
   let pointerX = 0, pointerY = 0, lastMove = -Infinity;
+  let fingerLifted = false; // The finger is off the glass, so it can't be in the headline.
 
   function notePointer(x, y) {
     pointerX = x;
     pointerY = y;
     lastMove = performance.now();
+    fingerLifted = false;
   }
+  function noteFingerLifted() {
+    fingerLifted = true;
+  }
+  window.addEventListener("touchend", noteFingerLifted, { passive: true });
+  window.addEventListener("touchcancel", noteFingerLifted, { passive: true });
   window.addEventListener("pointermove", (e) => notePointer(e.clientX, e.clientY), { passive: true });
   window.addEventListener("pointerdown", (e) => notePointer(e.clientX, e.clientY), { passive: true });
   // A finger that starts a scroll ends its pointer events, so follow touches too.
@@ -717,6 +850,291 @@ void main(){
     cursorAmt += ((active ? 1 : 0) - cursorAmt) * (1 - Math.exp(-dt / tau));
   }
 
+  /* ------------------------------------------------------- THE NAME IN PARTICLES
+
+     letterState runs intro -> rest -> scattered -> returning -> rest, and stays
+     "off" when reduced motion is on or the name can't be built. The h1 only ever
+     gets a class that sets its opacity, so it stays real, clickable text the
+     whole time, and any failure path puts it straight back. */
+
+  const headline = hero.querySelector("h1");
+  let lettersOn = false, letterState = "off", letterRows = 0, letterCount = 0;
+  let letterInk = 0, letterInkTarget = 0, stateUntil = 0, homesKey = "", headBox = null, lastHomes = null;
+  let pushFromX = 0, pushFromY = 0, pushToX = 0, pushToY = 0, pushDirX = 0, pushDirY = 0, pushStrength = 0;
+  let prevPointerX = 0, prevPointerY = 0, pointerSeen = false, wasInHeadline = false;
+
+  function hideHeadline(instantly) {
+    if (headline) headline.classList.add(instantly ? "ink-intro" : "ink-hidden");
+  }
+  function showHeadline() {
+    if (headline) headline.classList.remove("ink-intro", "ink-hidden");
+  }
+
+  function introPlayed() {
+    try {
+      return sessionStorage.getItem(INTRO_STORAGE_KEY) === "1";
+    } catch (err) {
+      return false;
+    }
+  }
+  function markIntroPlayed() {
+    try {
+      sessionStorage.setItem(INTRO_STORAGE_KEY, "1");
+    } catch (err) {
+      // Private modes can refuse storage. The intro just plays again next time.
+    }
+  }
+
+  // Where each glyph really sits, read from the live h1. Measuring one letter
+  // at a time means kerning, letter-spacing and line breaks all come from the
+  // browser's own layout and can't drift from the real text.
+  function measureGlyphs() {
+    const glyphs = [];
+    const range = document.createRange();
+    const walker = document.createTreeWalker(headline, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      for (let i = 0; i < node.length; i++) {
+        const ch = node.data[i];
+        if (!ch.trim()) continue;
+        range.setStart(node, i);
+        range.setEnd(node, i + 1);
+        const r = range.getBoundingClientRect();
+        if (r.width) glyphs.push({ ch, left: r.left, top: r.top, height: r.height });
+      }
+    }
+    return glyphs;
+  }
+
+  // Draws the name offscreen with the h1's exact font and glyph positions, then
+  // places one home per particle on the filled pixels. Thin strokes get extra
+  // weight, because plain sampling by area would leave hairlines and serifs
+  // too sparse to read. Returns false if there is nothing to sample.
+  function sampleHomes() {
+    const glyphs = measureGlyphs();
+    if (!glyphs.length) return false;
+    const box = hero.getBoundingClientRect();
+    const cs = getComputedStyle(headline);
+    const size = parseFloat(cs.fontSize);
+    const key = [box.width, box.height, glyphs[0].left - box.left, glyphs[0].top - box.top, size, cs.fontFamily].join();
+    if (key === homesKey) return true;
+
+    const SCALE = 3, PAD = Math.ceil(size * 0.3);
+    const left = Math.min(...glyphs.map((g) => g.left)) - PAD;
+    const top = Math.min(...glyphs.map((g) => g.top)) - PAD;
+    const right = Math.max(...glyphs.map((g) => g.left + size)) + PAD;
+    const bottom = Math.max(...glyphs.map((g) => g.top + g.height)) + PAD;
+    const w = Math.ceil((right - left) * SCALE), h = Math.ceil((bottom - top) * SCALE);
+    const scratch = document.createElement("canvas");
+    scratch.width = w;
+    scratch.height = h;
+    const ctx = scratch.getContext("2d", { willReadFrequently: true });
+    ctx.scale(SCALE, SCALE);
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#000";
+    const metrics = ctx.measureText("C");
+    for (const g of glyphs) {
+      // A glyph's rect is its font box, so center that box to find the baseline.
+      const ascent = metrics.fontBoundingBoxAscent || g.height * 0.8;
+      const descent = metrics.fontBoundingBoxDescent || g.height * 0.2;
+      ctx.fillText(g.ch, g.left - left, g.top - top + (g.height - ascent - descent) / 2 + ascent);
+    }
+    const alpha = ctx.getImageData(0, 0, w, h).data;
+
+    // A running sum over the pixels, so any box's fill can be read in one step.
+    const sums = new Uint32Array((w + 1) * (h + 1));
+    for (let y = 0; y < h; y++) {
+      let row = 0;
+      for (let x = 0; x < w; x++) {
+        row += alpha[(y * w + x) * 4 + 3] > 127 ? 1 : 0;
+        sums[(y + 1) * (w + 1) + x + 1] = sums[y * (w + 1) + x + 1] + row;
+      }
+    }
+    // A pixel's weight rises as the area around it gets emptier, which is what
+    // a thin stroke looks like up close.
+    const reach = Math.max(2, Math.round(size * 0.055 * SCALE));
+    const weights = new Float32Array(w * h);
+    let total = 0;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (alpha[(y * w + x) * 4 + 3] <= 127) continue;
+        const x0 = Math.max(0, x - reach), x1 = Math.min(w, x + reach + 1);
+        const y0 = Math.max(0, y - reach), y1 = Math.min(h, y + reach + 1);
+        const filled = sums[y1 * (w + 1) + x1] - sums[y0 * (w + 1) + x1] - sums[y1 * (w + 1) + x0] + sums[y0 * (w + 1) + x0];
+        const weight = Math.pow(((x1 - x0) * (y1 - y0)) / filled, THIN_STROKE_BOOST);
+        weights[y * w + x] = weight;
+        total += weight;
+      }
+    }
+    if (!total) return false;
+
+    // Evenly spaced picks along the weights give even coverage with no clumps.
+    const homes = new Float32Array(letterCount * 4);
+    const stride = total / letterCount;
+    let next = Math.random() * stride, running = 0, placed = 0;
+    for (let i = 0; i < weights.length && placed < letterCount; i++) {
+      if (!weights[i]) continue;
+      running += weights[i];
+      while (running > next && placed < letterCount) {
+        const px = (i % w + Math.random()) / SCALE + left - box.left;
+        const py = (Math.floor(i / w) + Math.random()) / SCALE + top - box.top;
+        homes.set([px / box.width, py / box.height, 1, 0], placed * 4);
+        placed++;
+        next += stride;
+      }
+    }
+    if (placed < letterCount) return false;
+    // Shuffled, so a particle's slot says nothing about which letter it builds.
+    for (let i = letterCount - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      for (let c = 0; c < 2; c++) {
+        const t = homes[i * 4 + c];
+        homes[i * 4 + c] = homes[j * 4 + c];
+        homes[j * 4 + c] = t;
+      }
+    }
+    gl.bindTexture(gl.TEXTURE_2D, homeTex);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, stateSide, letterRows, gl.RGBA, gl.FLOAT, homes);
+    lastHomes = homes;
+    homesKey = key;
+
+    const range = document.createRange();
+    range.selectNodeContents(headline);
+    const r = range.getBoundingClientRect();
+    headBox = { left: r.left - box.left, top: r.top - box.top, right: r.right - box.left, bottom: r.bottom - box.top };
+    return true;
+  }
+
+  // Turns the first rows of particles into letter particles, starting either at
+  // the hero's edges for the intro or already at home.
+  function buildLetters(playIntro) {
+    letterRows = Math.round(LETTER_SHARE * stateSide);
+    letterCount = letterRows * stateSide;
+    homesKey = "";
+    if (!sampleHomes()) throw new Error("inkfield: no letter shapes");
+
+    const box = hero.getBoundingClientRect();
+    const data = new Float32Array(letterCount * 4);
+    for (let i = 0; i < letterCount; i++) {
+      let x = lastHomes[i * 4], y = lastHomes[i * 4 + 1];
+      if (playIntro) {
+        // A random spot just inside the hero's outline.
+        const along = Math.random() * 2 * (box.width + box.height);
+        const inset = Math.random() * 24;
+        if (along < box.width) { x = along; y = inset; }
+        else if (along < box.width + box.height) { x = box.width - inset; y = along - box.width; }
+        else if (along < 2 * box.width + box.height) { x = along - box.width - box.height; y = box.height - inset; }
+        else { x = inset; y = along - 2 * box.width - box.height; }
+        x /= box.width;
+        y /= box.height;
+      }
+      data.set([x, y, playIntro ? 1 : 0, Math.random()], i * 4);
+    }
+    gl.bindTexture(gl.TEXTURE_2D, stateTex[0]);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, stateSide, letterRows, gl.RGBA, gl.FLOAT, data);
+
+    lettersOn = true;
+    pointerSeen = false;
+    wasInHeadline = false;
+    if (playIntro) {
+      markIntroPlayed();
+      letterState = "intro";
+      letterInk = letterInkTarget = 1;
+      stateUntil = performance.now() + INTRO_DURATION * 1000;
+      // Even if frames stop (a hidden tab, say), the name still comes back.
+      setTimeout(finishAssembling, INTRO_DURATION * 1000 + 400);
+    } else {
+      letterState = "rest";
+      letterInk = letterInkTarget = 0;
+      showHeadline();
+    }
+  }
+
+  // The real headline takes over from the particles.
+  function finishAssembling() {
+    if (letterState !== "intro" && letterState !== "returning" && letterState !== "scattered") return;
+    letterState = "rest";
+    letterInkTarget = 0;
+    showHeadline();
+  }
+
+  function lettersOff() {
+    lettersOn = false;
+    letterState = "off";
+    letterInk = letterInkTarget = 0;
+    showHeadline();
+  }
+
+  // Runs every frame: follows the pointer through the headline and moves between states.
+  function updateLetters(elapsed, now) {
+    if (!lettersOn) return;
+    const box = hero.getBoundingClientRect();
+    const x = pointerX - box.left, y = pointerY - box.top;
+    const inHeadline = !fingerLifted && headBox
+      && now - lastMove < CURSOR_IDLE_AFTER * 1000
+      && x >= headBox.left && x <= headBox.right && y >= headBox.top && y <= headBox.bottom;
+    const moved = pointerSeen && (pointerX !== prevPointerX || pointerY !== prevPointerY);
+
+    if (letterState !== "intro" && moved && !fingerLifted && (inHeadline || wasInHeadline)) {
+      if (inHeadline && letterState !== "scattered") {
+        letterState = "scattered";
+        letterInkTarget = 1;
+        hideHeadline(false);
+      }
+      const dx = pointerX - prevPointerX, dy = pointerY - prevPointerY;
+      const length = Math.hypot(dx, dy);
+      pushFromX = x - dx;
+      pushFromY = y - dy;
+      pushToX = x;
+      pushToY = y;
+      pushDirX = dx / length;
+      pushDirY = dy / length;
+      pushStrength = Math.max(SCATTER_MIN_PUSH, (length / FIELD_SCALE) * 60 * SCATTER_STRENGTH);
+    }
+    if (letterState === "scattered" && !inHeadline) {
+      letterState = "returning";
+      stateUntil = now + REASSEMBLE_TIME * 1000;
+    }
+    if ((letterState === "intro" || letterState === "returning") && now >= stateUntil) finishAssembling();
+
+    pointerSeen = !fingerLifted && now - lastMove < CURSOR_IDLE_AFTER * 1000;
+    prevPointerX = pointerX;
+    prevPointerY = pointerY;
+    wasInHeadline = inHeadline;
+
+    // Real time, not the capped simulation step: on a slow device the text has
+    // already come back, so the ink has to clear even if the particles lag.
+    const tau = letterInkTarget > letterInk ? LETTER_FADE_IN : LETTER_FADE_OUT;
+    letterInk += (letterInkTarget - letterInk) * (1 - Math.exp(-Math.min(elapsed / 1000, 1) / tau));
+  }
+
+  // Called once WebGL is confirmed working. For the intro the h1 hides right away
+  // so it can't flash, and it comes back if the font takes too long.
+  function prepareLetters() {
+    if (!headline || motionQuery.matches) return;
+    const box = hero.getBoundingClientRect();
+    const playIntro = !introPlayed() && !document.hidden && box.bottom > 0 && box.top < window.innerHeight;
+    if (playIntro) {
+      hideHeadline(true);
+      canvas.classList.add("is-quick");
+    }
+    let late = false;
+    const fontTimer = setTimeout(() => {
+      late = true;
+      showHeadline();
+    }, FONT_WAIT);
+    const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    fontsReady.then(() => {
+      clearTimeout(fontTimer);
+      if (!alive || motionQuery.matches) return showHeadline();
+      try {
+        buildLetters(playIntro && !late);
+      } catch (err) {
+        lettersOff();
+      }
+    });
+  }
+
   /* ------------------------------------------------------------------- LOOP */
 
   const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -734,6 +1152,7 @@ void main(){
     lastNow = now;
     const dt = Math.min(elapsed / 1000, MAX_STEP);
     updateCursor(dt, now);
+    updateLetters(elapsed, now);
     step(dt);
     drawField();
     show();
@@ -773,6 +1192,8 @@ void main(){
     } else if (!shouldRun && running) {
       running = false;
       cancelAnimationFrame(rafId);
+      // With no frames the particles can't finish, so hand back to the text now.
+      finishAssembling();
     }
   }
 
@@ -781,6 +1202,7 @@ void main(){
     if (!alive) return;
     sizeCanvas();
     measureLayout();
+    if (lettersOn && !sampleHomes()) lettersOff();
     if (motionQuery.matches) renderStill();
     else if (!running) drawField();
   }
@@ -796,6 +1218,7 @@ void main(){
       } else {
         for (let i = 0; i < WARM_UP_STEPS; i++) step(1 / 60);
         alive = true;
+        prepareLetters();
         refresh();
       }
     } catch (err) {
@@ -808,6 +1231,7 @@ void main(){
     alive = false;
     running = false;
     cancelAnimationFrame(rafId);
+    lettersOff();
     canvas.remove();
   }
 
@@ -817,6 +1241,7 @@ void main(){
     running = false;
     cancelAnimationFrame(rafId);
     canvas.classList.remove("is-live");
+    lettersOff();
   });
   canvas.addEventListener("webglcontextrestored", () => {
     drawnFrames = 0;
@@ -825,6 +1250,7 @@ void main(){
 
   document.addEventListener("visibilitychange", refresh);
   motionQuery.addEventListener("change", () => {
+    if (motionQuery.matches) lettersOff();
     refresh();
     if (alive && motionQuery.matches) renderStill();
   });
