@@ -9,6 +9,7 @@ desktop.ini
 # Local tooling at the root (never shipped; the site has no build step).
 # play-src/ keeps its package.json and lockfile under version control.
 node_modules/
+play-src/data/miami-beach/raw/
 /package.json
 /package-lock.json
 .claude/

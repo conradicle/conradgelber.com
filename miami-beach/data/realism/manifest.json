@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "service": "https://tiles.arcgis.com/tiles/8Pc9XBTAsYuxx9Ny/arcgis/rest/services/Buildings_Models_3D/SceneServer/layers/0",
+  "geometryUnits": "metres",
+  "verticalDatum": "NAVD88",
+  "sourceItem": "https://www.arcgis.com/home/item.html?id=ce420278a45a4bf4a349c37c197263b3",
+  "retrievedAt": "2026-11-06T05:00:59.771Z",
+  "regions": [
+    {
+      "id": "ocean-drive",
+      "name": "Ocean Drive realism pilot",
+      "bbox": [
+        -80.1347,
+        25.7748,
+        -80.1292,
+        25.7795
+      ],
+      "geo": [
+        -80.1317,
+        25.777
+      ],
+      "offset": [
+        180,
+        170,
+        270
+      ],
+      "asset": "ocean-drive.glb",
+      "records": "ocean-drive-records.json",
+      "buildings": 113,
+      "matchedFootprints": 111,
+      "triangles": 26496,
+      "bytes": 2862784,
+      "maxHeight": 54.37798547744751,
+      "compressedAsset": "ocean-drive.glb.gz",
+      "compressedBytes": 214178,
+      "sha256": "8687efbd737a4b68dd07ceab3ee446950f032306b429c2ad4d368fa8a23ca65d"
+    },
+    {
+      "id": "diamond",
+      "name": "Blue & Green Diamond height check",
+      "bbox": [
+        -80.123,
+        25.822,
+        -80.1192,
+        25.8254
+      ],
+      "geo": [
+        -80.121,
+        25.8233
+      ],
+      "offset": [
+        280,
+        240,
+        360
+      ],
+      "asset": "diamond.glb",
+      "records": "diamond-records.json",
+      "buildings": 14,
+      "matchedFootprints": 14,
+      "triangles": 24372,
+      "bytes": 2633428,
+      "maxHeight": 129.7533721923828,
+      "compressedAsset": "diamond.glb.gz",
+      "compressedBytes": 153997,
+      "sha256": "9262c887fa28aeac022b2808f78eb099a1a41341accd5e6182aa43c6797f9b39"
+    }
+  ]
+}

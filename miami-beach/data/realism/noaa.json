@@ -1,0 +1,61 @@
+{
+  "lidar": {
+    "year": 2021,
+    "metadata": "https://www.fisheries.noaa.gov/inport/item/76028",
+    "source": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/entwine/geoid18/10338"
+  },
+  "regions": [
+    {
+      "id": "ocean-drive",
+      "laser": {
+        "points": 2547419,
+        "classes": {
+          "1": 1214031,
+          "2": 221778,
+          "3": 65648,
+          "4": 217024,
+          "5": 297723,
+          "6": 531215
+        },
+        "maxElevation": 55.900000000000006,
+        "depth": 10
+      },
+      "imagery": {
+        "file": "ocean-drive-aerial.webp",
+        "bbox": [
+          -80.1347,
+          25.7748,
+          -80.1292,
+          25.7795
+        ],
+        "width": 2048,
+        "height": 1944,
+        "coverage": 1.0,
+        "date": "2023-10-21",
+        "license": "CC0-1.0",
+        "credit": "NOAA National Geodetic Survey",
+        "metadata": "https://www.fisheries.noaa.gov/inport/item/71599",
+        "sourceFiles": [
+          "https://coastalimagery.blob.core.windows.net/digitalcoast/MiamiFL_RGBN_2023_9996/585000e2853000n.tif"
+        ]
+      }
+    },
+    {
+      "id": "diamond",
+      "laser": {
+        "points": 1659250,
+        "classes": {
+          "1": 1160218,
+          "2": 72947,
+          "3": 48726,
+          "4": 117349,
+          "5": 101183,
+          "6": 158827
+        },
+        "maxElevation": 179.95,
+        "depth": 10
+      },
+      "imagery": null
+    }
+  ]
+}

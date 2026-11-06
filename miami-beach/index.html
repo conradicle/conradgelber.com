@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Miami Beach in 3D · Conrad Gelber</title>
+<meta name="description" content="Explore Miami Beach in three dimensions: a growing city model built from real municipal and county geographic data.">
+<link rel="canonical" href="https://conradgelber.com/miami-beach/">
+<meta name="theme-color" content="#174447"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/miami-beach/viewer.css?v=1">
+<script defer src="/miami-beach/viewer.js?v=1"></script>
+</head>
+<body>
+<a class="skip" href="#controls">Skip to city controls</a>
+<header class="mast"><a href="/">CONRAD GELBER <span>/</span> FIELD NOTES</a><div class="mast-right">25°49′ N &nbsp; 80°08′ W <a href="/built/">← Built</a></div></header>
+<main id="main">
+  <div id="viewport"><canvas id="city" tabindex="0" aria-label="Interactive 3D model of Miami Beach. Drag to orbit, scroll to zoom. Use the city controls for keyboard navigation."></canvas></div>
+  <aside class="panel" id="controls" tabindex="-1" aria-label="City controls">
+    <p class="eyebrow"><span class="dot"></span> AN EXPLORABLE CITY · EARLY EDITION</p>
+    <h1>Miami<br><em>Beach.</em></h1>
+    <p class="intro">An island city, in three dimensions.<br>Built from the geography beneath it.</p>
+    <div class="pilot-actions"><button data-view="pilot" aria-pressed="false">Realism pilot ↗</button><button data-view="heights" aria-pressed="false">Height check ↗</button></div>
+    <p id="pilot-note" class="pilot-note">Survey geometry + 2023 aerial photography</p>
+    <div class="rule"></div>
+    <p class="label">01 &nbsp; EXPLORE THE CITY</p>
+    <div class="districts" role="group" aria-label="Choose a district">
+      <button data-view="city" class="active" aria-pressed="true"><span>Entire municipality</span><span>↗</span></button>
+      <button data-view="south" aria-pressed="false"><span>South Beach</span><span>01</span></button>
+      <button data-view="mid" aria-pressed="false"><span>Mid-Beach</span><span>02</span></button>
+      <button data-view="north" aria-pressed="false"><span>North Beach</span><span>03</span></button>
+      <button data-view="islands" aria-pressed="false"><span>Bay islands</span><span>04</span></button>
+    </div>
+    <div class="landmark-control"><label class="label" for="landmark">02 &nbsp; FIND A LANDMARK</label><select id="landmark"><option value="">Choose a place…</option></select></div>
+    <div class="numbers"><div><strong id="building-count">—</strong><span>building footprints</span></div><div><strong id="tree-count">—</strong><span>mapped trees</span></div></div>
+    <button class="text-button" id="about-open">About the model & sources <span>↗</span></button>
+  </aside>
+  <div class="place-label" aria-hidden="true"><span id="place-name">BISCAYNE BAY / ATLANTIC OCEAN</span><span id="view-caption">MIAMI BEACH, FLORIDA</span></div>
+  <div class="tools" role="group" aria-label="Viewer settings">
+    <div class="segmented"><button id="orbit" class="active" aria-pressed="true">Orbit</button><button id="fly" aria-pressed="false">Fly</button></div>
+    <button id="tour" aria-pressed="false">Start tour ↗</button><button id="lighting" aria-pressed="false">Dusk</button>
+    <button id="layers-open" aria-expanded="false" aria-controls="layers">Layers +</button>
+    <button id="realism-toggle" aria-pressed="true" aria-label="Compare survey pilot with original massing" disabled>Compare</button>
+  </div>
+  <section id="layers" class="layers" hidden aria-label="Visible layers">
+    <label><input type="checkbox" id="show-buildings" checked> Buildings</label>
+    <label><input type="checkbox" id="show-trees" checked> Mapped trees</label>
+    <label><input type="checkbox" id="show-roads" checked> Streets</label>
+    <label><input type="checkbox" id="show-boundary" checked> Municipal boundary</label>
+    <label><input type="checkbox" id="show-landmarks" checked> Interpretive landmark models</label>
+    <label><input type="checkbox" id="show-laser" disabled> Laser survey comparison</label>
+  </section>
+  <div class="compass" aria-label="North compass"><span id="compass-arrow">↑</span><b>N</b></div>
+  <div class="zoom" role="group" aria-label="Zoom"><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button><button id="reset" aria-label="Reset view">⌂</button></div>
+  <div id="fly-pad" class="fly-pad" role="group" aria-label="Fly movement controls" hidden><button data-move="KeyW" aria-label="Fly forward">↑</button><button data-move="KeyR" aria-label="Fly up">Up</button><button data-move="KeyA" aria-label="Fly left">←</button><button data-move="KeyS" aria-label="Fly backward">↓</button><button data-move="KeyD" aria-label="Fly right">→</button><button data-move="KeyF" aria-label="Fly down">Down</button></div>
+  <div id="status" class="status" role="status" aria-live="polite">Preparing the city…</div>
+  <p class="hint" id="hint">DRAG TO ORBIT · SCROLL TO EXPLORE · CLICK A BUILDING</p>
+  <section id="selection" class="selection" hidden aria-label="Selected building"><button id="selection-close" class="close" aria-label="Close building details">×</button><p class="label">BUILDING RECORD</p><h2 id="selection-title"></h2><p id="selection-copy"></p></section>
+  <div id="fallback" class="fallback" hidden><h2>The city needs WebGL 2</h2><p>Try a browser with hardware acceleration enabled. You can still explore the source inventory and landmark list below.</p><button id="fallback-sources">View sources</button></div>
+</main>
+<footer><span>CITY + COUNTY GIS · NOAA IMAGERY &amp; LASER SURVEY</span><span>SURVEY PILOT · ESTIMATES ELSEWHERE <a href="/accessibility/">Accessibility</a></span></footer>
+<dialog id="about" aria-labelledby="about-title">
+<button class="close" id="about-close" aria-label="Close about the model">×</button>
+<p class="eyebrow">THE GEOGRAPHY COMES FIRST</p><h2 id="about-title">A city model in progress.</h2>
+<p>The complete municipal boundary sets the scope. The base inventory includes every intersecting footprint in the downloaded county dataset, with streets, waterways, green spaces and mapped trees from public GIS layers.</p>
+<h3>Realism pilot</h3>
+<p>The Ocean Drive pilot imports 113 county 3D building models, NOAA aerial photography captured October 21, 2023, and a terrain surface sampled from the 2021 laser survey. Tree locations come from the city inventory; nearby vegetation returns inform their estimated heights. Real roof photographs are projected onto the models. Image shadows are baked into the photographs.</p>
+<p><strong>Height check:</strong> 102 of 110 matched Ocean Drive models have roof elevations within 2 m of the sampled laser roof level; the median absolute difference is 0.22 m. This compares older sources, not today’s surveyed conditions. The Diamond tower models omit upper roof details and remain flagged for review. The pilot does not establish citywide accuracy.</p>
+<p>The Colony facade uses a GIS-aligned front edge. Its vertical sign and horizontal bands were checked against the hotel’s own exterior reference. Smaller proportions, wall colors and windows remain interpretations. The reference photograph is not redistributed.</p>
+<p><a href="/miami-beach/data/realism/validation.json">Pilot height checks</a> · <a href="https://www.fisheries.noaa.gov/inport/item/71599">NOAA imagery and CC0 terms</a> · <a href="https://www.fisheries.noaa.gov/inport/item/76028">NOAA laser survey</a> · <a href="https://www.arcgis.com/home/item.html?id=ce420278a45a4bf4a349c37c197263b3">County 3D source</a></p>
+<p><strong>Outside the pilot:</strong> pastel materials, windows and landmark forms are AI-assisted procedural artwork. Heights use plausible city floor counts × 3.2 m where matched, or a 6.4 m fallback. Ground outside the photographed pilot is flat; bridge decks are approximate. Source data includes older survey vintages and may omit recent changes.</p>
+<p>County 2D HEIGHT values are retained in detailed records, but their units are undocumented by that service, so they are not converted into geometry. The separate 3D service explicitly declares metre geometry. This is a geographic exploration, not a surveyed replica or a flood model.</p>
+<div id="source-summary"></div><h3>Build phases</h3><ol><li><strong>Working now:</strong> municipality-wide inventory and navigation, plus the survey-geometry and aerial-imagery pilot.</li><li><strong>Visual pass:</strong> natural pilot vegetation and a reference-checked Colony facade; other facades are interpreted.</li><li><strong>Next:</strong> resolve tower crown discrepancies, validate more districts, refresh missing structures and extend licensed ground imagery.</li></ol>
+<h3>Base data sources</h3><ul id="source-list"></ul>
+<p class="small">City and county geometry is provided as-is and is unsuitable for surveying, engineering or site-specific decisions. NOAA imagery is CC0-1.0. Geometry, imagery and point samples are served with this website; no Google tiles or live GIS requests.</p>
+<a href="/miami-beach/data/manifest.json">Download the base source manifest</a>
+</dialog>
+<noscript><p class="no-script">JavaScript is needed to draw the 3D city. <a href="/miami-beach/data/manifest.json">View the data manifest</a> or <a href="/built/">return to Built</a>.</p></noscript>
+</body></html>
