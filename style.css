@@ -67,6 +67,38 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius
 .skip{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
 .skip:focus{position:fixed;left:1rem;top:1rem;width:auto;height:auto;z-index:10;padding:.6rem 1rem;background:var(--paper);border:2px solid var(--ink);color:var(--ink)}
 
+/* Front page hero: a full-width band behind the masthead and tabs. The canvas
+   (js/inkfield.js) stays invisible until its first frame is ready, so with no
+   WebGL or no JS the band is just the paper. */
+.hero{
+  position:relative;
+  isolation:isolate;
+  min-height:70vh;
+  /* Open chart below the tabs. Without this a laptop gets none, since the
+     masthead and tabs alone already fill 70vh of an 800px-tall window. */
+  padding-bottom:clamp(5rem,14vh,8.5rem);
+}
+@media (max-width:640px){
+  /* The stacked masthead already runs past 55vh, so phones add no open band
+     that would push the intro further down. */
+  .hero{min-height:55vh;padding-bottom:0}
+}
+.inkfield{
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  display:block;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 1.8s ease;
+}
+.inkfield.is-live{opacity:1}
+@media (prefers-reduced-motion:reduce){
+  .inkfield{transition:none}
+}
+
 /* Masthead */
 header.mast{padding:clamp(4rem,11vw,7.5rem) 0 2rem}
 h1{
