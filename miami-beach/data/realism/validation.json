@@ -1,0 +1,232 @@
+{
+  "method": "2021 classified building roof P99.5 compared with 2015 county mesh top; different roof definitions and survey years can disagree. Unclassified maxima are diagnostic only.",
+  "regions": [
+    {
+      "id": "ocean-drive",
+      "checked": 110,
+      "within2m": 102,
+      "medianAbsDifference": 0.22,
+      "largest": [
+        {
+          "id": 4210,
+          "height": 54.38,
+          "geo": [
+            -80.13375626115936,
+            25.778616087706133
+          ],
+          "laser": {
+            "ground": 1.14,
+            "classifiedRoofP995": 55.17,
+            "classifiedHeight": 54.03,
+            "classifiedPoints": 22523,
+            "allReturnMax": 55.4,
+            "difference": -0.17,
+            "year": 2021
+          }
+        },
+        {
+          "id": 196723,
+          "height": 41.79,
+          "geo": [
+            -80.13253163854651,
+            25.775265429957084
+          ],
+          "laser": {
+            "ground": 1.6,
+            "classifiedRoofP995": 43.33,
+            "classifiedHeight": 41.72,
+            "classifiedPoints": 22763,
+            "allReturnMax": 45.38,
+            "difference": -0.06,
+            "year": 2021
+          }
+        },
+        {
+          "id": 140724,
+          "height": 26.31,
+          "geo": [
+            -80.13271931133508,
+            25.77738682696905
+          ],
+          "laser": {
+            "ground": 1.46,
+            "classifiedRoofP995": 27.83,
+            "classifiedHeight": 26.37,
+            "classifiedPoints": 4397,
+            "allReturnMax": 27.85,
+            "difference": -0.04,
+            "year": 2021
+          }
+        },
+        {
+          "id": 524911,
+          "height": 26.08,
+          "geo": [
+            -80.13183673830034,
+            25.776370342134246
+          ],
+          "laser": {
+            "ground": 2.23,
+            "classifiedRoofP995": 27.78,
+            "classifiedHeight": 25.55,
+            "classifiedPoints": 3624,
+            "allReturnMax": 28.63,
+            "difference": -0.13,
+            "year": 2021
+          }
+        },
+        {
+          "id": 32762,
+          "height": 25.44,
+          "geo": [
+            -80.13368733591585,
+            25.775109097243135
+          ],
+          "laser": {
+            "ground": 1.36,
+            "classifiedRoofP995": 27.62,
+            "classifiedHeight": 26.26,
+            "classifiedPoints": 14654,
+            "allReturnMax": 29.4,
+            "difference": 0.79,
+            "year": 2021
+          }
+        },
+        {
+          "id": 464729,
+          "height": 25.25,
+          "geo": [
+            -80.13290547784098,
+            25.776458384977136
+          ],
+          "laser": {
+            "ground": 1.45,
+            "classifiedRoofP995": 26.89,
+            "classifiedHeight": 25.44,
+            "classifiedPoints": 18652,
+            "allReturnMax": 30.08,
+            "difference": 0.16,
+            "year": 2021
+          }
+        }
+      ]
+    },
+    {
+      "id": "diamond",
+      "checked": 14,
+      "within2m": 11,
+      "medianAbsDifference": 0.27,
+      "largest": [
+        {
+          "id": 175559,
+          "height": 129.75,
+          "geo": [
+            -80.12137646418438,
+            25.82241416017127
+          ],
+          "laser": {
+            "ground": 1.49,
+            "classifiedRoofP995": 147.87,
+            "classifiedHeight": 146.38,
+            "classifiedPoints": 34606,
+            "allReturnMax": 160.17,
+            "difference": 15.96,
+            "year": 2021
+          }
+        },
+        {
+          "id": 171899,
+          "height": 129.39,
+          "geo": [
+            -80.12145178227826,
+            25.823257905878513
+          ],
+          "laser": {
+            "ground": 1.48,
+            "classifiedRoofP995": 148.06,
+            "classifiedHeight": 146.58,
+            "classifiedPoints": 11373,
+            "allReturnMax": 156.72,
+            "difference": 16.29,
+            "year": 2021
+          }
+        },
+        {
+          "id": 163958,
+          "height": 64.62,
+          "geo": [
+            -80.12136466494505,
+            25.824648748330905
+          ],
+          "laser": {
+            "ground": 2.23,
+            "classifiedRoofP995": 67.4,
+            "classifiedHeight": 65.17,
+            "classifiedPoints": 13421,
+            "allReturnMax": 86.18,
+            "difference": 0.44,
+            "year": 2021
+          }
+        },
+        {
+          "id": 535238,
+          "height": 63.95,
+          "geo": [
+            -80.12160202792899,
+            25.82397658307668
+          ],
+          "laser": {
+            "ground": 1.51,
+            "classifiedRoofP995": 66.19,
+            "classifiedHeight": 64.67,
+            "classifiedPoints": 38496,
+            "allReturnMax": 67.8,
+            "difference": -0.09,
+            "year": 2021
+          }
+        },
+        {
+          "id": 575710,
+          "height": 49.23,
+          "geo": [
+            -80.12125870096446,
+            25.825173448803508
+          ],
+          "laser": {
+            "ground": 2.75,
+            "classifiedRoofP995": 51.44,
+            "classifiedHeight": 48.69,
+            "classifiedPoints": 9176,
+            "allReturnMax": 52.91,
+            "difference": 0.16,
+            "year": 2021
+          }
+        },
+        {
+          "id": 521708,
+          "height": 20.35,
+          "geo": [
+            -80.12135281614161,
+            25.822828176274875
+          ],
+          "laser": {
+            "ground": 3.95,
+            "classifiedRoofP995": 24.23,
+            "classifiedHeight": 20.28,
+            "classifiedPoints": 3959,
+            "allReturnMax": 177.67,
+            "difference": -0.4,
+            "year": 2021
+          }
+        }
+      ]
+    }
+  ],
+  "reference": {
+    "name": "Blue Diamond Tower",
+    "architecturalHeight": 170.4,
+    "occupiedHeight": 130.3,
+    "url": "https://www.skyscrapercenter.com/miami-beach/blue-diamond-tower/2708/",
+    "note": "Architectural top includes the crown. An occupied-floor or sampled roof height is not equivalent."
+  }
+}
