@@ -56,7 +56,7 @@
   const CURSOR_TINT = 0.75;         // How far lines near the cursor shift from ink to teal, 0 to 1
   const CURSOR_WASH = 0.035;        // Faint teal wash on the paper near the cursor, 0 to 1
   const PARTICLE_PULL_RADIUS = 260; // How far away particles feel the cursor
-  const PARTICLE_ORBIT = 0.2;       // Sideways push, makes particles circle the cursor.
+  const PARTICLE_ORBIT = 0.2;       // Top speed of the circling around the cursor, field units per second
   const PARTICLE_GATHER = 0.06;      // Pull toward the ring they gather on.
   const PARTICLE_RING = 85;         // Radius of that ring
   const CURSOR_GLOW_INK = 0.5;      // Dots print this many times darker close to the cursor.
@@ -64,6 +64,16 @@
   const CURSOR_RISE_TIME = 0.8;     // The effect itself swells in slowly...
   const CURSOR_RELAX_TIME = 1.7;    // ...and relaxes back to ambient more slowly still.
   const CURSOR_IDLE_AFTER = 2.5;    // Idle time before relaxing
+
+  // Photo island: a permanent peak on the chart, centered on the photo
+  const ISLAND_SELECTOR = ".portrait img";
+  const ISLAND_SIZE = 1.7;          // How far the peak reaches past the photo's edge, in photo radii
+  const ISLAND_RINGS = 12;          // Main contour lines the peak adds between its foot and the photo
+  const ISLAND_RING_TIGHTNESS = 2.6; // Bigger = rings pack tighter at the photo and loosen faster.
+  const ISLAND_FRAME_WIDTH = 1.5;   // Width of the ink frame. Keep it equal to the box-shadow in style.css.
+  const ISLAND_MARGIN = 14;         // Clean paper between the frame and the nearest ink
+  const ISLAND_MARGIN_FADE = 8;     // Soft fade at the margin's outer edge
+  const ISLAND_FLOW_REACH = 220;    // How far out the current starts bending around the island
 
   // Finish
   const GRAIN = 0.011;              // Paper grain strength. Keep this tiny.
@@ -175,8 +185,25 @@ uniform float uDt;
 uniform int uFrame;
 out vec4 outState;
 ${TERRAIN}
+uniform vec3 uIsland;     // photo center and radius in field units; radius 0 = no photo
+const float ISLAND_WALL = ${f((ISLAND_FRAME_WIDTH + ISLAND_MARGIN + ISLAND_MARGIN_FADE) / FIELD_SCALE)};
+float islandGap(vec2 p){ return length(p - uIsland.xy) - uIsland.z - ISLAND_WALL; }
 float potential(vec2 p){
-  return terrain(p, uTime, 2) + ${f(FLOW_SWIRL)} * vnoise(vec3(p * 1.7 + 40.0, uTime * 1.4));
+  float flow = terrain(p, uTime, 2) + ${f(FLOW_SWIRL)} * vnoise(vec3(p * 1.7 + 40.0, uTime * 1.4));
+  // The orbit around the cursor is part of the potential, so like the current
+  // it is a curl: particles can circle without bunching up anywhere.
+  vec2 fromCursor = (p - uCursor) / ${f(PARTICLE_PULL_RADIUS / FIELD_SCALE)};
+  flow -= uCursorAmt * exp(-dot(fromCursor, fromCursor))
+        * ${f(PARTICLE_ORBIT * (PARTICLE_PULL_RADIUS / FIELD_SCALE) / (0.858 * FLOW_SPEED))};
+  // Scaling the potential to zero at the island's edge turns that edge into a
+  // streamline: the curl below runs along it and never through it. This ramp
+  // has a real slope at zero, so particles keep sliding along the edge. A
+  // smoothstep would stall them there, and stalled particles pile up.
+  if (uIsland.z > 0.0){
+    float r = clamp(islandGap(p) / ${f(ISLAND_FLOW_REACH / FIELD_SCALE)}, 0.0, 1.0);
+    flow *= r * (1.875 + r * r * (0.375 * r * r - 1.25));
+  }
+  return flow;
 }
 void main(){
   ivec2 texel = ivec2(gl_FragCoord.xy);
@@ -195,22 +222,35 @@ void main(){
   float dy = potential(p + vec2(0.0, E)) - potential(p - vec2(0.0, E));
   vec2 vel = vec2(dy, -dx) / (2.0 * E) * ${f(FLOW_SPEED)};
 
-  // Orbit and gather around the cursor.
+  // Gather toward a ring around the cursor. The orbit is in potential().
   if (uCursorAmt > 0.001){
     vec2 toCursor = uCursor - p;
     float r = max(length(toCursor), 1e-3);
     vec2 inward = toCursor / r;
     float reach = r / ${f(PARTICLE_PULL_RADIUS / FIELD_SCALE)};
     float fall = uCursorAmt * exp(-reach * reach);
+    // Let go close to the island, or the pull piles particles up against it.
+    if (uIsland.z > 0.0) fall *= smoothstep(0.0, ${f(ISLAND_FLOW_REACH * 0.65 / FIELD_SCALE)}, islandGap(p));
     float ring = ${f(PARTICLE_RING / FIELD_SCALE)};
-    vel += fall * ${f(PARTICLE_ORBIT)} * vec2(-inward.y, inward.x);
     vel += fall * ${f(PARTICLE_GATHER)} * inward * clamp((r - ring) / ring, -1.0, 1.0);
+  }
+
+  // The cursor's pull isn't a curl, so it could still drag particles onto the
+  // island. Near the edge, cancel any inward motion and keep the sideways part.
+  bool onIsland = false;
+  if (uIsland.z > 0.0){
+    vec2 away = p - uIsland.xy;
+    away /= max(length(away), 1e-4);
+    float gap = islandGap(p);
+    onIsland = gap < 0.0;
+    float inward = min(dot(vel, away), 0.0);
+    vel -= away * inward * (1.0 - smoothstep(0.0, ISLAND_WALL, gap));
   }
 
   pos += vel * uDt / uExtent;
   float life = s.z - uDt / (${f(PARTICLE_LIFE)} * (0.6 + 0.8 * seed));
 
-  if (life <= 0.0 || pos.x < 0.0 || pos.x > 1.0 || pos.y < 0.0 || pos.y > 1.0){
+  if (life <= 0.0 || onIsland || pos.x < 0.0 || pos.x > 1.0 || pos.y < 0.0 || pos.y > 1.0){
     pos = vec2(hash(ivec3(texel, uFrame)), hash(ivec3(texel.yx, uFrame + 7919)));
     life = 1.0;
   }
@@ -273,6 +313,7 @@ uniform vec3 uInkSoft;
 uniform vec3 uAccent;
 uniform vec4 uQuiet[${QUIET_MAX}]; // text boxes: x0, y0, x1, y1 in CSS pixels
 uniform int uQuietCount;
+uniform vec3 uIsland;      // photo center and radius in CSS pixels; radius 0 = no photo
 in vec2 vUv;
 out vec4 outColor;
 ${TERRAIN}
@@ -314,8 +355,15 @@ void main(){
   float glow = uCursorAmt * bump;
   float near = uCursorAmt * exp(-dot(fromCursor, fromCursor) * 0.28);
 
+  // The island's slope is steepest at the photo and eases to nothing at its
+  // foot, so its rings start tight and loosen with distance. It adds to the
+  // terrain and the cursor bump, so the cursor still works beside the photo.
+  float islandEdge = uIsland.z > 0.0 ? length(css - uIsland.xy) - uIsland.z : 1e6;
+  float islandFoot = clamp(1.0 - max(islandEdge, 0.0) / (uIsland.z * ${f(ISLAND_SIZE)} + 1e-3), 0.0, 1.0);
+  float islandHeight = ${f(ISLAND_RINGS / LINE_DENSITY)} * pow(islandFoot, ${f(ISLAND_RING_TIGHTNESS)});
+
   float h = terrain(css / ${f(FIELD_SCALE)}, uTime, ${NOISE_OCTAVES})
-          + glow * ${f(CURSOR_STRENGTH)};
+          + glow * ${f(CURSOR_STRENGTH)} + islandHeight;
   float v = h * ${f(LINE_DENSITY)};
 
   float weight = 1.0 + near * ${f(CURSOR_LINE_BOOST)};
@@ -325,6 +373,9 @@ void main(){
 
   float edge = edgeFade(css);
   float mask = edge * mix(1.0, ${f(TEXT_QUIET)}, textQuiet(css));
+  // Clean paper around the photo: no lines, particles or cursor wash.
+  mask *= smoothstep(${f(ISLAND_FRAME_WIDTH + ISLAND_MARGIN)},
+                     ${f(ISLAND_FRAME_WIDTH + ISLAND_MARGIN + ISLAND_MARGIN_FADE)}, islandEdge);
   float strong = min(1.0, weight);
 
   vec3 lineInk = mix(uInk, uAccent, near * ${f(CURSOR_TINT)});
@@ -501,6 +552,26 @@ void main(){
 
   // Measures the words themselves (a Range hugs the text, where the block
   // box would run the full column width), so the quiet zones fit the text.
+  // The island follows the photo wherever the layout puts it.
+  let islandX = 0, islandY = 0, islandR = 0;
+  function measureIsland() {
+    const photo = hero.querySelector(ISLAND_SELECTOR);
+    const r = photo && photo.getBoundingClientRect();
+    if (!r || !r.width) {
+      islandR = 0;
+      return;
+    }
+    const box = hero.getBoundingClientRect();
+    islandX = r.left - box.left + r.width / 2;
+    islandY = r.top - box.top + r.height / 2;
+    islandR = r.width / 2;
+  }
+
+  function measureLayout() {
+    measureQuiet();
+    measureIsland();
+  }
+
   function measureQuiet() {
     const box = hero.getBoundingClientRect();
     const range = document.createRange();
@@ -550,6 +621,7 @@ void main(){
     gl.uniform2f(su.uExtent, cssW / FIELD_SCALE, cssH / FIELD_SCALE);
     gl.uniform2f(su.uCursor, cursorX / FIELD_SCALE, cursorY / FIELD_SCALE);
     gl.uniform1f(su.uCursorAmt, cursorAmt);
+    gl.uniform3f(su.uIsland, islandX / FIELD_SCALE, islandY / FIELD_SCALE, islandR / FIELD_SCALE);
     gl.uniform1f(su.uTime, time);
     gl.uniform1f(su.uDt, dt);
     gl.uniform1i(su.uFrame, frameIndex);
@@ -603,6 +675,7 @@ void main(){
     gl.uniform3fv(u.uAccent, colors.uAccent);
     gl.uniform4fv(u.uQuiet, quiet);
     gl.uniform1i(u.uQuietCount, quietCount);
+    gl.uniform3f(u.uIsland, islandX, islandY, islandR);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
@@ -707,7 +780,7 @@ void main(){
   function layoutChanged() {
     if (!alive) return;
     sizeCanvas();
-    measureQuiet();
+    measureLayout();
     if (motionQuery.matches) renderStill();
     else if (!running) drawField();
   }
@@ -716,7 +789,7 @@ void main(){
     try {
       initGL();
       sizeCanvas();
-      measureQuiet();
+      measureLayout();
       if (motionQuery.matches) {
         alive = true;
         renderStill();
