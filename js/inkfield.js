@@ -1030,12 +1030,23 @@ void main(){
     letterInk += (letterInkTarget - letterInk) * (1 - Math.exp(-Math.min(elapsed / 1000, 1) / LETTER_FADE_OUT));
   }
 
-  // Called once WebGL is confirmed working. For the intro the h1 hides right away
-  // so it can't flash, and it comes back if the font takes too long.
+  // True while the CSS hold from style.css still has the name hidden, meaning no
+  // one has seen it yet. Anything unexpected reads as false, which keeps it visible.
+  function headlineStillHeld() {
+    if (!headline.getAnimations) return false;
+    return headline.getAnimations().some((a) => a.animationName === "ink-hold" && a.playState !== "finished");
+  }
+
+  // Called once WebGL is confirmed working. The intro runs only if the name has
+  // never been on screen, so it can't go from visible to hidden. If WebGL was too
+  // late, the session counts the intro as played and the field starts normally.
+  // The h1 comes back if the font takes too long.
   function prepareLetters() {
     if (!headline || motionQuery.matches) return;
     const box = hero.getBoundingClientRect();
-    const playIntro = !introPlayed() && !document.hidden && box.bottom > 0 && box.top < window.innerHeight;
+    const wantIntro = !introPlayed() && !document.hidden && box.bottom > 0 && box.top < window.innerHeight;
+    const playIntro = wantIntro && headlineStillHeld();
+    if (wantIntro && !playIntro) markIntroPlayed();
     if (playIntro) {
       hideHeadlineForIntro();
       canvas.classList.add("is-quick");
