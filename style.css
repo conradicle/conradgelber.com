@@ -43,6 +43,15 @@
   --measure:63ch;
   --h1-size:clamp(2.7rem,8.4vw,4.9rem);
 }
+/* Only ever on if a visitor picks it from the command palette (js/site.js). */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0F1B2E;
+  --ink:#E7EBF1;
+  --ink-soft:#A6B1C2;
+  --rule:#34435C;
+  --accent:#5CC4B5;
+}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{

@@ -540,6 +540,15 @@ void main(){
     return target;
   }
 
+  function readColors() {
+    colors = {
+      uPaper: token("--paper"),
+      uInk: token("--ink"),
+      uInkSoft: token("--ink-soft"),
+      uAccent: token("--accent"),
+    };
+  }
+
   // Everything GPU-side. Throws if this device can't run the effect.
   function initGL() {
     gl = canvas.getContext("webgl2", {
@@ -553,12 +562,7 @@ void main(){
     if (!gl) throw new Error("inkfield: no WebGL2");
     if (!gl.getExtension("EXT_color_buffer_float")) throw new Error("inkfield: no float targets");
 
-    colors = {
-      uPaper: token("--paper"),
-      uInk: token("--ink"),
-      uInkSoft: token("--ink-soft"),
-      uAccent: token("--accent"),
-    };
+    readColors();
 
     programs = {
       sim: program(FULLSCREEN_VS, SIM_FS),
@@ -1204,6 +1208,13 @@ void main(){
   // Web fonts change where the text sits.
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {
     if (alive) layoutChanged();
+  });
+
+  // The command palette can switch the theme while the page is open.
+  document.addEventListener("site:theme", () => {
+    if (!alive) return;
+    readColors();
+    if (!running) drawField();
   });
 
   // A prerendered front page waits until it is actually shown, so the opening
