@@ -1,12 +1,20 @@
 [
   {
+    "version": "1.16.6",
+    "date": "2026-11-06",
+    "title": "No more flash of my name",
+    "bullets": [
+      "The opening particle animation now plays only if it can start before my name appears, so the name never vanishes once you've seen it.",
+      "My name stays the same color when you hover over it or focus it, and keyboard users still get a visible outline."
+    ]
+  },
+  {
     "version": "1.16.5",
     "date": "2026-11-06",
     "title": "My name stays put",
     "bullets": [
-      "Moving your cursor or finger over my name no longer blows it apart, and the name no longer changes color on hover.",
-      "The opening particle animation now plays only if it can start before the name appears, so the name never vanishes once you've seen it.",
-      "The cursor still stirs the teal current everywhere on the front page."
+      "Moving your cursor or finger over my name no longer blows it apart. The headline stays visible the whole time.",
+      "The cursor still stirs the teal current everywhere on the front page, and the opening particle animation is unchanged."
     ]
   },
   {
