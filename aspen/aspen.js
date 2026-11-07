@@ -37,7 +37,7 @@ function start() {
   if (Date.now() < retryAfter) return Promise.reject(new Error('The mountain imagery service is temporarily limiting requests. Please try again later.'));
   $('error').hidden = true;
   status('Loading the Roaring Fork Valley…');
-  starting = import('./viewer.js?v=9')
+  starting = import('./viewer.js?v=10')
     .then(({createScene}) => createScene('cesium', mountains, {
       onHover: preview,
       onEnter: m => openMountain(m),
