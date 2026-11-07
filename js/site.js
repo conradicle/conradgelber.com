@@ -118,6 +118,15 @@
   /* ---------------------------------------------------------------- KEYS */
 
   var IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform);
+  var GO = {
+    h: "/",
+    1: "/work/",
+    2: "/built/",
+    3: "/writing/",
+    4: "/next/",
+    5: "/off-the-clock/",
+    6: "/games/",
+  };
 
   function typingIn(el) {
     if (!el) return false;
@@ -129,12 +138,34 @@
     var key = e.key.toLowerCase();
 
     var paletteCombo = key === "k" && !e.shiftKey && !e.altKey && (IS_MAC ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey);
-    var slash = e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey;
-    if (paletteCombo || slash) {
+    if (paletteCombo) {
       e.preventDefault();
       withUI(function (ui) {
         ui.openPalette();
       });
+      return;
+    }
+
+    // Single keys are off on game pages, where the game may use them.
+    if (IS_APP || e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (e.key === "?") {
+      e.preventDefault();
+      withUI(function (ui) {
+        ui.toggleShortcuts();
+      });
+      return;
+    }
+    if (e.shiftKey) return;
+
+    if (e.key === "/") {
+      e.preventDefault();
+      withUI(function (ui) {
+        ui.openPalette();
+      });
+    } else if (GO[key]) {
+      e.preventDefault();
+      goTo(GO[key]);
     }
   });
 

@@ -98,6 +98,7 @@
     }
     if (links.linkedin) list.push({ title: "Open LinkedIn", url: links.linkedin });
     if (links.github) list.push({ title: "Open GitHub", url: links.github });
+    list.push({ title: "Show keyboard shortcuts", keywords: "help keys", run: toggleShortcuts });
     list.forEach(function (item) {
       item.group = "Action";
     });
@@ -235,6 +236,80 @@
     if (row && Number(row.dataset.index) !== active) setActive(Number(row.dataset.index));
   });
 
+  /* ------------------------------------------------------- SHORTCUTS CARD */
+
+  var SHORTCUTS = [
+    [searchKey() + " or /", "Search"],
+    ["1", "Work"],
+    ["2", "Built"],
+    ["3", "Writing"],
+    ["4", "Next"],
+    ["5", "Off the clock"],
+    ["6", "Games"],
+    ["H", "Home"],
+    ["?", "This list"],
+  ];
+
+  function searchKey() {
+    return /Mac|iPhone|iPad/.test(navigator.platform) ? "Cmd+K" : "Ctrl+K";
+  }
+
+  var card = el("dialog", "site-card");
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-modal", "true");
+  card.setAttribute("aria-labelledby", "site-card-title");
+  card.tabIndex = -1;
+  var cardTitle = el("h2", "site-card-title", "Keyboard shortcuts");
+  cardTitle.id = "site-card-title";
+  var cardList = el("dl", "site-card-list");
+  SHORTCUTS.forEach(function (row) {
+    var line = el("div");
+    var key = el("dt");
+    key.appendChild(el("kbd", "", row[0]));
+    line.append(key, el("dd", "", row[1]));
+    cardList.appendChild(line);
+  });
+  card.append(cardTitle, cardList);
+  if (Site.isApp) card.appendChild(el("p", "site-card-note", "Only the search key works on this page, because the game uses the keyboard."));
+  document.body.appendChild(card);
+
+  var cardOpener = null;
+
+  function closeShortcuts() {
+    if (!card.open) return;
+    card.close();
+    if (cardOpener && cardOpener.isConnected && cardOpener.focus) cardOpener.focus();
+    cardOpener = null;
+  }
+
+  function toggleShortcuts() {
+    if (card.open) return closeShortcuts();
+    cardOpener = document.activeElement;
+    card.showModal();
+    card.focus();
+  }
+
+  card.addEventListener("keydown", function (e) {
+    e.stopPropagation();
+    if (e.key === "Escape" || e.key === "?") {
+      e.preventDefault();
+      closeShortcuts();
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+    }
+  });
+  card.addEventListener("cancel", function (e) {
+    e.preventDefault();
+    closeShortcuts();
+  });
+  card.addEventListener("click", function (e) {
+    if (e.target === card) {
+      var box = card.getBoundingClientRect();
+      var inside = e.clientX >= box.left && e.clientX <= box.right && e.clientY >= box.top && e.clientY <= box.bottom;
+      if (!inside) closeShortcuts();
+    }
+  });
+
   fetch("/js/site-index.json").then(function (response) {
     if (!response.ok) throw new Error("no index");
     return response.json();
@@ -243,5 +318,5 @@
     if (dialog.open) render();
   }).catch(function () {});
 
-  Site.ui = { openPalette: openPalette, closePalette: closePalette, showNote: showNote };
+  Site.ui = { openPalette: openPalette, closePalette: closePalette, showNote: showNote, toggleShortcuts: toggleShortcuts };
 })();
