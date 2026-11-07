@@ -189,5 +189,50 @@
     }
   });
 
+  /* ---------------------------------------------------- CHANGELOG FRESHNESS
+     scripts/build-site-index.mjs writes the next line from /changelog.json. With
+     no JS the footer link simply reads "Changelog". Phone widths keep that too,
+     so the footer doesn't wrap differently there. */
+
+  var LAST_UPDATED = "2026-11-06T19:58:00-05:00";
+  var FRESHNESS_WIDTH = "(min-width: 641px)";
+
+  function plural(count, unit) {
+    return count + " " + unit + (count === 1 ? "" : "s") + " ago";
+  }
+
+  function timeSince(iso) {
+    var hours = Math.max(0, Date.now() - new Date(iso).getTime()) / 3600000;
+    if (hours < 1) return "under an hour ago";
+    if (hours < 24) return plural(Math.floor(hours), "hour");
+    var days = hours / 24;
+    if (days < 30) return plural(Math.floor(days), "day");
+    if (days < 365) return plural(Math.floor(days / 30), "month");
+    return plural(Math.floor(days / 365), "year");
+  }
+
+  function showFreshness() {
+    var wide = window.matchMedia(FRESHNESS_WIDTH).matches;
+    document.querySelectorAll('footer a[href="/changelog/"]').forEach(function (link) {
+      link.textContent = wide ? "Changelog, updated " + timeSince(LAST_UPDATED) : "Changelog";
+    });
+  }
+
+  /* ---------------------------------------------------------- ON PAGE READY */
+
+  function whenShown(run) {
+    if (document.prerendering) document.addEventListener("prerenderingchange", run, { once: true });
+    else run();
+  }
+
+  function pageReady() {
+    showFreshness();
+    window.matchMedia(FRESHNESS_WIDTH).addEventListener("change", showFreshness);
+    whenShown(showFreshness);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pageReady);
+  else pageReady();
+
   window.Site = { isApp: IS_APP, uiVersion: UI_VERSION, currentTheme: currentTheme, toggleTheme: toggleTheme, goTo: goTo };
 })();

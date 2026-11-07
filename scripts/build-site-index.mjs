@@ -1,5 +1,6 @@
 // Builds js/site-index.json, the command palette's search list, from the site's
-// own pages. Run it locally and commit the result; Cloudflare has no build step:
+// own pages, and writes the changelog footer link's date into js/site.js. Run it
+// locally and commit the result; Cloudflare has no build step:
 //
 //   node scripts/build-site-index.mjs
 //
@@ -16,6 +17,7 @@ import { resolvePath, isGatedPath } from "../functions/_lib/paths.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "js", "site-index.json");
+const SITE_SCRIPT = join(ROOT, "js", "site.js");
 const ORIGIN = "https://conradgelber.com";
 const SITE_SUFFIX = /\s*(&middot;|·)\s*Conrad Gelber\s*$/;
 
@@ -102,7 +104,36 @@ export function renderIndex() {
   return JSON.stringify(buildIndex(), null, 2) + "\n";
 }
 
+// The date of the newest /changelog.json entry, by version number.
+export function newestChangelogDate() {
+  const parts = (entry) => entry.version.split(".").map(Number);
+  const entries = JSON.parse(readFileSync(join(ROOT, "changelog.json"), "utf8"));
+  entries.sort((a, b) => {
+    const [x, y] = [parts(a), parts(b)];
+    return y[0] - x[0] || y[1] - x[1] || y[2] - x[2];
+  });
+  return entries[0].date;
+}
+
+// Writes the footer link's date into js/site.js. Entries only carry a day, so an
+// entry dated today gets the current time, which lets the link say "3 hours ago".
+// That time stays put on later runs. An older entry counts from noon that day.
+function stampSiteScript() {
+  const line = /var LAST_UPDATED = "([^"]*)";/;
+  const source = readFileSync(SITE_SCRIPT, "utf8");
+  const date = newestChangelogDate();
+  if (source.match(line)[1].startsWith(date)) return;
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const offset = -now.getTimezoneOffset();
+  const zone = (offset < 0 ? "-" : "+") + pad(Math.floor(Math.abs(offset) / 60)) + ":" + pad(Math.abs(offset) % 60);
+  const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const time = date === today ? `${pad(now.getHours())}:${pad(now.getMinutes())}:00` : "12:00:00";
+  writeFileSync(SITE_SCRIPT, source.replace(line, `var LAST_UPDATED = "${date}T${time}${zone}";`));
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   writeFileSync(OUT, renderIndex());
-  console.log("wrote js/site-index.json");
+  stampSiteScript();
+  console.log("wrote js/site-index.json and the date in js/site.js");
 }

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildIndex, renderIndex } from "../scripts/build-site-index.mjs";
+import { buildIndex, renderIndex, newestChangelogDate } from "../scripts/build-site-index.mjs";
 
 const read = (path) => readFileSync(new URL("../" + path, import.meta.url), "utf8");
 
@@ -11,6 +11,12 @@ const NO_SCRIPT_PAGES = ["connect/index.html", "login/index.html", "hub/index.ht
 
 test("the committed search index is up to date", () => {
   assert.equal(read("js/site-index.json"), renderIndex(), "run node scripts/build-site-index.mjs");
+});
+
+test("the changelog date in js/site.js matches the newest entry", () => {
+  const stamp = read("js/site.js").match(/var LAST_UPDATED = "([^"]*)";/)[1];
+  assert.ok(stamp.startsWith(newestChangelogDate() + "T"), "run node scripts/build-site-index.mjs");
+  assert.ok(!Number.isNaN(new Date(stamp).getTime()));
 });
 
 test("nothing private is in the search index", () => {
