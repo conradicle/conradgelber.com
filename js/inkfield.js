@@ -1206,5 +1206,8 @@ void main(){
     if (alive) layoutChanged();
   });
 
-  start();
+  // A prerendered front page waits until it is actually shown, so the opening
+  // animation isn't spent on a hidden page.
+  if (document.prerendering) document.addEventListener("prerenderingchange", start, { once: true });
+  else start();
 })();

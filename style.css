@@ -386,3 +386,30 @@ footer{
   .tabs a{margin-bottom:0;border-bottom:1px solid var(--rule)}
   .tabs a[aria-current="page"]{border-bottom:3px solid var(--accent)}
 }
+
+/* Page transitions between documents. The header, photo and tabs hold still
+   while the page content crossfades and the section title settles into place.
+   With reduced motion none of this applies and pages swap instantly; browsers
+   without support navigate normally. The overlay lets clicks through so a second
+   click can cut a running transition short (js/site.js). */
+@media (prefers-reduced-motion:no-preference){
+  @view-transition{navigation:auto}
+  ::view-transition{pointer-events:none}
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*){animation-duration:220ms;animation-timing-function:ease}
+
+  /* Front page and section page mastheads have different shapes, so each keeps
+     its own name and fades where it stands. */
+  .mast{view-transition-name:site-masthead}
+  .mast-sub{view-transition-name:site-header}
+  .portrait img{view-transition-name:site-portrait}
+  .tabs{view-transition-name:site-tabs}
+
+  .page-title{view-transition-name:page-title}
+  ::view-transition-group(page-title){animation:none}
+  ::view-transition-old(page-title){animation:view-title-out 110ms ease both}
+  ::view-transition-new(page-title){animation:view-title-in 220ms ease both}
+}
+@keyframes view-title-out{to{opacity:0}}
+@keyframes view-title-in{from{opacity:0;transform:translateY(5px)}}
