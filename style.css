@@ -362,6 +362,15 @@ h2{
 .prose p{margin:0 0 1.1rem}
 .prose p:last-child{margin-bottom:0}
 
+/* Keyboard shortcuts on /accessibility/ */
+.shortcut-list{margin:0 0 1.1rem}
+.shortcut-list div{display:grid;grid-template-columns:10rem 1fr;gap:0 1rem;padding:.2rem 0}
+.shortcut-list dt{font-weight:500}
+.shortcut-list dd{margin:0}
+@media (max-width:560px){
+  .shortcut-list div{grid-template-columns:1fr}
+}
+
 /* Contact */
 footer{
   margin-top:4rem;

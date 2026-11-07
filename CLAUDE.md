@@ -16,6 +16,10 @@ Privacy rules (this file, the entries and the repo are all public):
 - Describe security-related fixes only as "Maintenance and fixes."
 - No secrets, keys, endpoints or internal file paths.
 
+## The search list
+
+After adding a changelog entry, or a page, game, essay or project, run `node scripts/build-site-index.mjs` and commit the result. It rebuilds the command palette's list and the date in the footer's changelog link, and `test/site-index.test.mjs` fails if they are stale. A new public page also needs `<script src="/js/site.js?v=N"></script>` after its stylesheet; add `data-app` to that tag if the page uses the keyboard. A new page that does real work on load, or a new private page, needs a line in `js/speculation-rules.json`.
+
 ## What the site serves
 
 The deploy serves the repo root. `isBlockedPath` in `functions/_lib/paths.js` returns a 404 for docs, config and source that no page needs. If you add a top-level folder or config file that visitors don't need, add it there and to `test/blocked-paths.test.mjs`.
