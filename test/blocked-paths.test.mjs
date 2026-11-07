@@ -85,8 +85,22 @@ test("every spelling of a private folder is gated, and lookalikes are not", () =
   assert.equal(gatedCanonical(resolvePath("/observatory.html")), null);
 });
 
+const sessionRows = new Map();
+const sessionDB = {
+  prepare(sql) {
+    return { bind(...values) { return {
+      async run() {
+        if (sql.startsWith('INSERT INTO hub_sessions')) sessionRows.set(values[0], values[1]);
+        else if (sql.startsWith('DELETE FROM hub_sessions WHERE expires')) {
+          for (const [nonce, expires] of sessionRows) if (expires < values[0]) sessionRows.delete(nonce);
+        } else if (sql.startsWith('DELETE FROM hub_sessions WHERE nonce')) sessionRows.delete(values[0]);
+      },
+      async first() { return sessionRows.get(values[0]) > values[1] ? {nonce: values[0]} : null; },
+    }; } };
+  },
+};
 const SESSION_ENV = {
-  PIN_SALT_B64: "AA==", PIN_HASH_B64: "AA==", SESSION_SECRET: "test-only", DB: {},
+  PIN_SALT_B64: "AA==", PIN_HASH_B64: "AA==", SESSION_SECRET: "test-only", DB: sessionDB,
   ASSETS: { fetch: async () => new Response("missing", { status: 404 }) },
 };
 const refuseNext = async () => assert.fail("next() must not run without a session");

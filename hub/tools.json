@@ -20,6 +20,13 @@
       "description": "Early tracker of state foreign agent laws, with sources and the build plan.",
       "icon": "/observatory/icon.svg",
       "route": "/observatory/"
+    },
+    {
+      "id": "operations-desk",
+      "name": "Operations desk",
+      "description": "Explore project records and connections.",
+      "icon": "/hub/tools/operations-desk/icon.svg",
+      "route": "/hub/tools/operations-desk/"
     }
   ]
 }

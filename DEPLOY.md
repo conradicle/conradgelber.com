@@ -755,7 +755,7 @@ login and a dashboard of tools. How to add a tool is in
 
 - **Session.** A signed cookie, `__Host-hub` (HttpOnly, Secure,
   SameSite=Strict, 30 days): expiry and a random nonce, HMAC-SHA256 with the
-  `SESSION_SECRET` secret. Log out clears the cookie on that device. To sign
+  `SESSION_SECRET` secret. Log out revokes the current session in D1 and clears the cookie on that device. To sign
   out every device, put a new `SESSION_SECRET`.
 - **Headers.** `_headers` covers only static files Pages serves directly.
   The Functions replace its CSP on `/login/` and `/hub/` responses with one
@@ -836,3 +836,12 @@ block (after `worksFor`, before `sameAs`):
 
 Then paste the page URL into <https://validator.schema.org/> to confirm the
 block still parses, and update `<lastmod>` in `sitemap.xml`.
+
+
+### Operations desk setup (development checkout)
+
+The desk discovers repositories accessible to the `DESK_GITHUB_TOKEN` Pages secret. Use a fine-grained personal access token scoped only to the intended repositories, including the knowledge repository. Grant repository permissions Contents, Issues, Pull requests, and Actions **read-only**; Metadata read is automatic. Add `DESK_GITHUB_TOKEN` and `DESK_KNOWLEDGE_REPO` (the knowledge repository's `owner/name`) to the local `.dev.vars` file, which is git-ignored. Preserve existing entries when adding local PIN and session test settings; do not overwrite an existing `.dev.vars`. Never commit either setting or print the token. For a future deployment, set both in the target Pages environment's secret configuration; do not deploy merely to test locally. Missing access appears as unavailable rather than empty.
+
+The importer reads project Markdown and explicitly related records using a directory, filename and section allowlist. Repository selection is saved in the existing private D1 store. Repository file previews are fetched on demand; supported UTF-8 text is limited to 100 KB, and sensitive paths, links, and submodules are excluded. Directory results stop at GitHub's 1,000-entry limit; the interface displays up to 100 in its list and 30 per expanded folder in its graph. The fleet is paginated up to 2,000 repositories; detail views identify their first-page limits, and workflow runs can be paged up to 600. GitHub Actions data is retrieved status, not live streaming. The source repositories are never modified.
+
+Before any future deployment, apply migration `0003_hub_sessions.sql` to D1 and configure the two settings in the appropriate Pages environment. This migration invalidates pre-existing cookies; users must sign in again. Logout revokes the current session in D1. The desk defaults to locking after 15 minutes of inactivity, configurable in `hub/tools/operations-desk/desk.js`. The browser stores no private content. Refresh bypasses the one-minute in-memory server cache.

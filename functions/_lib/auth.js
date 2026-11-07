@@ -60,6 +60,8 @@ function hmacKey(env) {
 export async function newSessionCookie(env) {
   const exp = Date.now() + SESSION_DAYS * 86400000;
   const nonce = bytesToB64url(crypto.getRandomValues(new Uint8Array(16)));
+  await env.DB.prepare("DELETE FROM hub_sessions WHERE expires < ?").bind(Date.now()).run();
+  await env.DB.prepare("INSERT INTO hub_sessions (nonce, expires) VALUES (?, ?)").bind(nonce, exp).run();
   const payload = `${exp}.${nonce}`;
   const sig = await crypto.subtle.sign("HMAC", await hmacKey(env), enc.encode("hub-session-v1." + payload));
   return `${COOKIE}=${payload}.${bytesToB64url(sig)}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; Secure; SameSite=Strict`;
@@ -79,7 +81,8 @@ export async function hasSession(request, env) {
   let sig;
   try { sig = b64urlToBytes(parts[2]); } catch { return false; }
   // subtle.verify compares the MAC in constant time.
-  return crypto.subtle.verify("HMAC", await hmacKey(env), sig, enc.encode(`hub-session-v1.${parts[0]}.${parts[1]}`));
+  if (!(await crypto.subtle.verify("HMAC", await hmacKey(env), sig, enc.encode(`hub-session-v1.${parts[0]}.${parts[1]}`)))) return false;
+  return Boolean(await env.DB.prepare("SELECT nonce FROM hub_sessions WHERE nonce = ? AND expires > ?").bind(parts[1], Date.now()).first());
 }
 
 // State-changing requests must come from a page on this origin.
@@ -146,4 +149,10 @@ export function privatize(response, csp) {
   const res = new Response(response.body, response);
   privateHeaders(res.headers, csp);
   return res;
+}
+
+export async function revokeSession(request, env) {
+  if (!(await hasSession(request, env))) return;
+  const raw = (request.headers.get("Cookie") || "").split(/;\s*/).find(c => c.startsWith(COOKIE + "="));
+  await env.DB.prepare("DELETE FROM hub_sessions WHERE nonce = ?").bind(raw.slice(COOKIE.length + 1).split(".")[1]).run();
 }
