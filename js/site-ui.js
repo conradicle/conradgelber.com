@@ -72,6 +72,27 @@
     });
   }
 
+  /* ---------------------------------------------------------------- X-RAY */
+
+  var xrayReady = null;
+
+  function toggleXray() {
+    if (!xrayReady) {
+      xrayReady = new Promise(function (resolve, reject) {
+        var script = document.createElement("script");
+        script.src = "/js/site-xray.js?v=" + Site.uiVersion;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+    xrayReady.then(function () {
+      Site.xray.toggle();
+    }, function () {
+      xrayReady = null;
+    });
+  }
+
   /* --------------------------------------------------------------- ACTIONS */
 
   var indexData = { links: {}, items: [] };
@@ -98,6 +119,11 @@
     }
     if (links.linkedin) list.push({ title: "Open LinkedIn", url: links.linkedin });
     if (links.github) list.push({ title: "Open GitHub", url: links.github });
+    list.push({
+      title: Site.xray && Site.xray.isOn() ? "Turn off X-ray mode" : "Turn on X-ray mode",
+      keywords: "xray layout grid inspect sliders ink field",
+      run: toggleXray,
+    });
     list.push({ title: "Show keyboard shortcuts", keywords: "help keys", run: toggleShortcuts });
     list.forEach(function (item) {
       item.group = "Action";
@@ -247,6 +273,7 @@
     ["5", "Off the clock"],
     ["6", "Games"],
     ["H", "Home"],
+    ["X", "X-ray mode"],
     ["?", "This list"],
   ];
 
@@ -318,5 +345,5 @@
     if (dialog.open) render();
   }).catch(function () {});
 
-  Site.ui = { openPalette: openPalette, closePalette: closePalette, showNote: showNote, toggleShortcuts: toggleShortcuts };
+  Site.ui = { openPalette: openPalette, closePalette: closePalette, showNote: showNote, toggleShortcuts: toggleShortcuts, toggleXray: toggleXray };
 })();

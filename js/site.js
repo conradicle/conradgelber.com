@@ -74,9 +74,24 @@
     if (link) link.click();
   }, true);
 
+  // A transition can be dropped for ordinary reasons, like a slow page. The
+  // navigation still works, so that is not worth an error in the console.
+  function ignoreDropped(transition) {
+    function ignore() {}
+    transition.ready.catch(ignore);
+    transition.updateCallbackDone.catch(ignore);
+    transition.finished.catch(ignore);
+  }
+
+  window.addEventListener("pagereveal", function (e) {
+    if (e.viewTransition) ignoreDropped(e.viewTransition);
+  });
+
   window.addEventListener("pageswap", function (e) {
     finishRunningTransition();
-    if (e.viewTransition && cutShortRecently()) e.viewTransition.skipTransition();
+    if (!e.viewTransition) return;
+    ignoreDropped(e.viewTransition);
+    if (cutShortRecently()) e.viewTransition.skipTransition();
   });
 
   function goTo(url) {
@@ -129,7 +144,7 @@
   };
 
   function typingIn(el) {
-    if (!el) return false;
+    if (!el || !el.getAttribute) return false;
     return el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || /^(textbox|combobox|searchbox)$/.test(el.getAttribute("role") || "");
   }
 
@@ -163,11 +178,16 @@
       withUI(function (ui) {
         ui.openPalette();
       });
+    } else if (key === "x") {
+      e.preventDefault();
+      withUI(function (ui) {
+        ui.toggleXray();
+      });
     } else if (GO[key]) {
       e.preventDefault();
       goTo(GO[key]);
     }
   });
 
-  window.Site = { isApp: IS_APP, currentTheme: currentTheme, toggleTheme: toggleTheme, goTo: goTo };
+  window.Site = { isApp: IS_APP, uiVersion: UI_VERSION, currentTheme: currentTheme, toggleTheme: toggleTheme, goTo: goTo };
 })();
