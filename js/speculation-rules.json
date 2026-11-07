@@ -1,0 +1,26 @@
+{
+  "prerender": [
+    {
+      "where": {
+        "and": [
+          { "href_matches": "/*" },
+          { "not": { "href_matches": "/login{/*}?" } },
+          { "not": { "href_matches": "/logout{/*}?" } },
+          { "not": { "href_matches": "/hub{/*}?" } },
+          { "not": { "href_matches": "/hurricanes{/*}?" } },
+          { "not": { "href_matches": "/observatory{/*}?" } },
+          { "not": { "href_matches": "/play{/*}?" } },
+          { "not": { "href_matches": "/flight-path{/*}?" } },
+          { "not": { "href_matches": "/borderline{/*}?" } },
+          { "not": { "href_matches": "/pool{/*}?" } },
+          { "not": { "href_matches": "/cambio{/*}?" } },
+          { "not": { "href_matches": "/poker{/*}?" } },
+          { "not": { "href_matches": "/historybowl{/*}?" } },
+          { "not": { "href_matches": "/12axes{/*}?" } },
+          { "not": { "href_matches": "/aspen{/*}?" } }
+        ]
+      },
+      "eagerness": "moderate"
+    }
+  ]
+}

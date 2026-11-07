@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.17.0",
+    "date": "2026-11-06",
+    "title": "Keyboard shortcuts and search",
+    "bullets": [
+      "Press ? to see the new keyboard shortcuts. Ctrl or Cmd+K searches every page, game and essay, and can also switch to a dark theme.",
+      "Moving between pages now crossfades, and pages you hover over start loading early.",
+      "X turns on X-ray mode, which shows the page layout and adds live controls for the front page's ink field."
+    ]
+  },
+  {
     "version": "1.16.6",
     "date": "2026-11-06",
     "title": "No more flash of my name",

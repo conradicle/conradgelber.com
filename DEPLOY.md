@@ -75,7 +75,8 @@ curl -sI https://conradgelber.com/ | grep -i "content-security-policy\|x-content
 
 You should see the three headers from `_headers`. Then open the site with
 DevTools → Network: every request should be same-origin (HTML, `style.css`,
-four woff2 files, favicon). The console should be empty. On `/play/`, expect
+four woff2 files, favicon, `js/site.js`). The console should show only the
+note `js/site.js` prints. On `/play/`, expect
 `play.css`, `play.js`, `land.json` and `places.json` as well, and the three
 difficulty buttons should become clickable once the map loads (if they stay
 disabled, the CSP is blocking the script). On `/flight-path/`, expect
@@ -203,6 +204,30 @@ deploys; test that link on the live site. The game loads `/fonts/*.woff2` and
 `conradgelber.com/poker` and `conradgelber.com/poker/*`, deployed by hand
 with `npm run deploy:poker` there. It also loads `/fonts/*.woff2` and
 `/favicon.svg` from this site.
+
+## Page transitions, search and shortcuts
+
+All of it is hidden until summoned. `js/site.js` loads in `<head>` on every public
+page: theme, shortcuts, the changelog link's wording, the console note, and cutting
+a page transition short. It loads `js/site-ui.js`, `js/site-ui.css` and
+`js/site-xray.js` on demand. Bump `?v=` on the `site.js` tag in every page when that
+file changes, and `UI_VERSION` inside it when the on-demand files change. These
+pages have no site script on purpose: `/connect/` (it must work with no JavaScript,
+and a test checks that), `/login/`, `/hub/`, `/hurricanes/` and `/observatory/`.
+Cambio and Poker come from another repo, so they have none either.
+
+`node scripts/build-site-index.mjs` rebuilds `js/site-index.json` and the date in
+`js/site.js`. Pages has no build step, so run it locally and commit the result;
+`test/site-index.test.mjs` fails if either is stale.
+
+Prerendering uses a `Speculation-Rules` header in `_headers` that points at
+`js/speculation-rules.json`, so it needs no inline script and no CSP change. To check
+it, hover a tab in normal Chrome, click, and read `activationStart` from
+`performance.getEntriesByType("navigation")[0]`; above 0 means it was prerendered.
+DevTools shows the rules under Application, Speculative loads.
+
+Pages that set `data-app` on the script tag (the games and `/aspen/`) ignore every
+single-key shortcut and stay in the light theme.
 
 ## The /play/ game
 

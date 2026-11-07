@@ -1,0 +1,151 @@
+{
+  "links": {
+    "email": "conrad@conradgelber.com",
+    "linkedin": "https://www.linkedin.com/in/conradgelber",
+    "github": "https://github.com/conradicle"
+  },
+  "items": [
+    {
+      "group": "Pages",
+      "title": "Home",
+      "url": "/"
+    },
+    {
+      "group": "Pages",
+      "title": "Work",
+      "url": "/work/"
+    },
+    {
+      "group": "Pages",
+      "title": "Things I've built",
+      "url": "/built/",
+      "keywords": "Built"
+    },
+    {
+      "group": "Pages",
+      "title": "Writing",
+      "url": "/writing/"
+    },
+    {
+      "group": "Pages",
+      "title": "Where this is going",
+      "url": "/next/",
+      "keywords": "Next"
+    },
+    {
+      "group": "Pages",
+      "title": "Off the clock",
+      "url": "/off-the-clock/"
+    },
+    {
+      "group": "Pages",
+      "title": "Games",
+      "url": "/games/"
+    },
+    {
+      "group": "Pages",
+      "title": "Connect with Conrad Gelber",
+      "url": "/connect/"
+    },
+    {
+      "group": "Pages",
+      "title": "Accessibility",
+      "url": "/accessibility/"
+    },
+    {
+      "group": "Pages",
+      "title": "Changelog",
+      "url": "/changelog/"
+    },
+    {
+      "group": "Games",
+      "title": "Pin drop",
+      "url": "/play/"
+    },
+    {
+      "group": "Games",
+      "title": "Flight Path",
+      "url": "/flight-path/"
+    },
+    {
+      "group": "Games",
+      "title": "Borderline",
+      "url": "/borderline/"
+    },
+    {
+      "group": "Games",
+      "title": "Cambio",
+      "url": "/cambio/"
+    },
+    {
+      "group": "Games",
+      "title": "Poker",
+      "url": "/poker/"
+    },
+    {
+      "group": "Games",
+      "title": "Pool",
+      "url": "/pool/"
+    },
+    {
+      "group": "Games",
+      "title": "History Bowl Study",
+      "url": "/historybowl/"
+    },
+    {
+      "group": "Games",
+      "title": "12 Axes",
+      "url": "/12axes/"
+    },
+    {
+      "group": "Writing",
+      "title": "Why Iran and the UAE joined BRICS, and why their reasons were not the same",
+      "url": "/writing/#:~:text=Why%20Iran%20and%20the%20UAE%20joined%20BRICS%2C%20and%20why%20their%20reasons%20were%20not%20the%20same"
+    },
+    {
+      "group": "Writing",
+      "title": "The demolition of Königsberg Castle, 1967–1969",
+      "url": "/writing/#:~:text=The%20demolition%20of%20K%C3%B6nigsberg%20Castle%2C%201967%E2%80%931969"
+    },
+    {
+      "group": "Writing",
+      "title": "The drone arms race in Myanmar's civil war",
+      "url": "/writing/#:~:text=The%20drone%20arms%20race%20in%20Myanmar's%20civil%20war"
+    },
+    {
+      "group": "Writing",
+      "title": "Overdevelopment in South Florida against Everglades restoration mandates",
+      "url": "/writing/#:~:text=Overdevelopment%20in%20South%20Florida%20against%20Everglades%20restoration%20mandates"
+    },
+    {
+      "group": "Built",
+      "title": "Aspen mountain explorer",
+      "url": "/aspen/"
+    },
+    {
+      "group": "Built",
+      "title": "miamidadecommissionwatch.com",
+      "url": "https://miamidadecommissionwatch.com"
+    },
+    {
+      "group": "Built",
+      "title": "MDCW district lookup",
+      "url": "https://www.miamidadecommissionwatch.com/get-involved.html#find-district"
+    },
+    {
+      "group": "Built",
+      "title": "flcountycommissionwatch.com",
+      "url": "https://flcountycommissionwatch.com"
+    },
+    {
+      "group": "Built",
+      "title": "Everglades Navigator",
+      "url": "https://evergladesnavigator.com"
+    },
+    {
+      "group": "Built",
+      "title": "This site and the globe game",
+      "url": "https://github.com/conradicle/conradgelber.com"
+    }
+  ]
+}

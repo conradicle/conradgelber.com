@@ -43,6 +43,15 @@
   --measure:63ch;
   --h1-size:clamp(2.7rem,8.4vw,4.9rem);
 }
+/* Only ever on if a visitor picks it from the command palette (js/site.js). */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0F1B2E;
+  --ink:#E7EBF1;
+  --ink-soft:#A6B1C2;
+  --rule:#34435C;
+  --accent:#5CC4B5;
+}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{
@@ -353,6 +362,15 @@ h2{
 .prose p{margin:0 0 1.1rem}
 .prose p:last-child{margin-bottom:0}
 
+/* Keyboard shortcuts on /accessibility/ */
+.shortcut-list{margin:0 0 1.1rem}
+.shortcut-list div{display:grid;grid-template-columns:10rem 1fr;gap:0 1rem;padding:.2rem 0}
+.shortcut-list dt{font-weight:500}
+.shortcut-list dd{margin:0}
+@media (max-width:560px){
+  .shortcut-list div{grid-template-columns:1fr}
+}
+
 /* Contact */
 footer{
   margin-top:4rem;
@@ -386,3 +404,30 @@ footer{
   .tabs a{margin-bottom:0;border-bottom:1px solid var(--rule)}
   .tabs a[aria-current="page"]{border-bottom:3px solid var(--accent)}
 }
+
+/* Page transitions between documents. The header, photo and tabs hold still
+   while the page content crossfades and the section title settles into place.
+   With reduced motion none of this applies and pages swap instantly; browsers
+   without support navigate normally. The overlay lets clicks through so a second
+   click can cut a running transition short (js/site.js). */
+@media (prefers-reduced-motion:no-preference){
+  @view-transition{navigation:auto}
+  ::view-transition{pointer-events:none}
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*){animation-duration:220ms;animation-timing-function:ease}
+
+  /* Front page and section page mastheads have different shapes, so each keeps
+     its own name and fades where it stands. */
+  .mast{view-transition-name:site-masthead}
+  .mast-sub{view-transition-name:site-header}
+  .portrait img{view-transition-name:site-portrait}
+  .tabs{view-transition-name:site-tabs}
+
+  .page-title{view-transition-name:page-title}
+  ::view-transition-group(page-title){animation:none}
+  ::view-transition-old(page-title){animation:view-title-out 110ms ease both}
+  ::view-transition-new(page-title){animation:view-title-in 220ms ease both}
+}
+@keyframes view-title-out{to{opacity:0}}
+@keyframes view-title-in{from{opacity:0;transform:translateY(5px)}}

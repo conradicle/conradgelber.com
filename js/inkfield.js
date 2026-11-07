@@ -18,101 +18,120 @@
   /* ---------------------------------------------------------------- TUNING
      Sizes are CSS pixels and times are seconds unless a comment says otherwise. */
 
-  // Contour lines
-  const FIELD_SCALE = 460;          // Size of the biggest landforms. Bigger = broader, calmer shapes.
-  const LINE_DENSITY = 11;          // Main contour lines per unit of height. Bigger = more lines.
-  const MAJOR_EVERY = 5;            // Every Nth main line is heavy, as on a topo map.
-  const FINE_PER_MAIN = 3;          // Divisions between main lines. 3 draws 2 fine lines in each gap.
-  const MAJOR_WIDTH = 1.5;          // Line widths
-  const MAIN_WIDTH = 0.8;
-  const FINE_WIDTH = 0.5;
-  const MAJOR_OPACITY = 0.72;       // Ink strength of each kind of line, 0 to 1
-  const MAIN_OPACITY = 0.52;
-  const FINE_OPACITY = 0.3;
-  const NOISE_OCTAVES = 3;          // More = wigglier lines, slower to draw.
-  const DOMAIN_WARP = 0.42;         // How much the shapes curl and stretch.
+  // Every number here can be changed while the page runs, through inkfield.set()
+  // (see the end of this file). X-ray mode's sliders use that. Changes last until
+  // the page reloads.
+  const CONFIG = {
+    // Contour lines
+    FIELD_SCALE: 460,          // Size of the biggest landforms. Bigger = broader, calmer shapes.
+    LINE_DENSITY: 11,          // Main contour lines per unit of height. Bigger = more lines.
+    MAJOR_EVERY: 5,            // Every Nth main line is heavy, as on a topo map.
+    FINE_PER_MAIN: 3,          // Divisions between main lines. 3 draws 2 fine lines in each gap.
+    MAJOR_WIDTH: 1.5,          // Line widths
+    MAIN_WIDTH: 0.8,
+    FINE_WIDTH: 0.5,
+    MAJOR_OPACITY: 0.72,       // Ink strength of each kind of line, 0 to 1
+    MAIN_OPACITY: 0.52,
+    FINE_OPACITY: 0.3,
+    NOISE_OCTAVES: 3,          // More = wigglier lines, slower to draw.
+    DOMAIN_WARP: 0.42,         // How much the shapes curl and stretch.
 
-  // Motion
-  const EVOLVE_SPEED = 0.028;       // How fast the terrain changes shape.
-  const DRIFT_X = 0.006;            // Slow sideways slide of the whole chart, field units per second
-  const DRIFT_Y = -0.003;
+    // Motion
+    EVOLVE_SPEED: 0.028,       // How fast the terrain changes shape.
+    DRIFT_X: 0.006,            // Slow sideways slide of the whole chart, field units per second
+    DRIFT_Y: -0.003,
 
-  // Particles
-  const PARTICLE_COUNT = 65000;     // Laptop and desktop screens
-  const PARTICLE_COUNT_SMALL = 30000; // Screens narrower than SMALL_SCREEN_WIDTH
-  const SMALL_SCREEN_WIDTH = 760;
-  const FLOW_SPEED = 0.05;          // How fast particles ride the current.
-  const FLOW_SWIRL = 0.22;          // Extra curl-noise on top of the contour-following flow.
-  const PARTICLE_LIFE = 11;         // Average life before a particle respawns elsewhere
-  const PARTICLE_SIZE = 1.5;        // Dot diameter
-  const PARTICLE_INK = 0.05;        // How dark one dot prints. Bigger = more teal overall.
-  const PARTICLE_MAX_OPACITY = 0.8; // Ceiling where many dots pile up
-  const TRAIL_FADE = 0.2;           // Trail length, as a fade time. Bigger = longer trails.
+    // Particles
+    PARTICLE_COUNT: 65000,     // Laptop and desktop screens
+    PARTICLE_COUNT_SMALL: 30000, // Screens narrower than SMALL_SCREEN_WIDTH
+    SMALL_SCREEN_WIDTH: 760,
+    FLOW_SPEED: 0.05,          // How fast particles ride the current.
+    FLOW_SWIRL: 0.22,          // Extra curl-noise on top of the contour-following flow.
+    PARTICLE_LIFE: 11,         // Average life before a particle respawns elsewhere
+    PARTICLE_SIZE: 1.5,        // Dot diameter
+    PARTICLE_INK: 0.05,        // How dark one dot prints. Bigger = more teal overall.
+    PARTICLE_MAX_OPACITY: 0.8, // Ceiling where many dots pile up
+    TRAIL_FADE: 0.2,           // Trail length, as a fade time. Bigger = longer trails.
 
-  // Cursor
-  const CURSOR_RADIUS = 125;        // Width of the bump in the terrain
-  const CURSOR_STRENGTH = 0.95;     // Height of the bump. Bigger = more rings around the cursor.
-  const CURSOR_LINE_BOOST = 0.8;    // Extra line weight and darkness near the cursor
-  const CURSOR_TINT = 0.75;         // How far lines near the cursor shift from ink to teal, 0 to 1
-  const CURSOR_WASH = 0.035;        // Faint teal wash on the paper near the cursor, 0 to 1
-  const PARTICLE_PULL_RADIUS = 260; // How far away particles feel the cursor
-  const PARTICLE_ORBIT = 0.2;       // Top speed of the circling around the cursor, field units per second
-  const PARTICLE_GATHER = 0.06;      // Pull toward the ring they gather on.
-  const PARTICLE_RING = 85;         // Radius of that ring
-  const CURSOR_GLOW_INK = 0.5;      // Dots print this many times darker close to the cursor.
-  const CURSOR_FOLLOW_TIME = 0.09;  // The effect point catches up to the cursor quickly.
-  const CURSOR_RISE_TIME = 0.8;     // The effect itself swells in slowly...
-  const CURSOR_RELAX_TIME = 1.7;    // ...and relaxes back to ambient more slowly still.
-  const CURSOR_IDLE_AFTER = 2.5;    // Idle time before relaxing
+    // Cursor
+    CURSOR_RADIUS: 125,        // Width of the bump in the terrain
+    CURSOR_STRENGTH: 0.95,     // Height of the bump. Bigger = more rings around the cursor.
+    CURSOR_LINE_BOOST: 0.8,    // Extra line weight and darkness near the cursor
+    CURSOR_TINT: 0.75,         // How far lines near the cursor shift from ink to teal, 0 to 1
+    CURSOR_WASH: 0.035,        // Faint teal wash on the paper near the cursor, 0 to 1
+    PARTICLE_PULL_RADIUS: 260, // How far away particles feel the cursor
+    PARTICLE_ORBIT: 0.2,       // Top speed of the circling around the cursor, field units per second
+    PARTICLE_GATHER: 0.06,      // Pull toward the ring they gather on.
+    PARTICLE_RING: 85,         // Radius of that ring
+    CURSOR_GLOW_INK: 0.5,      // Dots print this many times darker close to the cursor.
+    CURSOR_FOLLOW_TIME: 0.09,  // The effect point catches up to the cursor quickly.
+    CURSOR_RISE_TIME: 0.8,     // The effect itself swells in slowly...
+    CURSOR_RELAX_TIME: 1.7,    // ...and relaxes back to ambient more slowly still.
+    CURSOR_IDLE_AFTER: 2.5,    // Idle time before relaxing
 
-  // Photo island: a permanent peak on the chart, centered on the photo
+    // Photo island: a permanent peak on the chart, centered on the photo
+    ISLAND_SIZE: 1.7,          // How far the peak reaches past the photo's edge, in photo radii
+    ISLAND_RINGS: 12,          // Main contour lines the peak adds between its foot and the photo
+    ISLAND_RING_TIGHTNESS: 2.6, // Bigger = rings pack tighter at the photo and loosen faster.
+    ISLAND_FRAME_WIDTH: 1.5,   // Width of the ink frame. Keep it equal to the box-shadow in style.css.
+    ISLAND_MARGIN: 14,         // Clean paper between the frame and the nearest ink
+    ISLAND_MARGIN_FADE: 8,     // Soft fade at the margin's outer edge
+    ISLAND_FLOW_REACH: 220,    // How far out the current starts bending around the island
+
+    // The name in particles
+    LETTER_SHARE: 0.4,         // Share of all particles that build the name
+    INTRO_DURATION: 2.5,       // From load until the real headline fades in
+    SPRING_STRENGTH: 40,       // Pull toward home. Bigger = snappier, tighter letters.
+    LETTER_FREE_DAMPING: 1.4,  // How quickly a loose particle slows into the current
+    LETTER_MAX_SPEED: 1.8,     // Speed limit for letter particles, field units per second
+    LETTER_INK: 0.26,          // How dark one letter dot prints
+    LETTER_TRAIL_FADE: 0.07,   // Trail length for letter dots. Short keeps the letters crisp.
+    INTRO_LANDING: 0.65,       // Share of the intro spent flying in. The rest is the settled name.
+    LETTER_MAX_OPACITY: 0.96,  // Ceiling where letter dots overlap
+    LETTER_SHIMMER: 0.45,      // How far settled particles wander from home
+    LETTER_FLOW: 0.03,         // Share of the current settled particles still feel
+    THIN_STROKE_BOOST: 1.1,    // Bigger = more particles on hairlines and serifs
+    LETTER_FADE_OUT: 0.35,     // Fade time for the letter ink once the headline is back
+    FONT_WAIT: 1500,           // Milliseconds to wait for the web font before showing the headline
+
+    // Finish
+    GRAIN: 0.011,             // Paper grain strength. Keep this tiny.
+    EDGE_FADE_SIDES: 0.13,     // Fade zones as a share of the hero's width or height
+    EDGE_FADE_TOP: 0.08,
+    EDGE_FADE_BOTTOM: 0.11,
+    TEXT_QUIET: 0.1,           // Ink left behind text: 0 = none, 1 = no fade at all
+    TEXT_QUIET_SOFTNESS: 54,   // How softly the quiet zone blends out from the text
+    TEXT_QUIET_PADDING: 8,     // Extra room kept clear around the text
+
+    // Performance
+    MAX_DPR: 2,                // devicePixelRatio cap
+    RENDER_SCALE: 0.8,         // Starting resolution, as a share of the capped DPR
+    RENDER_SCALE_MIN: 0.6,     // Lowest it will drop to if frames run slow
+    RENDER_SCALE_STEP: 0.9,    // Multiplier for each drop
+    SLOW_FRAME_MS: 21,         // Average frame time that counts as slow
+    SLOW_CHECK_FRAMES: 40,     // Frames to average before deciding
+    WARM_UP_STEPS: 45,         // Simulation steps run before the first visible frame
+    STILL_STEPS: 260,          // Steps behind the single frame for reduced motion
+    FADE_IN_DELAY_FRAMES: 2,   // Frames drawn before the canvas starts to fade in
+  };
+
+  // How X-ray mode groups the sliders. A few startup-only settings are left out,
+  // since changing them on a running page would do nothing.
+  const CONFIG_GROUPS = {
+    "Contour lines": ["FIELD_SCALE","LINE_DENSITY","MAJOR_EVERY","FINE_PER_MAIN","MAJOR_WIDTH","MAIN_WIDTH","FINE_WIDTH","MAJOR_OPACITY","MAIN_OPACITY","FINE_OPACITY","NOISE_OCTAVES","DOMAIN_WARP"],
+    "Motion": ["EVOLVE_SPEED","DRIFT_X","DRIFT_Y"],
+    "Particles": ["PARTICLE_COUNT","PARTICLE_COUNT_SMALL","SMALL_SCREEN_WIDTH","FLOW_SPEED","FLOW_SWIRL","PARTICLE_LIFE","PARTICLE_SIZE","PARTICLE_INK","PARTICLE_MAX_OPACITY","TRAIL_FADE"],
+    "Cursor": ["CURSOR_RADIUS","CURSOR_STRENGTH","CURSOR_LINE_BOOST","CURSOR_TINT","CURSOR_WASH","PARTICLE_PULL_RADIUS","PARTICLE_ORBIT","PARTICLE_GATHER","PARTICLE_RING","CURSOR_GLOW_INK","CURSOR_FOLLOW_TIME","CURSOR_RISE_TIME","CURSOR_RELAX_TIME","CURSOR_IDLE_AFTER"],
+    "Photo island": ["ISLAND_SIZE","ISLAND_RINGS","ISLAND_RING_TIGHTNESS","ISLAND_FRAME_WIDTH","ISLAND_MARGIN","ISLAND_MARGIN_FADE","ISLAND_FLOW_REACH"],
+    "The name in particles": ["LETTER_SHARE","INTRO_DURATION","SPRING_STRENGTH","LETTER_FREE_DAMPING","LETTER_MAX_SPEED","LETTER_INK","LETTER_TRAIL_FADE","INTRO_LANDING","LETTER_MAX_OPACITY","LETTER_SHIMMER","LETTER_FLOW","THIN_STROKE_BOOST","LETTER_FADE_OUT"],
+    "Finish": ["GRAIN","EDGE_FADE_SIDES","EDGE_FADE_TOP","EDGE_FADE_BOTTOM","TEXT_QUIET","TEXT_QUIET_SOFTNESS","TEXT_QUIET_PADDING"],
+    "Performance": ["MAX_DPR","RENDER_SCALE","RENDER_SCALE_MIN","RENDER_SCALE_STEP","SLOW_FRAME_MS","SLOW_CHECK_FRAMES"],
+  };
+
   const ISLAND_SELECTOR = ".portrait img";
-  const ISLAND_SIZE = 1.7;          // How far the peak reaches past the photo's edge, in photo radii
-  const ISLAND_RINGS = 12;          // Main contour lines the peak adds between its foot and the photo
-  const ISLAND_RING_TIGHTNESS = 2.6; // Bigger = rings pack tighter at the photo and loosen faster.
-  const ISLAND_FRAME_WIDTH = 1.5;   // Width of the ink frame. Keep it equal to the box-shadow in style.css.
-  const ISLAND_MARGIN = 14;         // Clean paper between the frame and the nearest ink
-  const ISLAND_MARGIN_FADE = 8;     // Soft fade at the margin's outer edge
-  const ISLAND_FLOW_REACH = 220;    // How far out the current starts bending around the island
-
-  // The name in particles
-  const LETTER_SHARE = 0.4;         // Share of all particles that build the name
-  const INTRO_DURATION = 2.5;       // From load until the real headline fades in
-  const SPRING_STRENGTH = 40;       // Pull toward home. Bigger = snappier, tighter letters.
-  const LETTER_FREE_DAMPING = 1.4;  // How quickly a loose particle slows into the current
-  const LETTER_MAX_SPEED = 1.8;     // Speed limit for letter particles, field units per second
-  const LETTER_INK = 0.26;          // How dark one letter dot prints
-  const LETTER_TRAIL_FADE = 0.07;   // Trail length for letter dots. Short keeps the letters crisp.
-  const INTRO_LANDING = 0.65;       // Share of the intro spent flying in. The rest is the settled name.
-  const LETTER_MAX_OPACITY = 0.96;  // Ceiling where letter dots overlap
-  const LETTER_SHIMMER = 0.45;      // How far settled particles wander from home
-  const LETTER_FLOW = 0.03;         // Share of the current settled particles still feel
-  const THIN_STROKE_BOOST = 1.1;    // Bigger = more particles on hairlines and serifs
-  const LETTER_FADE_OUT = 0.35;     // Fade time for the letter ink once the headline is back
-  const FONT_WAIT = 1500;           // Milliseconds to wait for the web font before showing the headline
   const INTRO_STORAGE_KEY = "inkfield-intro-played";
-
-  // Finish
-  const GRAIN = 0.011;             // Paper grain strength. Keep this tiny.
-  const EDGE_FADE_SIDES = 0.13;     // Fade zones as a share of the hero's width or height
-  const EDGE_FADE_TOP = 0.08;
-  const EDGE_FADE_BOTTOM = 0.11;
-  const TEXT_QUIET = 0.1;           // Ink left behind text: 0 = none, 1 = no fade at all
-  const TEXT_QUIET_SOFTNESS = 54;   // How softly the quiet zone blends out from the text
-  const TEXT_QUIET_PADDING = 8;     // Extra room kept clear around the text
   const QUIET_SELECTORS = ["h1", ".standfirst", ".stamp", ".tabs"];
-
-  // Performance
-  const MAX_DPR = 2;                // devicePixelRatio cap
-  const RENDER_SCALE = 0.8;         // Starting resolution, as a share of the capped DPR
-  const RENDER_SCALE_MIN = 0.6;     // Lowest it will drop to if frames run slow
-  const RENDER_SCALE_STEP = 0.9;    // Multiplier for each drop
-  const SLOW_FRAME_MS = 21;         // Average frame time that counts as slow
-  const SLOW_CHECK_FRAMES = 40;     // Frames to average before deciding
   const MAX_STEP = 1 / 30;          // Longest simulated step, so a stall can't make particles jump
-  const WARM_UP_STEPS = 45;         // Simulation steps run before the first visible frame
-  const STILL_STEPS = 260;          // Steps behind the single frame for reduced motion
-  const FADE_IN_DELAY_FRAMES = 2;   // Frames drawn before the canvas starts to fade in
 
   /* ------------------------------------------------------------------ SETUP */
 
@@ -133,7 +152,12 @@
     return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
   }
 
-  /* ---------------------------------------------------------------- SHADERS */
+  /* ---------------------------------------------------------------- SHADERS
+     Built from CONFIG, so a changed setting can be compiled into a new program. */
+
+  const QUIET_MAX = 8;
+
+  function shaderSources() {
 
   const HEADER = `#version 300 es
 precision highp float;
@@ -176,10 +200,10 @@ const mat2 TURN = mat2(0.8, 0.6, -0.6, 0.8);
 // p is in field units, t is evolved time. Each octave runs on its own clock
 // so the lattice steps in time never line up into a visible pulse.
 float terrain(vec2 p, float t, int octaves){
-  p += vec2(${f(DRIFT_X)}, ${f(DRIFT_Y)}) * t / ${f(EVOLVE_SPEED)};
+  p += vec2(${f(CONFIG.DRIFT_X)}, ${f(CONFIG.DRIFT_Y)}) * t / ${f(CONFIG.EVOLVE_SPEED)};
   vec2 warp = vec2(vnoise(vec3(p * 0.7 + 11.3, t * 0.6)),
                    vnoise(vec3(p * 0.7 - 7.9, t * 0.6 + 31.0)));
-  p += warp * ${f(DOMAIN_WARP)};
+  p += warp * ${f(CONFIG.DOMAIN_WARP)};
   float h = 0.0, a = 0.62;
   for (int i = 0; i < octaves; i++){
     h += a * vnoise(vec3(p, t * (1.0 + float(i) * 0.37) + float(i) * 17.3));
@@ -209,21 +233,21 @@ layout(location = 0) out vec4 outState;
 layout(location = 1) out vec4 outVelocity;
 ${TERRAIN}
 uniform vec3 uIsland;     // photo center and radius in field units; radius 0 = no photo
-const float ISLAND_WALL = ${f((ISLAND_FRAME_WIDTH + ISLAND_MARGIN + ISLAND_MARGIN_FADE) / FIELD_SCALE)};
+const float ISLAND_WALL = ${f((CONFIG.ISLAND_FRAME_WIDTH + CONFIG.ISLAND_MARGIN + CONFIG.ISLAND_MARGIN_FADE) / CONFIG.FIELD_SCALE)};
 float islandGap(vec2 p){ return length(p - uIsland.xy) - uIsland.z - ISLAND_WALL; }
 float potential(vec2 p){
-  float flow = terrain(p, uTime, 2) + ${f(FLOW_SWIRL)} * vnoise(vec3(p * 1.7 + 40.0, uTime * 1.4));
+  float flow = terrain(p, uTime, 2) + ${f(CONFIG.FLOW_SWIRL)} * vnoise(vec3(p * 1.7 + 40.0, uTime * 1.4));
   // The orbit around the cursor is part of the potential, so like the current
   // it is a curl: particles can circle without bunching up anywhere.
-  vec2 fromCursor = (p - uCursor) / ${f(PARTICLE_PULL_RADIUS / FIELD_SCALE)};
+  vec2 fromCursor = (p - uCursor) / ${f(CONFIG.PARTICLE_PULL_RADIUS / CONFIG.FIELD_SCALE)};
   flow -= uCursorAmt * exp(-dot(fromCursor, fromCursor))
-        * ${f(PARTICLE_ORBIT * (PARTICLE_PULL_RADIUS / FIELD_SCALE) / (0.858 * FLOW_SPEED))};
+        * ${f(CONFIG.PARTICLE_ORBIT * (CONFIG.PARTICLE_PULL_RADIUS / CONFIG.FIELD_SCALE) / (0.858 * CONFIG.FLOW_SPEED))};
   // Scaling the potential to zero at the island's edge turns that edge into a
   // streamline: the curl below runs along it and never through it. This ramp
   // has a real slope at zero, so particles keep sliding along the edge. A
   // smoothstep would stall them there, and stalled particles pile up.
   if (uIsland.z > 0.0){
-    float r = clamp(islandGap(p) / ${f(ISLAND_FLOW_REACH / FIELD_SCALE)}, 0.0, 1.0);
+    float r = clamp(islandGap(p) / ${f(CONFIG.ISLAND_FLOW_REACH / CONFIG.FIELD_SCALE)}, 0.0, 1.0);
     flow *= r * (1.875 + r * r * (0.375 * r * r - 1.25));
   }
   return flow;
@@ -250,30 +274,30 @@ void main(){
   const float E = 0.005;
   float dx = potential(p + vec2(E, 0.0)) - potential(p - vec2(E, 0.0));
   float dy = potential(p + vec2(0.0, E)) - potential(p - vec2(0.0, E));
-  vec2 vel = vec2(dy, -dx) / (2.0 * E) * ${f(FLOW_SPEED)};
+  vec2 vel = vec2(dy, -dx) / (2.0 * E) * ${f(CONFIG.FLOW_SPEED)};
 
   vec4 home = texelFetch(uHome, texel, 0);
   if (home.z > 0.5){
     vec2 v = texelFetch(uVelocity, texel, 0).xy;
     // Particles start the intro loose and come under the spring as they land.
-    float loose = max(0.0, s.z - uDt / (${f(INTRO_DURATION * INTRO_LANDING)} * (0.55 + 0.45 * seed)));
+    float loose = max(0.0, s.z - uDt / (${f(CONFIG.INTRO_DURATION * CONFIG.INTRO_LANDING)} * (0.55 + 0.45 * seed)));
 
     // A spring toward home that strengthens as the particle comes back, plus
     // the current, which settled particles barely feel. The small circle added
     // to home is the shimmer.
     float tight = (1.0 - loose) * (1.0 - loose);
-    float clock = uTime / ${f(EVOLVE_SPEED)};
+    float clock = uTime / ${f(CONFIG.EVOLVE_SPEED)};
     vec2 target = home.xy * uExtent + vec2(sin(clock * (2.0 + seed * 3.0) + seed * 80.0),
                                            cos(clock * (1.5 + seed * 3.0) + seed * 50.0))
-                                    * ${f(LETTER_SHIMMER / FIELD_SCALE)};
-    v += (target - p) * ${f(SPRING_STRENGTH)} * tight * uDt;
-    v *= exp(-mix(${f(2 * Math.sqrt(SPRING_STRENGTH))}, ${f(LETTER_FREE_DAMPING)}, loose) * uDt);
+                                    * ${f(CONFIG.LETTER_SHIMMER / CONFIG.FIELD_SCALE)};
+    v += (target - p) * ${f(CONFIG.SPRING_STRENGTH)} * tight * uDt;
+    v *= exp(-mix(${f(2 * Math.sqrt(CONFIG.SPRING_STRENGTH))}, ${f(CONFIG.LETTER_FREE_DAMPING)}, loose) * uDt);
     // Each particle has its own limit, mostly slow with a few fast. A shared limit
     // lines flying particles up into a hard-edged arc.
     float limit = fract(seed * 97.13);
-    v *= min(1.0, ${f(LETTER_MAX_SPEED)} * (0.12 + 0.88 * limit * limit) / max(length(v), 1e-4));
+    v *= min(1.0, ${f(CONFIG.LETTER_MAX_SPEED)} * (0.12 + 0.88 * limit * limit) / max(length(v), 1e-4));
 
-    vec2 move = slideOffIsland(v + vel * mix(${f(LETTER_FLOW)}, 1.0, loose), p);
+    vec2 move = slideOffIsland(v + vel * mix(${f(CONFIG.LETTER_FLOW)}, 1.0, loose), p);
     outState = vec4(clamp(pos + move * uDt / uExtent, -0.2, 1.2), loose, seed);
     outVelocity = vec4(v, 0.0, 0.0);
     return;
@@ -285,12 +309,12 @@ void main(){
     vec2 toCursor = uCursor - p;
     float r = max(length(toCursor), 1e-3);
     vec2 inward = toCursor / r;
-    float reach = r / ${f(PARTICLE_PULL_RADIUS / FIELD_SCALE)};
+    float reach = r / ${f(CONFIG.PARTICLE_PULL_RADIUS / CONFIG.FIELD_SCALE)};
     float fall = uCursorAmt * exp(-reach * reach);
     // Let go close to the island, or the pull piles particles up against it.
-    if (uIsland.z > 0.0) fall *= smoothstep(0.0, ${f(ISLAND_FLOW_REACH * 0.65 / FIELD_SCALE)}, islandGap(p));
-    float ring = ${f(PARTICLE_RING / FIELD_SCALE)};
-    vel += fall * ${f(PARTICLE_GATHER)} * inward * clamp((r - ring) / ring, -1.0, 1.0);
+    if (uIsland.z > 0.0) fall *= smoothstep(0.0, ${f(CONFIG.ISLAND_FLOW_REACH * 0.65 / CONFIG.FIELD_SCALE)}, islandGap(p));
+    float ring = ${f(CONFIG.PARTICLE_RING / CONFIG.FIELD_SCALE)};
+    vel += fall * ${f(CONFIG.PARTICLE_GATHER)} * inward * clamp((r - ring) / ring, -1.0, 1.0);
   }
 
   // The cursor's pull isn't a curl, so it could still drag particles onto the
@@ -299,7 +323,7 @@ void main(){
   vel = slideOffIsland(vel, p);
 
   pos += vel * uDt / uExtent;
-  float life = s.z - uDt / (${f(PARTICLE_LIFE)} * (0.6 + 0.8 * seed));
+  float life = s.z - uDt / (${f(CONFIG.PARTICLE_LIFE)} * (0.6 + 0.8 * seed));
 
   if (life <= 0.0 || onIsland || pos.x < 0.0 || pos.x > 1.0 || pos.y < 0.0 || pos.y > 1.0){
     pos = vec2(hash(ivec3(texel, uFrame)), hash(ivec3(texel.yx, uFrame + 7919)));
@@ -345,9 +369,9 @@ void main(){
   // Most particles print faintly and a few print darker, so currents show
   // as threads rather than an even teal haze.
   float tier = mix(0.2, 3.4, pow(seed, 7.0));
-  vec2 d = (s.xy * uSize - uCursorPx) / ${f(PARTICLE_PULL_RADIUS * 0.8)};
+  vec2 d = (s.xy * uSize - uCursorPx) / ${f(CONFIG.PARTICLE_PULL_RADIUS * 0.8)};
   float near = uCursorAmt * exp(-dot(d, d));
-  vInk = vec2(uDeposit * tier * born * dying * (1.0 + near * ${f(CURSOR_GLOW_INK)}), 0.0);
+  vInk = vec2(uDeposit * tier * born * dying * (1.0 + near * ${f(CONFIG.CURSOR_GLOW_INK)}), 0.0);
 }`;
   const POINTS_FS = HEADER + `
 in vec2 vInk;
@@ -358,7 +382,6 @@ void main(){
 }`;
 
   // Pass 3: the chart.
-  const QUIET_MAX = 8;
   const FIELD_FS = HEADER + `
 uniform sampler2D uTrail;
 uniform vec2 uSize;        // hero size in CSS pixels
@@ -393,10 +416,10 @@ float iso(float v, float widthPx, float slopeWeight){
   return line * (1.0 - smoothstep(0.16 * slopeWeight, 0.42 * slopeWeight, w));
 }
 float edgeFade(vec2 css){
-  vec2 side = uSize * vec2(${f(EDGE_FADE_SIDES)}, 1.0);
+  vec2 side = uSize * vec2(${f(CONFIG.EDGE_FADE_SIDES)}, 1.0);
   return smoothstep(0.0, side.x, css.x) * smoothstep(0.0, side.x, uSize.x - css.x)
-       * smoothstep(0.0, uSize.y * ${f(EDGE_FADE_TOP)}, css.y)
-       * smoothstep(0.0, uSize.y * ${f(EDGE_FADE_BOTTOM)}, uSize.y - css.y);
+       * smoothstep(0.0, uSize.y * ${f(CONFIG.EDGE_FADE_TOP)}, css.y)
+       * smoothstep(0.0, uSize.y * ${f(CONFIG.EDGE_FADE_BOTTOM)}, uSize.y - css.y);
 }
 float textQuiet(vec2 css){
   float q = 0.0;
@@ -404,13 +427,13 @@ float textQuiet(vec2 css){
     vec4 b = uQuiet[i];
     vec2 c = (b.xy + b.zw) * 0.5;
     vec2 d = max(abs(css - c) - (b.zw - b.xy) * 0.5, 0.0);
-    q = max(q, 1.0 - smoothstep(0.0, ${f(TEXT_QUIET_SOFTNESS)}, length(d)));
+    q = max(q, 1.0 - smoothstep(0.0, ${f(CONFIG.TEXT_QUIET_SOFTNESS)}, length(d)));
   }
   return q;
 }
 void main(){
   vec2 css = vec2(vUv.x, 1.0 - vUv.y) * uSize;
-  vec2 fromCursor = (css - uCursorPx) / ${f(CURSOR_RADIUS)};
+  vec2 fromCursor = (css - uCursorPx) / ${f(CONFIG.CURSOR_RADIUS)};
   float bump = exp(-dot(fromCursor, fromCursor));
   float glow = uCursorAmt * bump;
   float near = uCursorAmt * exp(-dot(fromCursor, fromCursor) * 0.28);
@@ -419,36 +442,36 @@ void main(){
   // foot, so its rings start tight and loosen with distance. It adds to the
   // terrain and the cursor bump, so the cursor still works beside the photo.
   float islandEdge = uIsland.z > 0.0 ? length(css - uIsland.xy) - uIsland.z : 1e6;
-  float islandFoot = clamp(1.0 - max(islandEdge, 0.0) / (uIsland.z * ${f(ISLAND_SIZE)} + 1e-3), 0.0, 1.0);
-  float islandHeight = ${f(ISLAND_RINGS / LINE_DENSITY)} * pow(islandFoot, ${f(ISLAND_RING_TIGHTNESS)});
+  float islandFoot = clamp(1.0 - max(islandEdge, 0.0) / (uIsland.z * ${f(CONFIG.ISLAND_SIZE)} + 1e-3), 0.0, 1.0);
+  float islandHeight = ${f(CONFIG.ISLAND_RINGS / CONFIG.LINE_DENSITY)} * pow(islandFoot, ${f(CONFIG.ISLAND_RING_TIGHTNESS)});
 
-  float h = terrain(css / ${f(FIELD_SCALE)}, uTime, ${NOISE_OCTAVES})
-          + glow * ${f(CURSOR_STRENGTH)} + islandHeight;
-  float v = h * ${f(LINE_DENSITY)};
+  float h = terrain(css / ${f(CONFIG.FIELD_SCALE)}, uTime, ${CONFIG.NOISE_OCTAVES})
+          + glow * ${f(CONFIG.CURSOR_STRENGTH)} + islandHeight;
+  float v = h * ${f(CONFIG.LINE_DENSITY)};
 
-  float weight = 1.0 + near * ${f(CURSOR_LINE_BOOST)};
-  float major = iso(v / ${f(MAJOR_EVERY)}, ${f(MAJOR_WIDTH)} * weight * uPixel, 2.5 / ${f(MAJOR_EVERY)});
-  float main_ = iso(v, ${f(MAIN_WIDTH)} * weight * uPixel, 1.0);
-  float fine = iso(v * ${f(FINE_PER_MAIN)}, ${f(FINE_WIDTH)} * uPixel, 1.0);
+  float weight = 1.0 + near * ${f(CONFIG.CURSOR_LINE_BOOST)};
+  float major = iso(v / ${f(CONFIG.MAJOR_EVERY)}, ${f(CONFIG.MAJOR_WIDTH)} * weight * uPixel, 2.5 / ${f(CONFIG.MAJOR_EVERY)});
+  float main_ = iso(v, ${f(CONFIG.MAIN_WIDTH)} * weight * uPixel, 1.0);
+  float fine = iso(v * ${f(CONFIG.FINE_PER_MAIN)}, ${f(CONFIG.FINE_WIDTH)} * uPixel, 1.0);
 
   float edge = edgeFade(css);
-  float mask = edge * mix(1.0, ${f(TEXT_QUIET)}, textQuiet(css));
+  float mask = edge * mix(1.0, ${f(CONFIG.TEXT_QUIET)}, textQuiet(css));
   // Clean paper around the photo: no lines, particles or cursor wash.
-  float islandClear = smoothstep(${f(ISLAND_FRAME_WIDTH + ISLAND_MARGIN)},
-                                 ${f(ISLAND_FRAME_WIDTH + ISLAND_MARGIN + ISLAND_MARGIN_FADE)}, islandEdge);
+  float islandClear = smoothstep(${f(CONFIG.ISLAND_FRAME_WIDTH + CONFIG.ISLAND_MARGIN)},
+                                 ${f(CONFIG.ISLAND_FRAME_WIDTH + CONFIG.ISLAND_MARGIN + CONFIG.ISLAND_MARGIN_FADE)}, islandEdge);
   mask *= islandClear;
   float strong = min(1.0, weight);
 
-  vec3 lineInk = mix(uInk, uAccent, near * ${f(CURSOR_TINT)});
-  vec3 softInk = mix(uInkSoft, uAccent, near * ${f(CURSOR_TINT)});
-  vec3 col = mix(uPaper, uAccent, near * ${f(CURSOR_WASH)} * mask);
-  col = mix(col, softInk, fine * ${f(FINE_OPACITY)} * mask);
-  col = mix(col, lineInk, main_ * min(1.0, ${f(MAIN_OPACITY)} * weight) * mask);
-  col = mix(col, lineInk, major * min(1.0, ${f(MAJOR_OPACITY)} * weight) * mask * strong);
+  vec3 lineInk = mix(uInk, uAccent, near * ${f(CONFIG.CURSOR_TINT)});
+  vec3 softInk = mix(uInkSoft, uAccent, near * ${f(CONFIG.CURSOR_TINT)});
+  vec3 col = mix(uPaper, uAccent, near * ${f(CONFIG.CURSOR_WASH)} * mask);
+  col = mix(col, softInk, fine * ${f(CONFIG.FINE_OPACITY)} * mask);
+  col = mix(col, lineInk, main_ * min(1.0, ${f(CONFIG.MAIN_OPACITY)} * weight) * mask);
+  col = mix(col, lineInk, major * min(1.0, ${f(CONFIG.MAJOR_OPACITY)} * weight) * mask * strong);
 
   // Particles multiply onto what is printed, so they only ever darken.
   vec2 printed = texture(uTrail, vUv).rg;
-  float ink = (1.0 - exp(-printed.r)) * ${f(PARTICLE_MAX_OPACITY)} * mask;
+  float ink = (1.0 - exp(-printed.r)) * ${f(CONFIG.PARTICLE_MAX_OPACITY)} * mask;
   // Dividing by the paper means full ink on bare paper lands exactly on teal.
   col *= mix(vec3(1.0), uAccent / uPaper, ink);
 
@@ -456,20 +479,28 @@ void main(){
   // show right where the headline sits, but it still keeps off the island and
   // fades out just before the canvas ends.
   vec2 fromEdge = min(css, uSize - css);
-  float letterInk = (1.0 - exp(-printed.g)) * ${f(LETTER_MAX_OPACITY)} * uLetterInk * islandClear
+  float letterInk = (1.0 - exp(-printed.g)) * ${f(CONFIG.LETTER_MAX_OPACITY)} * uLetterInk * islandClear
                   * smoothstep(0.0, 12.0, min(fromEdge.x, fromEdge.y));
   col *= mix(vec3(1.0), uInk / uPaper, letterInk);
 
   // Grain stays fixed to the page so it can't shimmer, and goes to nothing at
   // the edges so the canvas meets the page's paper with no seam.
-  col += (hash(ivec3(ivec2(gl_FragCoord.xy), 7)) - 0.5) * ${f(GRAIN)} * edge;
+  col += (hash(ivec3(ivec2(gl_FragCoord.xy), 7)) - 0.5) * ${f(CONFIG.GRAIN)} * edge;
 
   outColor = vec4(col, 1.0);
 }`;
 
+  return {
+    sim: [FULLSCREEN_VS, SIM_FS],
+    fade: [FULLSCREEN_VS, FADE_FS],
+    points: [POINTS_VS, POINTS_FS],
+    field: [FULLSCREEN_VS, FIELD_FS],
+  };
+  }
+
   /* --------------------------------------------------------------- GL STATE */
 
-  let gl, programs, vao;
+  let gl, programs, programSources, vao;
   let stateTex, stateFbo, velocityTex, homeTex, trailTex, trailFbo, particleCount, stateSide;
   let colors;
 
@@ -540,6 +571,15 @@ void main(){
     return target;
   }
 
+  function readColors() {
+    colors = {
+      uPaper: token("--paper"),
+      uInk: token("--ink"),
+      uInkSoft: token("--ink-soft"),
+      uAccent: token("--accent"),
+    };
+  }
+
   // Everything GPU-side. Throws if this device can't run the effect.
   function initGL() {
     gl = canvas.getContext("webgl2", {
@@ -553,26 +593,47 @@ void main(){
     if (!gl) throw new Error("inkfield: no WebGL2");
     if (!gl.getExtension("EXT_color_buffer_float")) throw new Error("inkfield: no float targets");
 
-    colors = {
-      uPaper: token("--paper"),
-      uInk: token("--ink"),
-      uInkSoft: token("--ink-soft"),
-      uAccent: token("--accent"),
-    };
+    readColors();
 
-    programs = {
-      sim: program(FULLSCREEN_VS, SIM_FS),
-      fade: program(FULLSCREEN_VS, FADE_FS),
-      points: program(POINTS_VS, POINTS_FS),
-      field: program(FULLSCREEN_VS, FIELD_FS),
-    };
+    programs = {};
+    programSources = {};
+    updatePrograms();
 
     vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.BLEND);
 
-    particleCount = window.innerWidth < SMALL_SCREEN_WIDTH ? PARTICLE_COUNT_SMALL : PARTICLE_COUNT;
+    stateTex = null;
+    makeParticles();
+    trailTex = null;
+    trailFbo = null;
+  }
+
+  // Compiles only the programs whose source changed, so most slider moves cost
+  // nothing here. A setting that won't compile leaves the old program running.
+  function updatePrograms() {
+    const sources = shaderSources();
+    for (const name of Object.keys(sources)) {
+      const key = sources[name].join("");
+      if (programSources[name] === key) continue;
+      const next = program(sources[name][0], sources[name][1]);
+      if (programs[name]) gl.deleteProgram(programs[name].prog);
+      programs[name] = next;
+      programSources[name] = key;
+    }
+  }
+
+  function deleteParticles() {
+    if (!stateTex) return;
+    for (const tex of [...stateTex, ...velocityTex, homeTex]) gl.deleteTexture(tex);
+    for (const fbo of stateFbo) gl.deleteFramebuffer(fbo);
+    stateTex = null;
+  }
+
+  function makeParticles() {
+    deleteParticles();
+    particleCount = window.innerWidth < CONFIG.SMALL_SCREEN_WIDTH ? CONFIG.PARTICLE_COUNT_SMALL : CONFIG.PARTICLE_COUNT;
     stateSide = Math.ceil(Math.sqrt(particleCount));
     particleCount = stateSide * stateSide;
 
@@ -594,13 +655,11 @@ void main(){
     letterState = "off";
     letterCount = 0;
     letterInk = letterInkTarget = 0;
-    trailTex = null;
-    trailFbo = null;
   }
 
   /* --------------------------------------------------------- SIZE AND TEXT */
 
-  let cssW = 0, cssH = 0, pixel = 1, renderScale = RENDER_SCALE;
+  let cssW = 0, cssH = 0, pixel = 1, renderScale = CONFIG.RENDER_SCALE;
   const quiet = new Float32Array(QUIET_MAX * 4);
   let quietCount = 0;
 
@@ -608,7 +667,7 @@ void main(){
     const box = hero.getBoundingClientRect();
     cssW = Math.max(1, box.width);
     cssH = Math.max(1, box.height);
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    const dpr = Math.min(window.devicePixelRatio || 1, CONFIG.MAX_DPR);
     pixel = Math.min(dpr, Math.max(1, dpr * renderScale));
     const w = Math.max(1, Math.round(cssW * pixel));
     const h = Math.max(1, Math.round(cssH * pixel));
@@ -674,10 +733,10 @@ void main(){
       const r = range.getBoundingClientRect();
       if (!r.width || !r.height) continue;
       quiet.set([
-        r.left - box.left - TEXT_QUIET_PADDING,
-        r.top - box.top - TEXT_QUIET_PADDING,
-        r.right - box.left + TEXT_QUIET_PADDING,
-        r.bottom - box.top + TEXT_QUIET_PADDING,
+        r.left - box.left - CONFIG.TEXT_QUIET_PADDING,
+        r.top - box.top - CONFIG.TEXT_QUIET_PADDING,
+        r.right - box.left + CONFIG.TEXT_QUIET_PADDING,
+        r.bottom - box.top + CONFIG.TEXT_QUIET_PADDING,
       ], quietCount * 4);
       quietCount++;
     }
@@ -700,7 +759,7 @@ void main(){
 
   // One simulation step: move the particles, then print them onto the trails.
   function step(dt) {
-    time += dt * EVOLVE_SPEED;
+    time += dt * CONFIG.EVOLVE_SPEED;
     frameIndex = (frameIndex + 1) % 1000000;
 
     // Particles
@@ -711,10 +770,10 @@ void main(){
     bindTexture(0, stateTex[0], su.uState);
     bindTexture(1, homeTex, su.uHome);
     bindTexture(2, velocityTex[0], su.uVelocity);
-    gl.uniform2f(su.uExtent, cssW / FIELD_SCALE, cssH / FIELD_SCALE);
-    gl.uniform2f(su.uCursor, cursorX / FIELD_SCALE, cursorY / FIELD_SCALE);
+    gl.uniform2f(su.uExtent, cssW / CONFIG.FIELD_SCALE, cssH / CONFIG.FIELD_SCALE);
+    gl.uniform2f(su.uCursor, cursorX / CONFIG.FIELD_SCALE, cursorY / CONFIG.FIELD_SCALE);
     gl.uniform1f(su.uCursorAmt, cursorAmt);
-    gl.uniform3f(su.uIsland, islandX / FIELD_SCALE, islandY / FIELD_SCALE, islandR / FIELD_SCALE);
+    gl.uniform3f(su.uIsland, islandX / CONFIG.FIELD_SCALE, islandY / CONFIG.FIELD_SCALE, islandR / CONFIG.FIELD_SCALE);
     gl.uniform1f(su.uTime, time);
     gl.uniform1f(su.uDt, dt);
     gl.uniform1i(su.uFrame, frameIndex);
@@ -729,7 +788,7 @@ void main(){
     gl.bindFramebuffer(gl.FRAMEBUFFER, trailFbo[1]);
     gl.viewport(0, 0, canvas.width, canvas.height);
     bindTexture(0, trailTex[0], fade.uniforms.uTrail);
-    gl.uniform2f(fade.uniforms.uFade, Math.exp(-dt / TRAIL_FADE), Math.exp(-dt / LETTER_TRAIL_FADE));
+    gl.uniform2f(fade.uniforms.uFade, Math.exp(-dt / CONFIG.TRAIL_FADE), Math.exp(-dt / CONFIG.LETTER_TRAIL_FADE));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     // ...then add the dots. One dot's ink scales with the area per particle,
@@ -740,12 +799,12 @@ void main(){
     useProgram(pts);
     bindTexture(0, stateTex[0], pu.uState);
     bindTexture(1, homeTex, pu.uHome);
-    gl.uniform1f(pu.uLetterDeposit, LETTER_INK * dt * 60);
+    gl.uniform1f(pu.uLetterDeposit, CONFIG.LETTER_INK * dt * 60);
     gl.uniform2f(pu.uSize, cssW, cssH);
     gl.uniform2f(pu.uCursorPx, cursorX, cursorY);
     gl.uniform1f(pu.uCursorAmt, cursorAmt);
-    gl.uniform1f(pu.uPointPx, Math.max(1, PARTICLE_SIZE * pixel));
-    gl.uniform1f(pu.uDeposit, PARTICLE_INK * area * dt * 60);
+    gl.uniform1f(pu.uPointPx, Math.max(1, CONFIG.PARTICLE_SIZE * pixel));
+    gl.uniform1f(pu.uDeposit, CONFIG.PARTICLE_INK * area * dt * 60);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE);
     gl.drawArrays(gl.POINTS, 0, particleCount);
@@ -801,16 +860,16 @@ void main(){
     const box = hero.getBoundingClientRect();
     const x = pointerX - box.left;
     const y = pointerY - box.top;
-    const active = now - lastMove < CURSOR_IDLE_AFTER * 1000
+    const active = now - lastMove < CONFIG.CURSOR_IDLE_AFTER * 1000
       && x >= 0 && x <= box.width && y >= 0 && y <= box.height;
 
     if (active) {
       // Arriving from nothing: start at the cursor rather than sweeping to it.
-      const follow = cursorAmt < 0.01 ? 1 : 1 - Math.exp(-dt / CURSOR_FOLLOW_TIME);
+      const follow = cursorAmt < 0.01 ? 1 : 1 - Math.exp(-dt / CONFIG.CURSOR_FOLLOW_TIME);
       cursorX += (x - cursorX) * follow;
       cursorY += (y - cursorY) * follow;
     }
-    const tau = active ? CURSOR_RISE_TIME : CURSOR_RELAX_TIME;
+    const tau = active ? CONFIG.CURSOR_RISE_TIME : CONFIG.CURSOR_RELAX_TIME;
     cursorAmt += ((active ? 1 : 0) - cursorAmt) * (1 - Math.exp(-dt / tau));
   }
 
@@ -923,7 +982,7 @@ void main(){
         const x0 = Math.max(0, x - reach), x1 = Math.min(w, x + reach + 1);
         const y0 = Math.max(0, y - reach), y1 = Math.min(h, y + reach + 1);
         const filled = sums[y1 * (w + 1) + x1] - sums[y0 * (w + 1) + x1] - sums[y1 * (w + 1) + x0] + sums[y0 * (w + 1) + x0];
-        const weight = Math.pow(((x1 - x0) * (y1 - y0)) / filled, THIN_STROKE_BOOST);
+        const weight = Math.pow(((x1 - x0) * (y1 - y0)) / filled, CONFIG.THIN_STROKE_BOOST);
         weights[y * w + x] = weight;
         total += weight;
       }
@@ -965,7 +1024,7 @@ void main(){
   // Turns the first rows of particles into letter particles, starting either at
   // the hero's edges for the intro or already at home.
   function buildLetters(playIntro) {
-    letterRows = Math.round(LETTER_SHARE * stateSide);
+    letterRows = Math.round(CONFIG.LETTER_SHARE * stateSide);
     letterCount = letterRows * stateSide;
     homesKey = "";
     if (!sampleHomes()) throw new Error("inkfield: no letter shapes");
@@ -995,9 +1054,9 @@ void main(){
       markIntroPlayed();
       letterState = "intro";
       letterInk = letterInkTarget = 1;
-      stateUntil = performance.now() + INTRO_DURATION * 1000;
+      stateUntil = performance.now() + CONFIG.INTRO_DURATION * 1000;
       // Even if frames stop (a hidden tab, say), the name still comes back.
-      setTimeout(finishAssembling, INTRO_DURATION * 1000 + 400);
+      setTimeout(finishAssembling, CONFIG.INTRO_DURATION * 1000 + 400);
     } else {
       letterState = "rest";
       letterInk = letterInkTarget = 0;
@@ -1027,7 +1086,7 @@ void main(){
 
     // This uses real time because on a slow device the text has already come
     // back, so the ink has to clear even if the particles lag.
-    letterInk += (letterInkTarget - letterInk) * (1 - Math.exp(-Math.min(elapsed / 1000, 1) / LETTER_FADE_OUT));
+    letterInk += (letterInkTarget - letterInk) * (1 - Math.exp(-Math.min(elapsed / 1000, 1) / CONFIG.LETTER_FADE_OUT));
   }
 
   // True while the CSS hold from style.css still has the name hidden, meaning no
@@ -1055,7 +1114,7 @@ void main(){
     const fontTimer = setTimeout(() => {
       late = true;
       showHeadline();
-    }, FONT_WAIT);
+    }, CONFIG.FONT_WAIT);
     const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
     fontsReady.then(() => {
       clearTimeout(fontTimer);
@@ -1075,7 +1134,7 @@ void main(){
   let slowSum = 0, slowCount = 0, drawnFrames = 0;
 
   function show() {
-    if (++drawnFrames >= FADE_IN_DELAY_FRAMES) canvas.classList.add("is-live");
+    if (++drawnFrames >= CONFIG.FADE_IN_DELAY_FRAMES) canvas.classList.add("is-live");
   }
 
   function frame(now) {
@@ -1095,11 +1154,11 @@ void main(){
   // Trades resolution for frame rate, one small drop at a time. Only ever
   // goes down, so it can't oscillate.
   function watchFrameRate(elapsed) {
-    if (renderScale <= RENDER_SCALE_MIN || elapsed > 200) return;
+    if (renderScale <= CONFIG.RENDER_SCALE_MIN || elapsed > 200) return;
     slowSum += elapsed;
-    if (++slowCount < SLOW_CHECK_FRAMES) return;
-    if (slowSum / slowCount > SLOW_FRAME_MS) {
-      renderScale = Math.max(RENDER_SCALE_MIN, renderScale * RENDER_SCALE_STEP);
+    if (++slowCount < CONFIG.SLOW_CHECK_FRAMES) return;
+    if (slowSum / slowCount > CONFIG.SLOW_FRAME_MS) {
+      renderScale = Math.max(CONFIG.RENDER_SCALE_MIN, renderScale * CONFIG.RENDER_SCALE_STEP);
       sizeCanvas();
     }
     slowSum = 0;
@@ -1108,7 +1167,7 @@ void main(){
 
   function renderStill() {
     cursorAmt = 0;
-    for (let i = 0; i < STILL_STEPS; i++) step(1 / 30);
+    for (let i = 0; i < CONFIG.STILL_STEPS; i++) step(1 / 30);
     drawField();
     canvas.classList.add("is-live");
   }
@@ -1149,7 +1208,7 @@ void main(){
         alive = true;
         renderStill();
       } else {
-        for (let i = 0; i < WARM_UP_STEPS; i++) step(1 / 60);
+        for (let i = 0; i < CONFIG.WARM_UP_STEPS; i++) step(1 / 60);
         alive = true;
         prepareLetters();
         refresh();
@@ -1206,5 +1265,69 @@ void main(){
     if (alive) layoutChanged();
   });
 
-  start();
+  /* ---------------------------------------------------------- LIVE SETTINGS
+     Changes are gathered for a moment, so dragging a slider doesn't compile on
+     every frame. Anything read from CONFIG in the loop needs no help here. */
+
+  const CHANGE_WAIT = 60; // Milliseconds
+  const PARTICLE_SETTINGS =["PARTICLE_COUNT", "PARTICLE_COUNT_SMALL", "SMALL_SCREEN_WIDTH", "LETTER_SHARE"];
+  const changed = new Set();
+  let changePending = 0;
+
+  function applyChanges() {
+    changePending = 0;
+    const keys = new Set(changed);
+    changed.clear();
+    if (!alive) return;
+    try {
+      updatePrograms();
+      if (PARTICLE_SETTINGS.some((key) => keys.has(key))) {
+        makeParticles();
+        if (headline && !motionQuery.matches) buildLetters(false);
+      }
+      if (keys.has("RENDER_SCALE")) renderScale = CONFIG.RENDER_SCALE;
+      if (keys.has("THIN_STROKE_BOOST")) homesKey = "";
+      layoutChanged();
+    } catch (err) {
+      // A bad value keeps what was already running, and a reload restores everything.
+    }
+  }
+
+  function setConfig(key, value) {
+    if (typeof CONFIG[key] !== "number" || !Number.isFinite(value)) return;
+    CONFIG[key] = value;
+    changed.add(key);
+    if (!changePending) changePending = setTimeout(() => requestAnimationFrame(applyChanges), CHANGE_WAIT);
+  }
+
+  // Plays the opening again, so the settings for the name can be seen.
+  function replayIntro() {
+    if (!alive || !headline || motionQuery.matches) return;
+    hideHeadlineForIntro();
+    try {
+      buildLetters(true);
+    } catch (err) {
+      lettersOff();
+    }
+  }
+
+  window.inkfield = {
+    config: CONFIG,
+    groups: CONFIG_GROUPS,
+    set: setConfig,
+    replayIntro,
+    isLive: () => alive,
+  };
+
+  // The command palette can switch the theme while the page is open.
+  document.addEventListener("site:theme", () => {
+    if (!alive) return;
+    readColors();
+    if (!running) drawField();
+  });
+
+  // A prerendered front page waits until it is actually shown, so the opening
+  // animation isn't spent on a hidden page.
+  if (document.prerendering) document.addEventListener("prerenderingchange", start, { once: true });
+  else start();
 })();

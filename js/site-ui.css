@@ -1,0 +1,187 @@
+/* Things a visitor summons from the keyboard. js/site.js loads this file on demand,
+   so it never affects a page until then. Colors and fonts come from style.css. */
+
+.site-sr{
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  clip-path:inset(50%);
+  white-space:nowrap;
+}
+
+/* Small confirmation, such as "Copied" */
+.site-note{
+  position:fixed;
+  left:50%;
+  bottom:1.5rem;
+  transform:translateX(-50%);
+  z-index:30;
+  padding:.3rem .75rem;
+  font:400 .85rem/1.4 "IBM Plex Sans",system-ui,sans-serif;
+  color:var(--ink);
+  background:var(--paper);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  opacity:0;
+  pointer-events:none;
+}
+.site-note.is-on{opacity:1}
+
+/* Command palette */
+.site-palette{
+  width:min(36rem,calc(100vw - 2rem));
+  max-width:none;
+  max-height:none;
+  overflow:hidden;
+  margin:12vh auto 0;
+  padding:0;
+  border:1px solid var(--ink);
+  border-radius:2px;
+  background:var(--paper);
+  color:var(--ink);
+  font:400 .95rem/1.4 "IBM Plex Sans",system-ui,sans-serif;
+}
+.site-palette::backdrop{background:rgba(19,35,60,.22)}
+:root[data-theme="dark"] .site-palette::backdrop{background:rgba(0,0,0,.45)}
+.site-palette-input{
+  display:block;
+  width:100%;
+  padding:.8rem 1rem;
+  border:0;
+  border-bottom:1px solid var(--rule);
+  border-radius:0;
+  background:transparent;
+  color:var(--ink);
+  font:400 1.1rem/1.4 Spectral,Georgia,serif;
+  outline:none;
+}
+.site-palette-input::placeholder{color:var(--ink-soft);opacity:1}
+.site-palette-input:focus-visible{border-bottom:2px solid var(--accent);padding-bottom:calc(.8rem - 1px)}
+.site-palette-list{
+  max-height:min(22.5rem,60vh);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:var(--rule) transparent;
+}
+.site-palette-list[hidden]{display:none}
+.site-palette-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.45rem 1rem .45rem calc(1rem - 2px);
+  border-left:2px solid transparent;
+  cursor:pointer;
+}
+.site-palette-row[aria-selected="true"]{border-left-color:var(--accent);color:var(--accent);background:var(--palette-tint,rgba(20,103,94,.07))}
+:root[data-theme="dark"] .site-palette-row[aria-selected="true"]{--palette-tint:rgba(92,196,181,.1)}
+.site-palette-group{flex:none;font-size:.8rem;color:var(--ink-soft)}
+.site-palette-empty{margin:0;padding:.8rem 1rem;color:var(--ink-soft)}
+
+/* X-ray mode. The overlay takes no clicks, so links keep working underneath it. */
+.site-xray{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  overflow:hidden;
+  z-index:15;
+  pointer-events:none;
+  --xray:#14A594;
+  font:400 10.5px/1.25 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+.site-xray-line{position:absolute;width:0;border-left:1px solid var(--xray)}
+.site-xray-line.is-soft{border-left-style:dashed;opacity:.55}
+.site-xray-margin{position:absolute;top:0;bottom:0;background:rgba(20,165,148,.06)}
+.site-xray-box{position:absolute;outline:1px solid rgba(20,165,148,.35);outline-offset:-1px}
+.site-xray-label{
+  position:absolute;
+  padding:0 3px;
+  color:#fff;
+  background:#0F6F64;
+  white-space:nowrap;
+}
+.site-xray-exit,
+.site-xray-button{
+  min-height:32px;
+  padding:0 .7rem;
+  font:400 .82rem/1 "IBM Plex Sans",system-ui,sans-serif;
+  color:var(--ink);
+  background:var(--paper);
+  border:1px solid var(--accent);
+  border-radius:2px;
+  cursor:pointer;
+}
+.site-xray-exit{position:fixed;left:1rem;bottom:1rem;z-index:17}
+.site-xray-exit:hover,
+.site-xray-button:hover{color:var(--accent)}
+.site-xray-exit:focus-visible,
+.site-xray-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.site-xray-panel{
+  position:fixed;
+  right:1rem;
+  bottom:1rem;
+  z-index:16;
+  width:min(17.5rem,calc(100vw - 2rem));
+  max-height:calc(100vh - 2rem);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:.6rem .8rem .7rem;
+  color:var(--ink);
+  background:var(--paper);
+  border:1px solid var(--accent);
+  border-radius:2px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--rule) transparent;
+  font:400 .8rem/1.3 "IBM Plex Sans",system-ui,sans-serif;
+}
+.site-xray-title{
+  margin:0 0 .35rem;
+  padding:0;
+  border:0;
+  font:500 .95rem/1.3 Spectral,Georgia,serif;
+  letter-spacing:normal;
+}
+.site-xray-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  column-gap:.5rem;
+  margin:0 0 .3rem;
+}
+.site-xray-row input{grid-column:1 / -1;width:100%;height:18px;margin:0;accent-color:var(--accent)}
+.site-xray-value{font:400 .75rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink-soft)}
+.site-xray-group{margin-top:.25rem;border-top:1px solid var(--rule);padding-top:.25rem}
+.site-xray-group summary{cursor:pointer;padding:.1rem 0;color:var(--ink-soft)}
+.site-xray-group summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.site-xray-group[open] summary{margin-bottom:.3rem}
+
+/* Shortcuts card */
+.site-card{
+  width:min(19rem,calc(100vw - 2rem));
+  max-height:calc(100vh - 2rem);
+  overflow-y:auto;
+  padding:1rem 1.1rem;
+  border:1px solid var(--ink);
+  border-radius:2px;
+  background:var(--paper);
+  color:var(--ink);
+  font:400 .92rem/1.4 "IBM Plex Sans",system-ui,sans-serif;
+}
+.site-card:focus{outline:none}
+.site-card::backdrop{background:rgba(19,35,60,.22)}
+:root[data-theme="dark"] .site-card::backdrop{background:rgba(0,0,0,.45)}
+.site-card-title{
+  margin:0 0 .6rem;
+  padding:0 0 .4rem;
+  border-bottom:1px solid var(--rule);
+  font:500 1.1rem/1.3 Spectral,Georgia,serif;
+  letter-spacing:normal;
+}
+.site-card-list{margin:0}
+.site-card-list div{display:flex;justify-content:space-between;gap:1rem;padding:.16rem 0}
+.site-card-list dd{margin:0;color:var(--ink-soft)}
+.site-card-list dt{margin:0}
+.site-card kbd{font:inherit;font-weight:500}
+.site-card-note{margin:.6rem 0 0;font-size:.82rem;color:var(--ink-soft)}
