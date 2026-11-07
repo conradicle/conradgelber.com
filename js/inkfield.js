@@ -79,12 +79,7 @@
   const LETTER_SHARE = 0.4;         // Share of all particles that build the name
   const INTRO_DURATION = 2.5;       // From load until the real headline fades in
   const SPRING_STRENGTH = 40;       // Pull toward home. Bigger = snappier, tighter letters.
-  const SCATTER_STRENGTH = 0.22;    // How hard the cursor's motion throws particles
-  const REASSEMBLE_TIME = 2;        // From the cursor leaving until the real headline fades in
-  const SCATTER_RADIUS = 44;        // Width of the cursor's path through the letters
-  const SCATTER_MIN_PUSH = 0.12;    // Push from even a slow cursor, field units per second
-  const SCATTER_SPREAD = 1.1;       // Fan of throw directions around the cursor's path, radians
-  const LETTER_FREE_DAMPING = 1.4;  // How quickly a thrown particle slows into the current
+  const LETTER_FREE_DAMPING = 1.4;  // How quickly a loose particle slows into the current
   const LETTER_MAX_SPEED = 1.8;     // Speed limit for letter particles, field units per second
   const LETTER_INK = 0.26;          // How dark one letter dot prints
   const LETTER_TRAIL_FADE = 0.07;   // Trail length for letter dots. Short keeps the letters crisp.
@@ -93,8 +88,7 @@
   const LETTER_SHIMMER = 0.45;      // How far settled particles wander from home
   const LETTER_FLOW = 0.03;         // Share of the current settled particles still feel
   const THIN_STROKE_BOOST = 1.1;    // Bigger = more particles on hairlines and serifs
-  const LETTER_FADE_IN = 0.07;      // Fade times for the letter ink
-  const LETTER_FADE_OUT = 0.35;
+  const LETTER_FADE_OUT = 0.35;     // Fade time for the letter ink once the headline is back
   const FONT_WAIT = 1500;           // Milliseconds to wait for the web font before showing the headline
   const INTRO_STORAGE_KEY = "inkfield-intro-played";
 
@@ -205,10 +199,6 @@ float terrain(vec2 p, float t, int octaves){
 uniform sampler2D uState;
 uniform sampler2D uVelocity;
 uniform sampler2D uHome;
-uniform float uHold;      // 1 keeps thrown particles loose while the cursor is in the headline
-uniform float uLooseTime; // Seconds for a loose particle to come back under the spring
-uniform vec4 uPushPath;   // Cursor's path this frame: start xy, end xy, field units
-uniform vec3 uPush;       // Cursor's direction xy and push strength; strength 0 = no push
 uniform vec2 uExtent;     // hero size in field units
 uniform vec2 uCursor;     // field units
 uniform float uCursorAmt;
@@ -265,21 +255,8 @@ void main(){
   vec4 home = texelFetch(uHome, texel, 0);
   if (home.z > 0.5){
     vec2 v = texelFetch(uVelocity, texel, 0).xy;
-    float loose = s.z;
-
-    // The cursor throws particles along its own direction of travel, fanned
-    // out a little. Particles near its path also come loose from their home.
-    if (uPush.z > 0.0){
-      vec2 ab = uPushPath.zw - uPushPath.xy;
-      float along = clamp(dot(p - uPushPath.xy, ab) / max(dot(ab, ab), 1e-8), 0.0, 1.0);
-      vec2 off = (p - uPushPath.xy - ab * along) / ${f(SCATTER_RADIUS / FIELD_SCALE)};
-      float hit = exp(-dot(off, off));
-      float fan = (fract(seed * 53.71) - 0.5) * ${f(SCATTER_SPREAD)};
-      float c = cos(fan), n = sin(fan);
-      v += vec2(c * uPush.x - n * uPush.y, n * uPush.x + c * uPush.y) * uPush.z * hit * (0.5 + seed);
-      loose = max(loose, smoothstep(0.05, 0.45, hit));
-    }
-    if (uHold < 0.5) loose = max(0.0, loose - uDt / (uLooseTime * (0.55 + 0.45 * seed)));
+    // Particles start the intro loose and come under the spring as they land.
+    float loose = max(0.0, s.z - uDt / (${f(INTRO_DURATION * INTRO_LANDING)} * (0.55 + 0.45 * seed)));
 
     // A spring toward home that strengthens as the particle comes back, plus
     // the current, which settled particles barely feel. The small circle added
@@ -292,8 +269,7 @@ void main(){
     v += (target - p) * ${f(SPRING_STRENGTH)} * tight * uDt;
     v *= exp(-mix(${f(2 * Math.sqrt(SPRING_STRENGTH))}, ${f(LETTER_FREE_DAMPING)}, loose) * uDt);
     // Each particle has its own limit, mostly slow with a few fast. A shared limit
-    // lines thrown particles up into a hard-edged arc, and so does tying the limit
-    // to the throw angle above, so the two come from different digits of the seed.
+    // lines flying particles up into a hard-edged arc.
     float limit = fract(seed * 97.13);
     v *= min(1.0, ${f(LETTER_MAX_SPEED)} * (0.12 + 0.88 * limit * limit) / max(length(v), 1e-4));
 
@@ -735,11 +711,6 @@ void main(){
     bindTexture(0, stateTex[0], su.uState);
     bindTexture(1, homeTex, su.uHome);
     bindTexture(2, velocityTex[0], su.uVelocity);
-    gl.uniform1f(su.uHold, letterState === "scattered" ? 1 : 0);
-    gl.uniform1f(su.uLooseTime, letterState === "intro" ? INTRO_DURATION * INTRO_LANDING : REASSEMBLE_TIME * 0.8);
-    gl.uniform4f(su.uPushPath, pushFromX / FIELD_SCALE, pushFromY / FIELD_SCALE, pushToX / FIELD_SCALE, pushToY / FIELD_SCALE);
-    gl.uniform3f(su.uPush, pushDirX, pushDirY, pushStrength);
-    pushStrength = 0;
     gl.uniform2f(su.uExtent, cssW / FIELD_SCALE, cssH / FIELD_SCALE);
     gl.uniform2f(su.uCursor, cursorX / FIELD_SCALE, cursorY / FIELD_SCALE);
     gl.uniform1f(su.uCursorAmt, cursorAmt);
@@ -808,19 +779,12 @@ void main(){
   /* ----------------------------------------------------------------- CURSOR */
 
   let pointerX = 0, pointerY = 0, lastMove = -Infinity;
-  let fingerLifted = false; // The finger is off the glass, so it can't be in the headline.
 
   function notePointer(x, y) {
     pointerX = x;
     pointerY = y;
     lastMove = performance.now();
-    fingerLifted = false;
   }
-  function noteFingerLifted() {
-    fingerLifted = true;
-  }
-  window.addEventListener("touchend", noteFingerLifted, { passive: true });
-  window.addEventListener("touchcancel", noteFingerLifted, { passive: true });
   window.addEventListener("pointermove", (e) => notePointer(e.clientX, e.clientY), { passive: true });
   window.addEventListener("pointerdown", (e) => notePointer(e.clientX, e.clientY), { passive: true });
   // A finger that starts a scroll ends its pointer events, so follow touches too.
@@ -852,22 +816,20 @@ void main(){
 
   /* ------------------------------------------------------- THE NAME IN PARTICLES
 
-     letterState runs intro -> rest -> scattered -> returning -> rest, and stays
-     "off" when reduced motion is on or the name can't be built. The h1 only ever
-     gets a class that sets its opacity, so it stays real, clickable text the
-     whole time, and any failure path puts it straight back. */
+     letterState runs intro -> rest, and stays "off" when reduced motion is on or
+     the name can't be built. The h1 is hidden only during the intro, by a class
+     that sets its opacity, so it stays real, clickable text the whole time, and
+     any failure path puts it straight back. After that nothing hides it. */
 
   const headline = hero.querySelector("h1");
   let lettersOn = false, letterState = "off", letterRows = 0, letterCount = 0;
-  let letterInk = 0, letterInkTarget = 0, stateUntil = 0, homesKey = "", headBox = null, lastHomes = null;
-  let pushFromX = 0, pushFromY = 0, pushToX = 0, pushToY = 0, pushDirX = 0, pushDirY = 0, pushStrength = 0;
-  let prevPointerX = 0, prevPointerY = 0, pointerSeen = false, wasInHeadline = false;
+  let letterInk = 0, letterInkTarget = 0, stateUntil = 0, homesKey = "", lastHomes = null;
 
-  function hideHeadline(instantly) {
-    if (headline) headline.classList.add(instantly ? "ink-intro" : "ink-hidden");
+  function hideHeadlineForIntro() {
+    if (headline) headline.classList.add("ink-intro");
   }
   function showHeadline() {
-    if (headline) headline.classList.remove("ink-intro", "ink-hidden");
+    if (headline) headline.classList.remove("ink-intro");
   }
 
   function introPlayed() {
@@ -997,11 +959,6 @@ void main(){
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, stateSide, letterRows, gl.RGBA, gl.FLOAT, homes);
     lastHomes = homes;
     homesKey = key;
-
-    const range = document.createRange();
-    range.selectNodeContents(headline);
-    const r = range.getBoundingClientRect();
-    headBox = { left: r.left - box.left, top: r.top - box.top, right: r.right - box.left, bottom: r.bottom - box.top };
     return true;
   }
 
@@ -1034,8 +991,6 @@ void main(){
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, stateSide, letterRows, gl.RGBA, gl.FLOAT, data);
 
     lettersOn = true;
-    pointerSeen = false;
-    wasInHeadline = false;
     if (playIntro) {
       markIntroPlayed();
       letterState = "intro";
@@ -1052,7 +1007,7 @@ void main(){
 
   // The real headline takes over from the particles.
   function finishAssembling() {
-    if (letterState !== "intro" && letterState !== "returning" && letterState !== "scattered") return;
+    if (letterState !== "intro") return;
     letterState = "rest";
     letterInkTarget = 0;
     showHeadline();
@@ -1065,47 +1020,14 @@ void main(){
     showHeadline();
   }
 
-  // Runs every frame: follows the pointer through the headline and moves between states.
+  // Runs every frame: ends the intro on time and fades the letter ink down.
   function updateLetters(elapsed, now) {
     if (!lettersOn) return;
-    const box = hero.getBoundingClientRect();
-    const x = pointerX - box.left, y = pointerY - box.top;
-    const inHeadline = !fingerLifted && headBox
-      && now - lastMove < CURSOR_IDLE_AFTER * 1000
-      && x >= headBox.left && x <= headBox.right && y >= headBox.top && y <= headBox.bottom;
-    const moved = pointerSeen && (pointerX !== prevPointerX || pointerY !== prevPointerY);
+    if (letterState === "intro" && now >= stateUntil) finishAssembling();
 
-    if (letterState !== "intro" && moved && !fingerLifted && (inHeadline || wasInHeadline)) {
-      if (inHeadline && letterState !== "scattered") {
-        letterState = "scattered";
-        letterInkTarget = 1;
-        hideHeadline(false);
-      }
-      const dx = pointerX - prevPointerX, dy = pointerY - prevPointerY;
-      const length = Math.hypot(dx, dy);
-      pushFromX = x - dx;
-      pushFromY = y - dy;
-      pushToX = x;
-      pushToY = y;
-      pushDirX = dx / length;
-      pushDirY = dy / length;
-      pushStrength = Math.max(SCATTER_MIN_PUSH, (length / FIELD_SCALE) * 60 * SCATTER_STRENGTH);
-    }
-    if (letterState === "scattered" && !inHeadline) {
-      letterState = "returning";
-      stateUntil = now + REASSEMBLE_TIME * 1000;
-    }
-    if ((letterState === "intro" || letterState === "returning") && now >= stateUntil) finishAssembling();
-
-    pointerSeen = !fingerLifted && now - lastMove < CURSOR_IDLE_AFTER * 1000;
-    prevPointerX = pointerX;
-    prevPointerY = pointerY;
-    wasInHeadline = inHeadline;
-
-    // Real time, not the capped simulation step: on a slow device the text has
-    // already come back, so the ink has to clear even if the particles lag.
-    const tau = letterInkTarget > letterInk ? LETTER_FADE_IN : LETTER_FADE_OUT;
-    letterInk += (letterInkTarget - letterInk) * (1 - Math.exp(-Math.min(elapsed / 1000, 1) / tau));
+    // This uses real time because on a slow device the text has already come
+    // back, so the ink has to clear even if the particles lag.
+    letterInk += (letterInkTarget - letterInk) * (1 - Math.exp(-Math.min(elapsed / 1000, 1) / LETTER_FADE_OUT));
   }
 
   // Called once WebGL is confirmed working. For the intro the h1 hides right away
@@ -1115,7 +1037,7 @@ void main(){
     const box = hero.getBoundingClientRect();
     const playIntro = !introPlayed() && !document.hidden && box.bottom > 0 && box.top < window.innerHeight;
     if (playIntro) {
-      hideHeadline(true);
+      hideHeadlineForIntro();
       canvas.classList.add("is-quick");
     }
     let late = false;
