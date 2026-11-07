@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.16.5",
+    "date": "2026-11-06",
+    "title": "My name stays put",
+    "bullets": [
+      "Moving your cursor or finger over my name no longer blows it apart. The headline stays visible the whole time.",
+      "The cursor still stirs the teal current everywhere on the front page, and the opening particle animation is unchanged."
+    ]
+  },
+  {
     "version": "1.16.4",
     "date": "2026-11-06",
     "title": "Two projects off the public site",
