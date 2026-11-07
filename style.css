@@ -96,12 +96,22 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius
 }
 .inkfield.is-live{opacity:1}
 .inkfield.is-quick{transition-duration:.7s}
-/* js/inkfield.js adds this class only during the intro, after WebGL has started,
-   so the name shows normally at all other times. Opacity keeps it real, clickable
-   text for screen readers and search, and keyboard focus always brings it back. */
+/* The name must never go from visible to hidden. ink-hold keeps it hidden for
+   its first 150ms on screen, with no JS needed. js/inkfield.js may start the
+   intro only while ink-hold is still running, because after that the name has
+   been seen. Either way it shows on its own when the hold ends. Opacity keeps it
+   real, clickable text for screen readers and search, and keyboard focus always
+   brings it back during the intro. */
+@keyframes ink-hold{from,to{opacity:0}}
 .hero h1{transition:opacity .7s ease}
+@media (prefers-reduced-motion:no-preference){
+  .hero h1{animation:ink-hold .15s linear}
+}
 .hero h1.ink-intro{opacity:0;transition:none}
 .hero h1.ink-intro:focus-within{opacity:1}
+/* The name stays in ink when hovered or focused. */
+.hero h1 a:hover,
+.hero h1 a:focus{color:var(--ink)}
 @media (prefers-reduced-motion:reduce){
   .inkfield{transition:none}
 }

@@ -4,8 +4,9 @@
     "date": "2026-11-06",
     "title": "My name stays put",
     "bullets": [
-      "Moving your cursor or finger over my name no longer blows it apart. The headline stays visible the whole time.",
-      "The cursor still stirs the teal current everywhere on the front page, and the opening particle animation is unchanged."
+      "Moving your cursor or finger over my name no longer blows it apart, and the name no longer changes color on hover.",
+      "The opening particle animation now plays only if it can start before the name appears, so the name never vanishes once you've seen it.",
+      "The cursor still stirs the teal current everywhere on the front page."
     ]
   },
   {
