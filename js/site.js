@@ -218,6 +218,19 @@
     });
   }
 
+  /* ------------------------------------------------------------ CONSOLE NOTE
+     For anyone who opens DevTools. The only thing this site prints. */
+
+  function printConsoleNote() {
+    console.log(
+      "%cHi, I'm Conrad Gelber.%c\nI built this site by hand: plain HTML, CSS and JavaScript, no framework.\n\n" +
+        "Hidden shortcuts:\n  Cmd/Ctrl+K  search\n  1 to 6      tabs\n  H           home\n  X           X-ray mode\n  ?           list of shortcuts\n\n" +
+        "Source: https://github.com/conradicle/conradgelber.com",
+      "font:600 15px Georgia,serif;color:#14675E",
+      "font:12px/1.5 ui-monospace,Menlo,Consolas,monospace"
+    );
+  }
+
   /* ---------------------------------------------------------- ON PAGE READY */
 
   function whenShown(run) {
@@ -229,6 +242,7 @@
     showFreshness();
     window.matchMedia(FRESHNESS_WIDTH).addEventListener("change", showFreshness);
     whenShown(showFreshness);
+    whenShown(printConsoleNote);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pageReady);
