@@ -29,3 +29,6 @@
 .login-form button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .login-msg{margin:.4rem 0 0;font-size:.95rem;font-weight:500}
 .login-msg::before{content:"! ";font-weight:600}
+
+/* Use the same dark surface as the rest of the site. */
+:root[data-theme="dark"] .login-form input{background:#17263b;color:var(--ink);border-color:var(--rule)}

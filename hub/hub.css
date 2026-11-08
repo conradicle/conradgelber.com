@@ -74,3 +74,6 @@
 
 /* A wrapped app shown in a frame (see ADDING_TOOLS.md) */
 .hub-frame{display:block;width:100%;height:calc(100vh - 7rem);min-height:480px;border:1px solid var(--rule);background:#fff}
+
+/* Keep controls and tool cards legible in the site’s dark appearance. */
+:root[data-theme="dark"] .tile,:root[data-theme="dark"] .hub-input,:root[data-theme="dark"] .hub-frame{background:#17263b}
