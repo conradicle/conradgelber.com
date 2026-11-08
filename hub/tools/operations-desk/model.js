@@ -14,6 +14,16 @@ const grid = (i, count, spacing = 7, maxColumns = 4) => {
   const cols = Math.min(maxColumns, Math.ceil(Math.sqrt(count)));
   return [(i % cols - (cols - 1) / 2) * spacing, (i % 3) * .85, (Math.floor(i / cols) - (Math.ceil(count / cols) - 1) / 2) * spacing];
 };
+// A spatial arrangement for display only; edges still come solely from records.
+const knowledgePosition = (i, count) => {
+  const n = Math.max(1, Math.min(count, 40));
+  const angle = i * 2.399963229728653;
+  const y = 1 - 2 * ((i + .5) / n);
+  const radius = Math.sqrt(Math.max(0, 1 - y * y));
+  const x = Math.cos(angle) * radius;
+  const z = Math.sin(angle) * radius;
+  return [x * 21 + (x < 0 ? -1.2 : 1.2), 5 + y * 10, z * 11];
+};
 export function makeModel(state) {
   const {view, repos, selected, folder, directory, offset, knowledge, detail, run, jobs} = state;
   const nodes = [], edges = [];
@@ -31,7 +41,7 @@ export function makeModel(state) {
     });
   } else if (view === 'knowledge') {
     const records = [...(knowledge?.projects || []), ...(knowledge?.documents || [])];
-    records.slice(0, 40).forEach((record, i) => add({id: 'knowledge:' + record.path, label: record.title, subtitle: record.status || 'Documented record', kind: 'record', position: grid(i, records.length, 9), action: 'knowledge', value: record.path}));
+    records.slice(0, 40).forEach((record, i) => add({id: 'knowledge:' + record.path, label: record.title, subtitle: record.status || 'Documented record', kind: 'record', position: knowledgePosition(i, records.length), action: 'knowledge', value: record.path}));
     const ids = new Set(nodes.map(n => n.id));
     for (const record of records) for (const path of record.related || []) if (ids.has('knowledge:' + path)) edges.push({from: 'knowledge:' + record.path, to: 'knowledge:' + path});
   } else if (view === 'workflow' && selected && detail) {

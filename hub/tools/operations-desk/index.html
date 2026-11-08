@@ -8,8 +8,8 @@
 <meta name="theme-color" content="#13233C">
 <script src="theme.js?v=1"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="desk.css?v=6">
-<script type="module" src="desk.js?v=9"></script>
+<link rel="stylesheet" href="desk.css?v=7">
+<script type="module" src="desk.js?v=10"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to workspace</a>
@@ -43,8 +43,9 @@
       <p class="rail-note"><span aria-hidden="true">✦</span> Star repositories to show them in Favorites. Choose All repos to add more.</p>
     </aside>
     <section class="stage" aria-label="Interactive explorer">
-      <div class="stage-top"><div><p class="eyebrow" id="view-label">FLEET / OVERVIEW</p><h2 id="view-title" tabindex="-1">Repository fleet</h2></div><div class="stage-actions"><button id="manage-favorites" type="button">Manage favorites</button><span class="dimension-tag" id="render-mode">INITIALIZING</span></div></div>
+      <div class="stage-top"><div><p class="eyebrow" id="view-label">FLEET / OVERVIEW</p><h2 id="view-title" tabindex="-1">Repository fleet</h2></div><div class="stage-actions"><button id="knowledge-labels" type="button" aria-pressed="false" hidden>Show labels</button><button id="manage-favorites" type="button">Manage favorites</button><span class="dimension-tag" id="render-mode">INITIALIZING</span></div></div>
       <nav id="breadcrumbs" aria-label="Explorer breadcrumbs"></nav>
+      <div id="knowledge-summary" class="knowledge-summary" aria-label="Knowledge overview" hidden></div>
       <div class="scene-wrap" id="scene-wrap">
         <canvas id="graph" tabindex="0" aria-label="3D explorer. Arrow keys orbit, plus and minus zoom, Home resets. Use the explorer list for all destinations." aria-describedby="scene-help"></canvas>
         <div id="scene-labels" aria-label="Visible 3D destinations"></div>

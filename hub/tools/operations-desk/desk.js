@@ -1,5 +1,5 @@
 import { toolStore } from '/hub/lib/store.js';
-import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './model.js?v=2';
+import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './model.js?v=3';
 const $ = s => document.querySelector(s), store = toolStore('operations-desk');
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const state = {repos: [], fleetStatus: 'loading', pins: [], pinnedOnly: false, knowledge: null, selected: null, detail: null, view: 'fleet', folder: '', directory: null, offset: 0, run: null, jobs: null, selectedId: null};
@@ -63,6 +63,7 @@ async function pin(name) {
 }
 function setFilter(pinned) { filterChosen = true; state.pinnedOnly = pinned; renderLibrary(); if (state.view === 'fleet') render(true); }
 $('#filter-all').onclick = () => setFilter(false); $('#filter-pins').onclick = () => setFilter(true);
+$('#knowledge-labels').onclick = () => { const shown = $('#knowledge-labels').getAttribute('aria-pressed') !== 'true'; $('#knowledge-labels').setAttribute('aria-pressed', String(shown)); $('#knowledge-labels').textContent = shown ? 'Hide labels' : 'Show labels'; $('#scene-wrap').classList.toggle('show-knowledge-labels', shown); };
 $('#manage-favorites').onclick = () => { $('#library').open = true; setFilter(false); $('#search').focus(); if (matchMedia('(max-width: 600px)').matches) $('#library').scrollIntoView({behavior: motionPreference.matches ? 'instant' : 'smooth', block: 'start'}); };
 function renderLibrary() {
   const out = $('#project-list'), query = $('#search').value.trim().toLowerCase(), focusKey = out.contains(document.activeElement) ? document.activeElement.dataset.focus : null; out.replaceChildren();
@@ -250,12 +251,19 @@ function render(reset = false) {
   for (const b of document.querySelectorAll('[data-view]')) { const active = b.dataset.view === state.view; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)); }
   $('#scene-wrap').dataset.view = state.view;
   $('#manage-favorites').hidden = state.view !== 'fleet';
+  $('#knowledge-labels').hidden = state.view !== 'knowledge';
   $('#view-label').textContent = state.view.toUpperCase() + ' / ' + (state.selected && state.view !== 'fleet' && state.view !== 'knowledge' ? state.selected.split('/')[1] : 'OVERVIEW');
   $('#view-title').textContent = {fleet: 'Repository fleet', structure: state.folder ? state.folder.split('/').pop() : 'Repository structure', workflow: state.run ? 'Inside the run' : 'Workflows & runs', knowledge: 'Knowledge constellation'}[state.view];
-  $('#scene-caption').textContent = {fleet: state.pinnedOnly ? 'Favorites only. Use Manage favorites to add more.' : 'All repositories. Star the ones you want in Favorites.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership. Moving dots are decorative, not live execution. Open Explorer list for all retrieved runs.', knowledge: 'Documented records. Connections are explicit references; claims are not measured progress.'}[state.view];
+  $('#scene-caption').textContent = {fleet: state.pinnedOnly ? 'Favorites only. Use Manage favorites to add more.' : 'All repositories. Star the ones you want in Favorites.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership. Moving dots are decorative, not live execution. Open Explorer list for all retrieved runs.', knowledge: 'Select a bright point or use Explorer list. Lines are explicit references; background particles are decorative.'}[state.view];
   renderedModel = makeModel(state);
+  const knowledgeSummary = $('#knowledge-summary'); knowledgeSummary.hidden = state.view !== 'knowledge' || !state.knowledge;
+  knowledgeSummary.replaceChildren();
+  if (!knowledgeSummary.hidden) {
+    const total = (state.knowledge.projects || []).length + (state.knowledge.documents || []).length;
+    for (const [value, label] of [[total, 'Records indexed'], [renderedModel.nodes.length, 'Points shown'], [renderedModel.edges.length, 'Links shown']]) { const cell = text('div', '', 'knowledge-stat'); cell.append(text('strong', String(value)), text('span', label)); knowledgeSummary.append(cell); }
+  }
   const signature = state.view + ':' + JSON.stringify(renderedModel);
-  if (scene && signature !== renderedSignature) { scene.setModel(renderedModel, {selected: state.selectedId, reset, animateConnections: state.view === 'workflow'}); renderedSignature = signature; }
+  if (scene && signature !== renderedSignature) { scene.setModel(renderedModel, {selected: state.selectedId, reset, animateConnections: state.view === 'workflow' || state.view === 'knowledge', knowledgeMode: state.view === 'knowledge'}); renderedSignature = signature; }
   else if (scene) { scene.select(state.selectedId); if (reset) scene.reset(); }
   renderBreadcrumbs(); renderOutline();
   if (!state.repos.length && state.view !== 'knowledge' && state.fleetStatus === 'connected') showMessage('No repositories available.', 'The configured connection returned no accessible repositories. Check its repository selection or refresh.', ['Refresh connection', () => sync(true)]);
@@ -284,7 +292,7 @@ function graphicsMode(available) {
   else $('#scene-help').textContent = matchMedia('(max-width: 600px)').matches ? 'One finger orbits · Pinch zooms · Two fingers pan' : 'Drag to orbit · Scroll to zoom · Right-drag to pan';
 }
 async function initScene() {
-  try { const {createScene} = await import('./scene.js?v=8'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true, animateConnections: state.view === 'workflow'}); renderedSignature = state.view + ':' + JSON.stringify(renderedModel); } }
+  try { const {createScene} = await import('./scene.js?v=9'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true, animateConnections: state.view === 'workflow' || state.view === 'knowledge', knowledgeMode: state.view === 'knowledge'}); renderedSignature = state.view + ':' + JSON.stringify(renderedModel); } }
   catch { graphicsMode(false); }
 }
 updateMotion(); initScene(); sync();

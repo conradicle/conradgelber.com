@@ -18,3 +18,7 @@ connections, its dots animate at the display frame rate. Workflow views animate
 all documented membership links; the dots are decorative, not live execution
 status. Otherwise the scene rests when idle. Hidden tabs do not render. Reduced motion and Pause motion stop
 the dots and shorten camera transitions.
+
+Knowledge view includes a decorative field of points to evoke a constellation;
+the field is not data. Brighter selectable points represent retrieved records,
+and lines represent only explicit references among displayed records.
