@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.18.2",
+    "date": "2026-11-07",
+    "title": "Dark mode across the site",
+    "bullets": [
+      "Dark mode now carries over to games and interactive pages, including 12 Axes."
+    ]
+  },
+  {
     "version": "1.18.1",
     "date": "2026-11-07",
     "title": "Updates",

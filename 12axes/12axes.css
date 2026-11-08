@@ -182,3 +182,6 @@
   .ax-diff td{overflow-wrap:anywhere}
   .ax-diff .num{white-space:normal}
 }
+
+:root[data-theme="dark"]{--pole-a:#77b5fa;--pole-b:#ffad66}
+:root[data-theme="dark"] .ax-banner,:root[data-theme="dark"] .ax-select,:root[data-theme="dark"] .ax-input{background:#1c2c43}

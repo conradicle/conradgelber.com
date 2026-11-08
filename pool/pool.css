@@ -291,3 +291,6 @@ body.compact .spin-panel{position:fixed;left:8px;right:8px;bottom:60px;z-index:3
 @media (prefers-reduced-motion:reduce){
   body.compact .banner{transition:none}
 }
+
+:root[data-theme="dark"] .pool input[type="text"],:root[data-theme="dark"] .pool input[type="number"],:root[data-theme="dark"] .pool select,:root[data-theme="dark"] .spin-panel{background:#1c2c43}
+:root[data-theme="dark"] .clock.low .clock-text,:root[data-theme="dark"] .banner.foul{color:#ffb4a6}

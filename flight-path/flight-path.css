@@ -155,3 +155,6 @@
   .tally{grid-template-columns:1fr}
   .guess-row .btn{flex:none}
 }
+
+:root[data-theme="dark"]{--bad-text:#f5a6c9}
+:root[data-theme="dark"] .combo input,:root[data-theme="dark"] .suggestions,:root[data-theme="dark"] .chip{background:#1c2c43}

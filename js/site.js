@@ -5,7 +5,7 @@
   "use strict";
 
   // Game pages and other full-screen apps mark their script tag with data-app.
-  // They draw with their own colors, so they stay in the light theme.
+  // This flag keeps single-key site shortcuts out of interactive apps.
   var IS_APP = document.currentScript.hasAttribute("data-app");
   var UI_VERSION = "1";
 
@@ -36,7 +36,7 @@
     document.dispatchEvent(new Event("site:theme"));
   }
 
-  if (!IS_APP && storedTheme() === "dark") document.documentElement.setAttribute("data-theme", "dark");
+  if (storedTheme() === "dark") document.documentElement.setAttribute("data-theme", "dark");
 
   /* ---------------------------------------------------- PAGE TRANSITIONS
      style.css turns on cross-document view transitions. If a visitor navigates
