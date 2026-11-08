@@ -79,3 +79,11 @@ button,.workspace,.search-field,.dimension-tag,.status-pill,#detail pre{border-r
 
 #notice:empty{display:none}
 main{padding-bottom:24px}
+
+/* Fleet tiers are adjustable per repository in the library. */
+.repo-info{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;padding-bottom:7px}
+.repo-info .repo-open{width:100%;flex:initial;padding-bottom:3px}
+.tier-select{max-width:100%;min-height:32px;margin:0 6px;padding:3px 5px;background:var(--panel2);border:1px solid var(--rule);border-radius:2px;color:var(--text);font:10px Plex,system-ui,sans-serif;cursor:pointer}
+.tier-select:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+:root:not([data-theme=dark]) .tier-select{background:#f7f8fa}
+@media(max-width:600px){.tier-select{min-height:44px;font-size:12px}}

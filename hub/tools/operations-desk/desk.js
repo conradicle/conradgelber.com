@@ -1,9 +1,9 @@
 import { toolStore } from '/hub/lib/store.js';
-import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './model.js?v=3';
+import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './model.js?v=4';
 const $ = s => document.querySelector(s), store = toolStore('operations-desk');
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-const state = {repos: [], fleetStatus: 'loading', pins: [], pinnedOnly: false, knowledge: null, selected: null, detail: null, view: 'fleet', folder: '', directory: null, offset: 0, run: null, jobs: null, selectedId: null};
-let graphicsAvailable = null, inspectorEpoch = 0, initialFavoritesApplied = false, filterChosen = false;
+const state = {repos: [], fleetStatus: 'loading', pins: [], tiers: {}, pinnedOnly: false, knowledge: null, selected: null, detail: null, view: 'fleet', folder: '', directory: null, offset: 0, run: null, jobs: null, selectedId: null};
+let graphicsAvailable = null, inspectorEpoch = 0, initialFavoritesApplied = false, filterChosen = false, tiersRevision = 0;
 let scene = null, locked = false, paused = motionPreference.matches, epoch = 0, fileEpoch = 0, lastInput = Date.now(), pending = new Set(), directories = new Map(), loadingFolder = false, folderError = '', renderedModel = {nodes: [], edges: []}, renderedSignature = null;
 const text = (tag, value, cls) => { const e = document.createElement(tag); e.textContent = value ?? ''; if (cls) e.className = cls; return e; };
 const button = (label, fn, cls = 'list-button') => { const b = text('button', label, cls); b.type = 'button'; b.addEventListener('click', fn); return b; };
@@ -11,7 +11,7 @@ function link(label, url) { const a = text('a', label); try { const u = new URL(
 function notice(message, error = false) { if (locked) return; $('#notice').textContent = message; $('#notice').classList.toggle('error', error); }
 function clearPrivate() {
   for (const controller of pending) controller.abort(); pending.clear(); epoch++; fileEpoch++;
-  Object.assign(state, {repos: [], pins: [], knowledge: null, selected: null, detail: null, directory: null, run: null, jobs: null, selectedId: null});
+  Object.assign(state, {repos: [], pins: [], tiers: {}, knowledge: null, selected: null, detail: null, directory: null, run: null, jobs: null, selectedId: null});
   directories.clear(); renderedModel = {nodes: [], edges: []}; renderedSignature = null; scene?.dispose(); scene = null;
   for (const id of ['#project-list', '#detail', '#alternate', '#results', '#scene-labels', '#breadcrumbs']) $(id)?.replaceChildren();
   if ($('#search')) $('#search').value = '';
@@ -40,8 +40,9 @@ if (matchMedia('(max-width: 600px)').matches) $('#library').open = false;
 async function sync(force = false) {
   notice('Refreshing your repository library and project context…'); $('#refresh').disabled = true;
   const extra = force ? {refresh: '1'} : {};
+  const syncTiersRevision = tiersRevision;
   try {
-    const [fleet, knowledge, pins] = await Promise.allSettled([api({action: 'fleet', ...extra}), api({action: 'knowledge', ...extra}), store.get('pins')]);
+    const [fleet, knowledge, pins, tiers] = await Promise.allSettled([api({action: 'fleet', ...extra}), api({action: 'knowledge', ...extra}), store.get('pins'), store.get('tiers')]);
     if (locked) return;
     const warnings = [];
     if (fleet.status === 'fulfilled') { state.fleetStatus = 'connected'; state.repos = fleet.value.repositories; $('#sync').textContent = 'Fetched ' + new Date(fleet.value.syncedAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); if (fleet.value.incomplete) warnings.push('Repository discovery is limited to 2,000 results.'); }
@@ -49,6 +50,8 @@ async function sync(force = false) {
     if (knowledge.status === 'fulfilled') state.knowledge = knowledge.value; else warnings.push('Knowledge refresh is unavailable.' + (state.knowledge ? ' Showing earlier knowledge records.' : ' Repository browsing still works.'));
     if (pins.status === 'fulfilled' && Array.isArray(pins.value?.value)) state.pins = pins.value.value.filter(n => typeof n === 'string').slice(0,100);
     else if (pins.status === 'rejected') warnings.push('Favorites could not be loaded.');
+    if (tiers.status === 'fulfilled' && tiersRevision === syncTiersRevision) { const value = tiers.value?.value; state.tiers = value && typeof value === 'object' && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).filter(([, tier]) => [1, 2, 3].includes(tier))) : {}; }
+    else if (tiers.status === 'rejected') warnings.push('Repository tiers could not be loaded.');
     if (pins.status === 'fulfilled' && !initialFavoritesApplied) { if (!filterChosen) state.pinnedOnly = state.pins.length > 0; initialFavoritesApplied = true; }
     $('#repo-count').textContent = state.repos.length; $('#library-count').textContent = state.repos.length; $('#knowledge-count').textContent = state.knowledge?.projects.length ?? '—';
     notice(warnings.join(' '), !!warnings.length);
@@ -60,6 +63,19 @@ async function pin(name) {
   const shouldPin = !state.pins.includes(name);
   try { const saved = await store.update('pins', value => { const pins = new Set(Array.isArray(value) ? value : []); shouldPin ? pins.add(name) : pins.delete(name); return [...pins].slice(0, 100); }, []); if (locked) return; state.pins = saved.value; renderLibrary(); if (state.view === 'fleet') render(false); }
   catch { notice('Your favorites could not be saved. Try again.', true); }
+}
+async function setTier(name, tier) {
+  if (![1, 2, 3].includes(tier)) return;
+  try {
+    const saved = await store.update('tiers', value => {
+      const next = value && typeof value === 'object' && !Array.isArray(value) ? {...value} : {};
+      if (tier === 1) delete next[name]; else next[name] = tier;
+      return next;
+    }, {});
+    if (locked) return;
+    tiersRevision++; state.tiers = saved.value;
+    renderLibrary(); if (state.view === 'fleet') render(false);
+  } catch { notice('The repository tier could not be saved. Try again.', true); renderLibrary(); }
 }
 function setFilter(pinned) { filterChosen = true; state.pinnedOnly = pinned; renderLibrary(); if (state.view === 'fleet') render(true); }
 $('#filter-all').onclick = () => setFilter(false); $('#filter-pins').onclick = () => setFilter(true);
@@ -73,10 +89,15 @@ function renderLibrary() {
   for (const repo of repos) {
     const row = text('div', '', 'repo-row'), open = button(repo.name.split('/')[1], () => selectRepo(repo.name), 'repo-open' + (state.selected === repo.name ? ' selected' : ''));
     open.dataset.focus = 'open:' + repo.name; open.setAttribute('aria-label', 'Open repository ' + repo.name); open.append(text('small', (repo.language || 'Repository') + ' · ' + repo.visibility));
-    const pinned = state.pins.includes(repo.name), toggle = button(pinned ? '★' : '☆', () => pin(repo.name), 'pin'); toggle.dataset.focus = 'pin:' + repo.name; toggle.setAttribute('aria-label', (pinned ? 'Remove from favorites: ' : 'Add to favorites: ') + repo.name); toggle.setAttribute('aria-pressed', String(pinned)); row.append(open, toggle); out.append(row);
+    const pinned = state.pins.includes(repo.name), toggle = button(pinned ? '★' : '☆', () => pin(repo.name), 'pin'); toggle.dataset.focus = 'pin:' + repo.name; toggle.setAttribute('aria-label', (pinned ? 'Remove from favorites: ' : 'Add to favorites: ') + repo.name); toggle.setAttribute('aria-pressed', String(pinned));
+    const choice = document.createElement('select'); choice.className = 'tier-select'; choice.dataset.focus = 'tier:' + repo.name; choice.setAttribute('aria-label', 'Fleet tier for ' + repo.name);
+    for (const [value, label] of [[1, 'Tier 1 · Teal'], [2, 'Tier 2 · Blue'], [3, 'Tier 3 · Gold']]) { const option = document.createElement('option'); option.value = String(value); option.textContent = label; choice.append(option); }
+    choice.value = String([1, 2, 3].includes(state.tiers[repo.name]) ? state.tiers[repo.name] : 1);
+    choice.addEventListener('change', () => { choice.disabled = true; setTier(repo.name, Number(choice.value)); });
+    const info = text('div', '', 'repo-info'); info.append(open, choice); row.append(info, toggle); out.append(row);
   }
   if (!repos.length) out.append(text('p', state.pinnedOnly ? 'No favorites match. Choose All repos and star a repository to add it.' : query ? 'No repositories match this search.' : 'No repositories loaded. Try Refresh.', 'muted'));
-  if (focusKey) ([...out.querySelectorAll('button')].find(b => b.dataset.focus === focusKey) || $('#filter-pins')).focus({preventScroll:true});
+  if (focusKey) ([...out.querySelectorAll('[data-focus]')].find(b => b.dataset.focus === focusKey) || $('#filter-pins')).focus({preventScroll:true});
 }
 $('#search').addEventListener('input', () => {
   renderLibrary(); const query = $('#search').value.trim().toLowerCase(), results = $('#results'); results.replaceChildren();
@@ -291,7 +312,7 @@ function graphicsMode(available) {
   else $('#scene-help').textContent = matchMedia('(max-width: 600px)').matches ? 'One finger orbits · Pinch zooms · Two fingers pan' : 'Drag to orbit · Scroll to zoom · Right-drag to pan';
 }
 async function initScene() {
-  try { const {createScene} = await import('./scene.js?v=9'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true, animateConnections: state.view === 'workflow' || state.view === 'knowledge', knowledgeMode: state.view === 'knowledge'}); renderedSignature = state.view + ':' + JSON.stringify(renderedModel); } }
+  try { const {createScene} = await import('./scene.js?v=10'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true, animateConnections: state.view === 'workflow' || state.view === 'knowledge', knowledgeMode: state.view === 'knowledge'}); renderedSignature = state.view + ':' + JSON.stringify(renderedModel); } }
   catch { graphicsMode(false); }
 }
 updateMotion(); initScene(); sync();

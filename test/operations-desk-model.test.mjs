@@ -29,3 +29,9 @@ test('fleet shows all available destinations unless pinned-only is requested',()
   assert.equal(makeModel({...base,view:'fleet',repos,pins:['owner/a']}).nodes.length,2);
   assert.deepEqual(makeModel({...base,view:'fleet',repos,pins:['owner/a'],pinnedOnly:true}).nodes.map(n=>n.id),['repo:owner/a']);
 });
+test('fleet tiers follow saved preferences and fall back safely',()=>{
+  const repos=[{name:'owner/a',visibility:'private'},{name:'owner/b',visibility:'public'},{name:'owner/c',visibility:'private'},{name:'owner/d',visibility:'public'}];
+  const nodes=makeModel({...base,view:'fleet',repos,tiers:{'owner/b':2,'owner/c':3,'owner/d':99}}).nodes;
+  assert.deepEqual(nodes.map(n=>n.tier),[1,2,3,1]);
+  assert.deepEqual(makeModel({...base,view:'fleet',repos,tiers:{'owner/b':2},pins:['owner/b'],pinnedOnly:true}).nodes.map(n=>[n.id,n.tier]),[['repo:owner/b',2]]);
+});

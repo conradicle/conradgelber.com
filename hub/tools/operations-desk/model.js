@@ -26,11 +26,12 @@ const knowledgePosition = (i, count) => {
 };
 export function makeModel(state) {
   const {view, repos, selected, folder, directory, offset, knowledge, detail, run, jobs} = state;
+  const tiers = state.tiers || {};
   const nodes = [], edges = [];
   const add = (node, parent) => { nodes.push(node); if (parent) edges.push({from: parent, to: node.id}); };
   if (view === 'fleet') {
     const fleet = repos.filter(r => !state.pinnedOnly || state.pins.includes(r.name));
-    fleet.slice(0, 40).forEach((r, i) => add({id: 'repo:' + r.name, label: r.name.split('/')[1], subtitle: r.language || r.visibility, kind: 'repo', position: grid(i, Math.min(fleet.length, 40), 13, 7), action: 'repo', value: r.name}));
+    fleet.slice(0, 40).forEach((r, i) => add({id: 'repo:' + r.name, label: r.name.split('/')[1], subtitle: r.language || r.visibility, kind: 'repo', tier: [1, 2, 3].includes(tiers[r.name]) ? tiers[r.name] : 1, position: grid(i, Math.min(fleet.length, 40), 13, 7), action: 'repo', value: r.name}));
   } else if (view === 'structure' && selected) {
     const chain = ancestors(folder);
     chain.forEach((path, i) => add({id: path ? 'path:' + path : 'repo:' + selected, label: path ? path.split('/').pop() : selected.split('/')[1], subtitle: i === chain.length - 1 ? 'Current folder' : 'Parent', kind: path ? 'dir' : 'repo', position: [0, 5 + (chain.length - 1 - i) * 2.5, -9 - (chain.length - 1 - i) * 7], action: 'folder', value: path}, i ? (chain[i - 1] ? 'path:' + chain[i - 1] : 'repo:' + selected) : null));

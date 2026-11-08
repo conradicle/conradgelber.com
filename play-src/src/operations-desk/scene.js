@@ -66,14 +66,15 @@ export function createScene({canvas, labels, onActivate, onMode}) {
   function glow(color,size,position) { const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture,color,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));sprite.scale.set(size,size,1);sprite.position.copy(position);return sprite; }
   function release(group) {group.traverse(o=>{o.geometry?.dispose();if(o.material){for(const m of Array.isArray(o.material)?o.material:[o.material])m.dispose();}});}
   function makeObject(node) {
-    const color=COLORS[node.kind]||COLORS.file, group=new THREE.Group(), major=node.kind==='repo', record=node.kind==='record';
+    const major=node.kind==='repo', record=node.kind==='record', tier=major&&[2,3].includes(node.tier)?node.tier:1;
+    const color=major?({1:0x8de8e0,2:0x80aaff,3:0xf1c57a})[tier]:(COLORS[node.kind]||COLORS.file), group=new THREE.Group();
     const base=new THREE.Mesh(new THREE.CylinderGeometry(major?2.6:1.75,major?2.9:1.95,.28,6),new THREE.MeshStandardMaterial({color:0x132638,roughness:.45,metalness:.65}));
     base.position.y=-.8;if(!record)group.add(base);
     const rim=new THREE.LineSegments(new THREE.EdgesGeometry(base.geometry),new THREE.LineBasicMaterial({color,transparent:true,opacity:.5}));rim.position.copy(base.position);if(!record)group.add(rim);
     if(record){base.geometry.dispose();base.material.dispose();rim.geometry.dispose();rim.material.dispose();}
     const height=major?2.9:node.kind==='dir'?1.7:.6;
     const geometry=record?new THREE.SphereGeometry(.65,12,8):major?new THREE.CylinderGeometry(.9,1.2,height,6):new THREE.BoxGeometry(node.kind==='dir'?2:1.5,height,node.kind==='dir'?1.3:1);
-    const body=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:major?0x204558:node.kind==='dir'?0x243b62:0x28354b,emissive:color,emissiveIntensity:record?.8:.16,metalness:.6,roughness:.35}));body.position.y=.1+height/2;group.add(body);
+    const body=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:major?({1:0x204558,2:0x273f70,3:0x684b30})[tier]:node.kind==='dir'?0x243b62:0x28354b,emissive:color,emissiveIntensity:record?.8:.16,metalness:.6,roughness:.35}));body.position.y=.1+height/2;group.add(body);
     const outline=new THREE.LineSegments(new THREE.EdgesGeometry(geometry),new THREE.LineBasicMaterial({color,transparent:true,opacity:.8}));outline.position.copy(body.position);if(!record)group.add(outline);else{outline.geometry.dispose();outline.material.dispose();}
     if(major){
       for(let i=0;i<3;i++){const band=new THREE.Mesh(new THREE.TorusGeometry(1.14,.025,5,6),new THREE.MeshBasicMaterial({color}));band.rotation.x=Math.PI/2;band.position.y=.65+i*.8;group.add(band);}
@@ -83,7 +84,8 @@ export function createScene({canvas, labels, onActivate, onMode}) {
     }
     const halo=glow(color,record?5:major?6:3.8,new THREE.Vector3(0,height/2,0));group.add(halo);
     const marker=new THREE.Mesh(new THREE.RingGeometry(major?3:2.1,major?3.08:2.18,64),new THREE.MeshBasicMaterial({color:0xf0c789,side:THREE.DoubleSide,transparent:true,opacity:.9}));marker.rotation.x=-Math.PI/2;marker.position.y=-.58;marker.visible=false;group.add(marker);
-    group.position.set(...node.position);objects.add(group);
+    const scale=major?({1:1,2:1.35,3:1.7})[tier]:1;
+    group.scale.setScalar(scale);group.position.set(...node.position);objects.add(group);
     const label=document.createElement('button');label.type='button';label.className='scene-label';label.dataset.kind=node.kind;label.dataset.node=node.id;
     const name=document.createElement('span');name.textContent=node.label;
     const meta=document.createElement('small');meta.textContent=node.subtitle;
@@ -91,7 +93,7 @@ export function createScene({canvas, labels, onActivate, onMode}) {
     label.title=`${node.label} · ${node.subtitle}`;
     label.addEventListener('click',()=>onActivate(node));label.addEventListener('focus',()=>select(node.id));labels.append(label);
     body.userData.node=node;
-    return {node,group,body,label,marker,halo,labelPoint:new THREE.Vector3(...node.position).add(new THREE.Vector3(0,major?5:3,0))};
+    return {node,group,body,label,marker,halo,labelPoint:new THREE.Vector3(...node.position).add(new THREE.Vector3(0,major?5*scale:3,0))};
   }
   function setModel(next,{selected=null,reset=true,animateConnections=false,knowledgeMode=false}={}) {
     animateAllEdges=animateConnections;knowledgeModeActive=knowledgeMode;
