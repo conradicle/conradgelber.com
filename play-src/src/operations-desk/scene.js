@@ -54,7 +54,7 @@ export function createScene({canvas, labels, onActivate, onMode}) {
   fieldGeometry.setAttribute('color',new THREE.Float32BufferAttribute(fieldColors,3));
   const knowledgeField=new THREE.Points(fieldGeometry,new THREE.PointsMaterial({size:.2,vertexColors:true,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false}));
   knowledgeField.visible=false;scene.add(knowledgeField);
-  let objects=new THREE.Group(), items=[], paths=[], model={nodes:[],edges:[]}, selectedId=null, animateAllEdges=false, knowledgeModeActive=false, paused=false, reduced=false, disposed=false, contextLost=false, frame=0, pointerStart=null, tween=null, dirty=true, labelsDirty=true;
+  let objects=new THREE.Group(), items=[], paths=[], model={nodes:[],edges:[]}, selectedId=null, animateAllEdges=false, knowledgeModeActive=false, fleetModeActive=false, paused=false, reduced=false, disposed=false, contextLost=false, frame=0, pointerStart=null, tween=null, dirty=true, labelsDirty=true;
   scene.add(objects);
   const raycaster=new THREE.Raycaster(), pointer=new THREE.Vector2();
   const targetPoint=new THREE.Vector3();
@@ -95,8 +95,8 @@ export function createScene({canvas, labels, onActivate, onMode}) {
     body.userData.node=node;
     return {node,group,body,label,marker,halo,labelPoint:new THREE.Vector3(...node.position).add(new THREE.Vector3(0,major?5*scale:3,0))};
   }
-  function setModel(next,{selected=null,reset=true,animateConnections=false,knowledgeMode=false}={}) {
-    animateAllEdges=animateConnections;knowledgeModeActive=knowledgeMode;
+  function setModel(next,{selected=null,reset=true,animateConnections=false,knowledgeMode=false,fleetMode=false}={}) {
+    animateAllEdges=animateConnections;knowledgeModeActive=knowledgeMode;fleetModeActive=fleetMode;
     knowledgeField.visible=knowledgeMode&&next.nodes.length>0;
     floor.visible=grid.visible=orbital.visible=!knowledgeMode;
     release(objects);scene.remove(objects);objects=new THREE.Group();scene.add(objects);labels.replaceChildren();paths=[];model=next;
@@ -116,8 +116,8 @@ export function createScene({canvas, labels, onActivate, onMode}) {
     const bounds=new THREE.Box3();for(const item of items)bounds.expandByPoint(item.group.position);
     if(bounds.isEmpty()){move(new THREE.Vector3(),new THREE.Vector3(28,30,38));return;}
     const center=bounds.getCenter(new THREE.Vector3()),size=bounds.getSize(new THREE.Vector3());
-    const extent=Math.max(size.x,size.z,15), distance=THREE.MathUtils.clamp((extent*.94+16)*Math.max(1,1.3/camera.aspect),26,110);
-    move(center.clone().add(new THREE.Vector3(0,-1,0)),center.clone().add(new THREE.Vector3(distance*.52,distance*.7,distance*.93)));
+    const extent=Math.max(size.x,size.z,15), distance=THREE.MathUtils.clamp((extent*(fleetModeActive?.7:.94)+16)*Math.max(1,1.3/camera.aspect),26,110);
+    move(center.clone().add(new THREE.Vector3(0,-1,0)),center.clone().add(fleetModeActive?new THREE.Vector3(distance*.25,distance*.9,distance*.75):new THREE.Vector3(distance*.52,distance*.7,distance*.93)));
   }
   function focus(id) {const item=items.find(x=>x.node.id===id);if(!item)return;const point=item.group.position.clone().add(new THREE.Vector3(0,1,0));move(point,point.clone().add(new THREE.Vector3(11,13,20)));select(id);}
   function select(id) {selectedId=id;for(const item of items){const active=item.node.id===id;item.marker.visible=active;item.label.classList.toggle('selected',active);item.body.material.emissiveIntensity=active?1:(item.node.kind==='record'?.8:.16);}for(const p of paths){const active=[p.edge.from,p.edge.to].includes(id);p.line.material.opacity=active?.8:knowledgeModeActive?.48:.23;p.line.material.color.setHex(active?0xe9c58c:knowledgeModeActive?0x61baff:0x6abfc5);p.pulse.visible=animateAllEdges||active;}dirty=true;labelsDirty=true;requestFrame();}

@@ -35,3 +35,22 @@ test('fleet tiers follow saved preferences and fall back safely',()=>{
   assert.deepEqual(nodes.map(n=>n.tier),[1,2,3,1]);
   assert.deepEqual(makeModel({...base,view:'fleet',repos,tiers:{'owner/b':2},pins:['owner/b'],pinnedOnly:true}).nodes.map(n=>[n.id,n.tier]),[['repo:owner/b',2]]);
 });
+test('fleet tiers form ordered, separated rings regardless of repository order',()=>{
+  const repos=Array.from({length:40},(_,i)=>({name:'owner/repo-'+String(i).padStart(2,'0'),visibility:'private'}));
+  const tiers=Object.fromEntries(repos.map((r,i)=>[r.name,i<3?3:i<12?2:1]));
+  const nodes=makeModel({...base,view:'fleet',repos,tiers}).nodes;
+  const radius=n=>Math.hypot(n.position[0],n.position[2]);
+  const ranges=[1,2,3].map(t=>nodes.filter(n=>n.tier===t).map(radius));
+  assert.ok(Math.max(...ranges[2])<Math.min(...ranges[1]));
+  assert.ok(Math.max(...ranges[1])<Math.min(...ranges[0]));
+  for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++)assert.ok(Math.hypot(nodes[i].position[0]-nodes[j].position[0],nodes[i].position[2]-nodes[j].position[2])>10);
+  const reordered=makeModel({...base,view:'fleet',repos:[...repos].reverse(),tiers}).nodes;
+  const positions=new Map(nodes.map(n=>[n.id,n.position]));
+  for(const node of reordered)assert.deepEqual(node.position,positions.get(node.id));
+});
+test('fleet honors favorites and handles an empty tier',()=>{
+  const repos=[{name:'owner/a'},{name:'owner/b'},{name:'owner/c'}];
+  const nodes=makeModel({...base,view:'fleet',repos,tiers:{'owner/a':3,'owner/b':1},pins:['owner/a','owner/b'],pinnedOnly:true}).nodes;
+  assert.equal(nodes.length,2);assert.equal(Math.hypot(...[nodes[0].position[0],nodes[0].position[2]]),0);
+  assert.ok(Math.hypot(nodes[1].position[0],nodes[1].position[2])>0);
+});

@@ -14,6 +14,32 @@ const grid = (i, count, spacing = 7, maxColumns = 4) => {
   const cols = Math.min(maxColumns, Math.ceil(Math.sqrt(count)));
   return [(i % cols - (cols - 1) / 2) * spacing, (i % 3) * .85, (Math.floor(i / cols) - (Math.ceil(count / cols) - 1) / 2) * spacing];
 };
+// Place higher tiers inside lower tiers; expand into extra rings as needed.
+function fleetPositions(repos, tiers) {
+  const positions = new Map();
+  let radius = 0, usedCenter = false;
+  const tierOf = repo => [1, 2, 3].includes(tiers[repo.name]) ? tiers[repo.name] : 1;
+  for (const tier of [3, 2, 1]) {
+    const group = repos.filter(repo => tierOf(repo) === tier).sort((a, b) => a.name.localeCompare(b.name));
+    if (!group.length) continue;
+    if (!usedCenter && group.length === 1) {
+      positions.set(group[0].name, [0, 0, 0]); usedCenter = true; continue;
+    }
+    let offset = 0;
+    while (offset < group.length) {
+      radius = radius ? radius + 13 : usedCenter ? 14 : 9;
+      const capacity = Math.max(2, Math.floor(2 * Math.PI * radius / 13));
+      const count = Math.min(capacity, group.length - offset);
+      const phase = -Math.PI / 2 + (Math.round(radius) % 2 ? 0 : Math.PI / Math.max(2, count));
+      for (let i = 0; i < count; i++) {
+        const angle = phase + i * 2 * Math.PI / count;
+        positions.set(group[offset + i].name, [radius * Math.cos(angle), 0, radius * Math.sin(angle)]);
+      }
+      usedCenter = true; offset += count;
+    }
+  }
+  return positions;
+}
 // A spatial arrangement for display only; edges still come solely from records.
 const knowledgePosition = (i, count) => {
   const n = Math.max(1, Math.min(count, 40));
@@ -31,7 +57,8 @@ export function makeModel(state) {
   const add = (node, parent) => { nodes.push(node); if (parent) edges.push({from: parent, to: node.id}); };
   if (view === 'fleet') {
     const fleet = repos.filter(r => !state.pinnedOnly || state.pins.includes(r.name));
-    fleet.slice(0, 40).forEach((r, i) => add({id: 'repo:' + r.name, label: r.name.split('/')[1], subtitle: r.language || r.visibility, kind: 'repo', tier: [1, 2, 3].includes(tiers[r.name]) ? tiers[r.name] : 1, position: grid(i, Math.min(fleet.length, 40), 13, 7), action: 'repo', value: r.name}));
+    const visible = fleet.slice(0, 40), positions = fleetPositions(visible, tiers);
+    visible.forEach(r => add({id: 'repo:' + r.name, label: r.name.split('/')[1], subtitle: r.language || r.visibility, kind: 'repo', tier: [1, 2, 3].includes(tiers[r.name]) ? tiers[r.name] : 1, position: positions.get(r.name), action: 'repo', value: r.name}));
   } else if (view === 'structure' && selected) {
     const chain = ancestors(folder);
     chain.forEach((path, i) => add({id: path ? 'path:' + path : 'repo:' + selected, label: path ? path.split('/').pop() : selected.split('/')[1], subtitle: i === chain.length - 1 ? 'Current folder' : 'Parent', kind: path ? 'dir' : 'repo', position: [0, 5 + (chain.length - 1 - i) * 2.5, -9 - (chain.length - 1 - i) * 7], action: 'folder', value: path}, i ? (chain[i - 1] ? 'path:' + chain[i - 1] : 'repo:' + selected) : null));

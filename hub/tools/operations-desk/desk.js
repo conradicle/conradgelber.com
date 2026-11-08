@@ -1,5 +1,5 @@
 import { toolStore } from '/hub/lib/store.js';
-import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './model.js?v=4';
+import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './model.js?v=5';
 const $ = s => document.querySelector(s), store = toolStore('operations-desk');
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const state = {repos: [], fleetStatus: 'loading', pins: [], tiers: {}, pinnedOnly: false, knowledge: null, selected: null, detail: null, view: 'fleet', folder: '', directory: null, offset: 0, run: null, jobs: null, selectedId: null};
@@ -74,7 +74,7 @@ async function setTier(name, tier) {
     }, {});
     if (locked) return;
     tiersRevision++; state.tiers = saved.value;
-    renderLibrary(); if (state.view === 'fleet') render(false);
+    renderLibrary(); if (state.view === 'fleet') render(true);
   } catch { notice('The repository tier could not be saved. Try again.', true); renderLibrary(); }
 }
 function setFilter(pinned) { filterChosen = true; state.pinnedOnly = pinned; renderLibrary(); if (state.view === 'fleet') render(true); }
@@ -283,7 +283,7 @@ function render(reset = false) {
     for (const [value, label] of [[total, 'Records indexed'], [renderedModel.nodes.length, 'Points shown'], [renderedModel.edges.length, 'Links shown']]) { const cell = text('div', '', 'knowledge-stat'); cell.append(text('strong', String(value)), text('span', label)); knowledgeSummary.append(cell); }
   }
   const signature = state.view + ':' + JSON.stringify(renderedModel);
-  if (scene && signature !== renderedSignature) { scene.setModel(renderedModel, {selected: state.selectedId, reset, animateConnections: state.view === 'workflow' || state.view === 'knowledge', knowledgeMode: state.view === 'knowledge'}); renderedSignature = signature; }
+  if (scene && signature !== renderedSignature) { scene.setModel(renderedModel, {selected: state.selectedId, reset, animateConnections: state.view === 'workflow' || state.view === 'knowledge', knowledgeMode: state.view === 'knowledge', fleetMode: state.view === 'fleet'}); renderedSignature = signature; }
   else if (scene) { scene.select(state.selectedId); if (reset) scene.reset(); }
   renderBreadcrumbs(); renderOutline();
   if (!state.repos.length && state.view !== 'knowledge' && state.fleetStatus === 'connected') showMessage('No repositories available.', 'The configured connection returned no accessible repositories. Check its repository selection or refresh.', ['Refresh connection', () => sync(true)]);
@@ -312,7 +312,7 @@ function graphicsMode(available) {
   else $('#scene-help').textContent = matchMedia('(max-width: 600px)').matches ? 'One finger orbits · Pinch zooms · Two fingers pan' : 'Drag to orbit · Scroll to zoom · Right-drag to pan';
 }
 async function initScene() {
-  try { const {createScene} = await import('./scene.js?v=10'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true, animateConnections: state.view === 'workflow' || state.view === 'knowledge', knowledgeMode: state.view === 'knowledge'}); renderedSignature = state.view + ':' + JSON.stringify(renderedModel); } }
+  try { const {createScene} = await import('./scene.js?v=11'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true, animateConnections: state.view === 'workflow' || state.view === 'knowledge', knowledgeMode: state.view === 'knowledge', fleetMode: state.view === 'fleet'}); renderedSignature = state.view + ':' + JSON.stringify(renderedModel); } }
   catch { graphicsMode(false); }
 }
 updateMotion(); initScene(); sync();
