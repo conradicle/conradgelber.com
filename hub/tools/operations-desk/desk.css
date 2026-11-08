@@ -13,3 +13,46 @@ main{padding:0 28px}.intro{display:flex;align-items:center;justify-content:space
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 @media(max-width:600px){.head-actions button,.scene-label,.scene-tools button,.stage-foot button,.library-filter button,summary{min-height:44px}.scene-tools button{min-width:44px}.pin{width:44px}}
+
+/* The desk shares the site's editorial type, paper, ink and teal. The 3D
+   viewport keeps a dark backdrop so its spatial cues remain legible. */
+@font-face{font-family:Spectral;src:url('/fonts/spectral-latin-600.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:Spectral;src:url('/fonts/spectral-latin-400.woff2') format('woff2');font-weight:400;font-display:swap}
+body{-webkit-font-smoothing:antialiased}
+h1,.stage-top h2,#detail h2,#scene-message h3{font-family:Spectral,Georgia,serif;font-weight:600;letter-spacing:-.022em}
+h1{font-size:clamp(2rem,3.6vw,3rem);line-height:1.1}
+.mast{border-bottom-width:2px}.brand{letter-spacing:normal;gap:10px;font-size:14px}.brand-name{font:600 1.25rem/1.3 Spectral,Georgia,serif}.brand-divider{color:var(--muted)}.brand-current{font-size:12px;color:var(--muted)}
+button,.workspace,.search-field,.dimension-tag,.status-pill,#detail pre{border-radius:2px}.workspace{box-shadow:none}
+:root:not([data-theme=dark]){color-scheme:light;--bg:#eef0f3;--panel:#fff;--panel2:#f6f7f8;--rule:#c7cdd7;--text:#13233c;--muted:#4a5870;--cyan:#14675e;--amber:#14675e;--violet:#14675e}
+:root:not([data-theme=dark]) .mast{background:var(--bg);border-bottom-color:var(--text)}
+:root:not([data-theme=dark]) button:hover{background:#e5eeeb;border-color:#14675e}
+:root:not([data-theme=dark]) .head-actions .lock{border-color:var(--rule);color:var(--text)}
+:root:not([data-theme=dark]) .rail,:root:not([data-theme=dark]) .inspector{background:#fff}
+:root:not([data-theme=dark]) .view.active{background:#edf4f1;border-color:#bdd4cc;color:#14675e;box-shadow:inset 2px 0 #14675e}
+:root:not([data-theme=dark]) .view small,:root:not([data-theme=dark]) .view .nav-number{color:#4a5870}
+:root:not([data-theme=dark]) summary{color:#13233c}
+:root:not([data-theme=dark]) .search-field{background:#fff}
+:root:not([data-theme=dark]) .search-field input::placeholder{color:#637086}
+:root:not([data-theme=dark]) .library-filter .active{background:#e6efeb;border-color:#14675e}
+:root:not([data-theme=dark]) .repo-row,:root:not([data-theme=dark]) .list-button{border-bottom-color:#e1e5ea}
+:root:not([data-theme=dark]) .pin{color:#637086}
+:root:not([data-theme=dark]) .pin[aria-pressed=true]{color:#14675e}
+:root:not([data-theme=dark]) .stage{background:#fff}
+:root:not([data-theme=dark]) .stage-foot,:root:not([data-theme=dark]) #outline{background:#f7f8fa}
+:root:not([data-theme=dark]) .dimension-tag{color:#14675e;border-color:#9fbfb4}
+:root:not([data-theme=dark]) #breadcrumbs button[aria-current]{color:#14675e}
+:root:not([data-theme=dark]) #detail h3{color:#4a5870}
+:root:not([data-theme=dark]) #detail pre{background:#f4f6f8;border-color:#c7cdd7;color:#13233c}
+:root:not([data-theme=dark]) .list-button:hover{background:#edf4f1}
+:root:not([data-theme=dark]) .action-row .primary{background:#13233c;border-color:#13233c;color:#fff}
+:root:not([data-theme=dark]) .action-row .primary:hover{background:#14675e;border-color:#14675e}
+:root:not([data-theme=dark]) #notice.error{color:#9a3f29}
+:root:not([data-theme=dark]) .file-summary{color:#14675e}
+:root:not([data-theme=dark]) footer{color:#4a5870}
+:root:not([data-theme=dark]) .scene-tools button{background:#0e1a29e8;border-color:#365469;color:#e3ebf2}
+:root:not([data-theme=dark]) .scene-tools button:hover{background:#1b2c3d;color:#fff}
+:root:not([data-theme=dark]) .scene-label{color:#e2edf6}
+:root:not([data-theme=dark]) .scene-label.selected{color:#fff2da}
+:root:not([data-theme=dark]) #scene-message h3{color:#dbe7ee}
+@media(max-width:600px){.brand{gap:6px}.brand-name{font-size:1.1rem}.brand-current{font-size:10px}h1{font-size:2rem}}
+@media(max-width:420px){.intro{align-items:flex-start;gap:8px}.intro>div:first-child{min-width:0}.readouts{flex-shrink:0;max-width:68px}.readouts>div{min-width:0}.readouts span{overflow-wrap:anywhere}.head-actions #motion{max-width:54px}footer{letter-spacing:.06em}}

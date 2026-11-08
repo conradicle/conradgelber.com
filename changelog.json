@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.18.3",
+    "date": "2026-11-07",
+    "title": "Updates",
+    "bullets": [
+      "Added a private personal area."
+    ]
+  },
+  {
     "version": "1.18.2",
     "date": "2026-11-07",
     "title": "Dark mode across the site",
