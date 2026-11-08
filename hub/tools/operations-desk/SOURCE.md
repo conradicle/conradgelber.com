@@ -13,6 +13,7 @@ The page remains usable through HTML lists if WebGL is unavailable or the contex
 Scene limits: 40 fleet destinations, 15 immediate folder entries per page,
 4 workflow definitions and 12 runs in the overview, or 6 jobs and 5 steps per
 job for a selected run. Retrieved workflow details remain available in the
-inspector and list. Rendering follows the display during interaction and camera movement, then stops
-when the scene is idle. Hidden tabs do not render. Reduced motion and Pause motion
-continue to shorten camera transitions and remove the selected connection marker.
+inspector and list. Camera movement renders at the display rate. When a selected node has visible
+connections, its dots animate at up to 20 updates per second; otherwise the scene
+rests when idle. Hidden tabs do not render. Reduced motion and Pause motion stop
+the dots and shorten camera transitions.
