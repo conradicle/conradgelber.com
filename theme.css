@@ -1,0 +1,21 @@
+/* Shared site palette. Dark is the default; visitors may explicitly choose light. */
+:root,:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#05090d;
+  --surface:#0c141c;
+  --surface-elevated:#131f2a;
+  --ink:#eaf0f2;
+  --ink-soft:#b6c5cc;
+  --rule:#526267;
+  --accent:#9bd2d6;
+}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --paper:#eef0f3;
+  --surface:#f8f9fa;
+  --surface-elevated:#fff;
+  --ink:#13233c;
+  --ink-soft:#4a5870;
+  --rule:#c7cdd7;
+  --accent:#14675e;
+}

@@ -10,7 +10,7 @@
   var UI_VERSION = "1";
 
   /* --------------------------------------------------------------- THEME
-     The site is light unless a visitor picks dark from the command palette. */
+     The site defaults to dark; an explicit choice is remembered. */
 
   var THEME_KEY = "site-theme";
 
@@ -29,14 +29,14 @@
   function toggleTheme() {
     var next = currentTheme() === "dark" ? "light" : "dark";
     if (next === "dark") document.documentElement.setAttribute("data-theme", "dark");
-    else document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", "light");
     try {
       localStorage.setItem(THEME_KEY, next);
     } catch (err) {}
     document.dispatchEvent(new Event("site:theme"));
   }
 
-  if (storedTheme() === "dark") document.documentElement.setAttribute("data-theme", "dark");
+  document.documentElement.setAttribute("data-theme", storedTheme() === "light" ? "light" : "dark");
 
   /* ---------------------------------------------------- PAGE TRANSITIONS
      style.css turns on cross-document view transitions. If a visitor navigates

@@ -76,11 +76,11 @@
 .hub-frame{display:block;width:100%;height:calc(100vh - 7rem);min-height:480px;border:1px solid var(--rule);background:#fff}
 
 /* Keep controls and tool cards legible in the site’s dark appearance. */
-:root[data-theme="dark"] .tile,:root[data-theme="dark"] .hub-input,:root[data-theme="dark"] .hub-frame{background:#17263b}
+:root[data-theme="dark"] .tile,:root[data-theme="dark"] .hub-input,:root[data-theme="dark"] .hub-frame{background:var(--surface-elevated)}
 
 /* Give the desk a clear entry point while retaining the shared Hub palette. */
 .featured-slot{margin:1.2rem 0 2.5rem}
-.featured-desk{position:relative;isolation:isolate;display:flex;align-items:center;min-height:235px;overflow:hidden;padding:2rem 2.2rem;background:#13233c;color:#f0f4f7;border:1px solid #263d59;border-top:3px solid #5cc4b5;border-radius:2px}
+.featured-desk{position:relative;isolation:isolate;display:flex;align-items:center;min-height:235px;overflow:hidden;padding:2rem 2.2rem;background:var(--surface-elevated);color:var(--ink);border:1px solid var(--rule);border-top:3px solid var(--accent);border-radius:2px}
 .featured-desk:hover{color:#fff;border-top-color:#a0e2d7}
 .featured-desk:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
 .featured-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;max-width:25rem}

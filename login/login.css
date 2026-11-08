@@ -31,4 +31,4 @@
 .login-msg::before{content:"! ";font-weight:600}
 
 /* Use the same dark surface as the rest of the site. */
-:root[data-theme="dark"] .login-form input{background:#17263b;color:var(--ink);border-color:var(--rule)}
+:root[data-theme="dark"] .login-form input{background:var(--surface-elevated);color:var(--ink);border-color:var(--rule)}

@@ -53,7 +53,7 @@ export function gatedCanonical(resolved) {
 // case, and a name followed by a character that can't be part of it still
 // counts ("DEPLOY.md;x"). Takes a path from resolvePath.
 const BLOCKED_FIRST =
-  /^(play-src|pool-worker|historybowl-worker|floorplan|graphify-out|node_modules|functions|scripts|test|db|wrangler\.jsonc|_headers|_routes\.json)(?![a-z0-9_-])/i;
+  /^(play-src|pool-worker|historybowl-worker|floorplan|graphify-out|node_modules|functions|scripts|test|docs|db|wrangler\.jsonc|_headers|_routes\.json)(?![a-z0-9_-])/i;
 const BLOCKED_ANY_DEPTH = /\.md(?![a-z0-9_-])/i;
 const DOTFILE = /^\.(?!well-known$)/i;
 

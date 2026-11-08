@@ -72,7 +72,7 @@ ${sharingImage ? `<meta property="og:image" content="${escape(sharingImage)}">
 <meta name="twitter:description" content="${escape(p.sharing.description)}">
 ${sharingImage ? `<meta name="twitter:image" content="${escape(sharingImage)}">
 <meta name="twitter:image:alt" content="${escape(p.sharing.imageAlt)}">` : ""}
-<meta name="theme-color" content="#EEF0F3">
+<meta name="theme-color" content="#05090d">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>

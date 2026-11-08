@@ -1,4 +1,4 @@
-// Apply the site's saved appearance without loading the public navigation UI.
+// Apply the saved appearance before the page is painted.
 try {
-  if (localStorage.getItem('site-theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-} catch { /* Keep the default light theme when storage is unavailable. */ }
+  document.documentElement.dataset.theme = localStorage.getItem('site-theme') === 'light' ? 'light' : 'dark';
+} catch { document.documentElement.dataset.theme = 'dark'; }

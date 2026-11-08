@@ -72,5 +72,5 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outlin
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-:root[data-theme="dark"] .readout,:root[data-theme="dark"] .status{background:#1c2c43ed}
+:root[data-theme="dark"] .readout,:root[data-theme="dark"] .status{background:var(--surface-elevated)}
 :root[data-theme="dark"] .mountain-card.active,:root[data-theme="dark"] .mountain-card:hover,:root[data-theme="dark"] .mountain-card:focus-visible,:root[data-theme="dark"] #run-detail{background:#263b48}

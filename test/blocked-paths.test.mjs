@@ -15,7 +15,7 @@ test("repo docs and config are blocked, however they are spelled", () => {
     "/DEPLOY.md", "/ADDING_TOOLS.md", "/CLAUDE.md", "/CLAUDE.local.md", "/wrangler.jsonc",
     "/aspen/README.md", "/hurricanes/README.md", "/connect/profile.mjs",
     "/.gitignore", "/.gitattributes", "/.dev.vars", "/.env", "/_headers", "/_routes.json",
-    "/scripts/build-connect.mjs", "/test/hub-flow.sh", "/db/migrations/0001_hub.sql",
+    "/scripts/build-connect.mjs", "/test/hub-flow.sh", "/docs/", "/docs/jellyfish-handoff.md", "/db/migrations/0001_hub.sql",
     "/functions/_middleware.js", "/play-src/package.json", "/floorplan/index.html",
     "/pool-worker/wrangler.jsonc", "/historybowl-worker/package.json",
     "/deploy.md", "//DEPLOY.md", "/%44EPLOY.md", "/%2FDEPLOY.md", "/x/../DEPLOY.md",

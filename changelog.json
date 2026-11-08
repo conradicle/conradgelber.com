@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.18.17",
+    "date": "2026-11-08",
+    "title": "A digital ocean",
+    "bullets": [
+      "Jellyfish made of code now swim independently, with pulsing bells and flowing tentacles.",
+      "The dark palette now carries through the site, with the optional light theme still available.",
+      "Restored the original portrait layout."
+    ]
+  },
+  {
     "version": "1.18.16",
     "date": "2026-11-08",
     "title": "Work and interests",

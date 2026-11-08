@@ -1,3 +1,4 @@
+@import url("/theme.css");
 /* Self-hosted fonts, latin subset (same unicode-range Google Fonts serves). */
 @font-face{
   font-family:"Spectral";
@@ -34,23 +35,8 @@
 }
 
 :root{
-  color-scheme: light;
-  --paper:#EEF0F3;
-  --ink:#13233C;
-  --ink-soft:#4A5870;
-  --rule:#C7CDD7;
-  --accent:#14675E;
   --measure:63ch;
   --h1-size:clamp(2.7rem,8.4vw,4.9rem);
-}
-/* Only ever on if a visitor picks it from the command palette (js/site.js). */
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --paper:#0F1B2E;
-  --ink:#E7EBF1;
-  --ink-soft:#A6B1C2;
-  --rule:#34435C;
-  --accent:#5CC4B5;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -76,54 +62,21 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius
 .skip{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
 .skip:focus{position:fixed;left:1rem;top:1rem;width:auto;height:auto;z-index:10;padding:.6rem 1rem;background:var(--paper);border:2px solid var(--ink);color:var(--ink)}
 
-/* Front page hero: a full-width band behind the masthead and tabs. The canvas
-   (js/inkfield.js) stays invisible until its first frame is ready, so with no
-   WebGL or no JS the band is just the paper. */
-.hero{
-  position:relative;
-  isolation:isolate;
-  min-height:70vh;
-  /* Open chart below the tabs. Without this a laptop gets none, since the
-     masthead and tabs alone already fill 70vh of an 800px-tall window. */
-  padding-bottom:clamp(5rem,14vh,8.5rem);
-}
-@media (max-width:640px){
-  /* The stacked masthead already runs past 55vh, so phones add no open band
-     that would push the intro further down. */
-  .hero{min-height:55vh;padding-bottom:0}
-}
-.inkfield{
-  position:absolute;
-  inset:0;
-  z-index:-1;
-  display:block;
-  width:100%;
-  height:100%;
-  pointer-events:none;
-  opacity:0;
-  transition:opacity 1.8s ease;
-}
-.inkfield.is-live{opacity:1}
-.inkfield.is-quick{transition-duration:.7s}
-/* The name must never go from visible to hidden. ink-hold keeps it hidden for
-   its first 150ms on screen, with no JS needed. js/inkfield.js may start the
-   intro only while ink-hold is still running, because after that the name has
-   been seen. Either way it shows on its own when the hold ends. Opacity keeps it
-   real, clickable text for screen readers and search, and keyboard focus always
-   brings it back during the intro. */
-@keyframes ink-hold{from,to{opacity:0}}
-.hero h1{transition:opacity .7s ease}
-@media (prefers-reduced-motion:no-preference){
-  .hero h1{animation:ink-hold .15s linear}
-}
-.hero h1.ink-intro{opacity:0;transition:none}
-.hero h1.ink-intro:focus-within{opacity:1}
-/* The name stays in ink when hovered or focused. */
-.hero h1 a:hover,
-.hero h1 a:focus{color:var(--ink)}
-@media (prefers-reduced-motion:reduce){
-  .inkfield{transition:none}
-}
+/* The artwork is out of flow: the original masthead and portrait grid are unchanged. */
+.hero{position:relative;isolation:isolate;min-height:70vh;padding-bottom:clamp(5rem,14vh,8.5rem);background:radial-gradient(ellipse at 52% 35%,rgba(21,39,53,.22),transparent 72%),var(--paper);color:var(--ink)}
+.hero .wrap{position:relative;z-index:1;pointer-events:none}
+.hero a{pointer-events:auto;color:#eaf0f2;border-bottom-color:#8eaab1}
+.hero a:hover{color:#a9d7dc}
+.hero a:focus-visible{outline-color:#b9e2e5}
+.hero .standfirst,.hero .stamp,.hero .tabs a{color:#c3ced1}
+.hero .stamp{border-top-color:#78898d}
+.hero .tabs{border-bottom-color:#526267}
+.hero .tabs a:hover{color:#fff}
+.hero .portrait img{box-shadow:0 0 0 1.5px #a7b5b8}
+.jellyfish{position:absolute;inset:0 auto auto 0;width:100%;height:calc(100% + 14rem);display:block;pointer-events:none;opacity:0;transition:opacity 1.5s ease}
+.jellyfish.is-live{opacity:1}
+@media(max-width:640px){.hero{min-height:55vh;padding-bottom:0}.hero .tabs a{border-bottom-color:#526267}}
+@media(prefers-reduced-motion:reduce){.jellyfish{transition:none}}
 
 /* Masthead */
 header.mast{padding:clamp(4rem,11vw,7.5rem) 0 2rem}
@@ -214,8 +167,7 @@ h1 a{border-bottom:none;padding-bottom:0}
 a.portrait{border-bottom:none;padding-bottom:0;cursor:default}
 a.portrait:focus-visible{border-radius:50%}
 a.portrait picture{display:block}
-/* The frame is a shadow so it takes no layout room and sits outside the photo.
-   Its width is ISLAND_FRAME_WIDTH in js/inkfield.js. */
+/* The frame is a shadow so it takes no layout room and sits outside the photo. */
 .portrait img{display:block;width:100%;height:auto;aspect-ratio:1 / 1;border-radius:50%;object-fit:cover;object-position:50% 30%;box-shadow:0 0 0 1.5px var(--ink)}
 
 /* Photo band: sits under the section rule, on the column edges, 1.6rem clear
@@ -431,3 +383,13 @@ footer{
 }
 @keyframes view-title-out{to{opacity:0}}
 @keyframes view-title-in{from{opacity:0;transform:translateY(5px)}}
+
+/* The optional light preference remains consistent with the rest of the page. */
+:root[data-theme="light"] .hero{background:var(--paper)}
+:root[data-theme="light"] .hero a{color:var(--ink);border-bottom-color:var(--accent)}
+:root[data-theme="light"] .hero a:hover{color:var(--accent)}
+:root[data-theme="light"] .hero .standfirst,:root[data-theme="light"] .hero .stamp,:root[data-theme="light"] .hero .tabs a{color:var(--ink-soft)}
+:root[data-theme="light"] .hero .stamp{border-top-color:var(--ink)}
+:root[data-theme="light"] .hero .tabs{border-bottom-color:var(--rule)}
+:root[data-theme="light"] .hero .portrait img{box-shadow:0 0 0 1.5px var(--ink)}
+:root[data-theme="light"] .jellyfish{visibility:hidden}
