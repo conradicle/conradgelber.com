@@ -249,10 +249,10 @@ function render(reset = false) {
   $('#scene-wrap').dataset.view = state.view;
   $('#view-label').textContent = state.view.toUpperCase() + ' / ' + (state.selected && state.view !== 'fleet' && state.view !== 'knowledge' ? state.selected.split('/')[1] : 'OVERVIEW');
   $('#view-title').textContent = {fleet: 'Repository fleet', structure: state.folder ? state.folder.split('/').pop() : 'Repository structure', workflow: state.run ? 'Inside the run' : 'Workflows & runs', knowledge: 'Knowledge constellation'}[state.view];
-  $('#scene-caption').textContent = {fleet: 'Repository destinations. No implied dependencies.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership, not execution dependencies. Open Explorer list for all retrieved runs.', knowledge: 'Documented records. Connections are explicit references; claims are not measured progress.'}[state.view];
+  $('#scene-caption').textContent = {fleet: 'Repository destinations. No implied dependencies.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership. Moving dots are decorative, not live execution. Open Explorer list for all retrieved runs.', knowledge: 'Documented records. Connections are explicit references; claims are not measured progress.'}[state.view];
   renderedModel = makeModel(state);
-  const signature = JSON.stringify(renderedModel);
-  if (scene && signature !== renderedSignature) { scene.setModel(renderedModel, {selected: state.selectedId, reset}); renderedSignature = signature; }
+  const signature = state.view + ':' + JSON.stringify(renderedModel);
+  if (scene && signature !== renderedSignature) { scene.setModel(renderedModel, {selected: state.selectedId, reset, animateConnections: state.view === 'workflow'}); renderedSignature = signature; }
   else if (scene) { scene.select(state.selectedId); if (reset) scene.reset(); }
   renderBreadcrumbs(); renderOutline();
   if (!state.repos.length && state.view !== 'knowledge' && state.fleetStatus === 'connected') showMessage('No repositories available.', 'The configured connection returned no accessible repositories. Check its repository selection or refresh.', ['Refresh connection', () => sync(true)]);
@@ -281,7 +281,7 @@ function graphicsMode(available) {
   else $('#scene-help').textContent = matchMedia('(max-width: 600px)').matches ? 'One finger orbits · Pinch zooms · Two fingers pan' : 'Drag to orbit · Scroll to zoom · Right-drag to pan';
 }
 async function initScene() {
-  try { const {createScene} = await import('./scene.js?v=7'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true}); renderedSignature = JSON.stringify(renderedModel); } }
+  try { const {createScene} = await import('./scene.js?v=8'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true, animateConnections: state.view === 'workflow'}); renderedSignature = state.view + ':' + JSON.stringify(renderedModel); } }
   catch { graphicsMode(false); }
 }
 updateMotion(); initScene(); sync();

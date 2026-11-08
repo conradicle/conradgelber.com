@@ -38,7 +38,7 @@ export function createScene({canvas, labels, onActivate, onMode}) {
   for(let i=0;i<160;i++)positions.push(Math.sin(i*83.2)*80,2+((i*13)%40),Math.cos(i*17.3)*80);
   stars.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
   const atmosphere=new THREE.Points(stars,new THREE.PointsMaterial({color:0x8ea9c5,size:.065,transparent:true,opacity:.45}));scene.add(atmosphere);
-  let objects=new THREE.Group(), items=[], paths=[], model={nodes:[],edges:[]}, selectedId=null, paused=false, reduced=false, disposed=false, contextLost=false, frame=0, pointerStart=null, tween=null, dirty=true, labelsDirty=true;
+  let objects=new THREE.Group(), items=[], paths=[], model={nodes:[],edges:[]}, selectedId=null, animateAllEdges=false, paused=false, reduced=false, disposed=false, contextLost=false, frame=0, pointerStart=null, tween=null, dirty=true, labelsDirty=true;
   scene.add(objects);
   const raycaster=new THREE.Raycaster(), pointer=new THREE.Vector2();
   const targetPoint=new THREE.Vector3();
@@ -76,7 +76,8 @@ export function createScene({canvas, labels, onActivate, onMode}) {
     body.userData.node=node;
     return {node,group,body,label,marker,halo,labelPoint:new THREE.Vector3(...node.position).add(new THREE.Vector3(0,major?5:3,0))};
   }
-  function setModel(next,{selected=null,reset=true}={}) {
+  function setModel(next,{selected=null,reset=true,animateConnections=false}={}) {
+    animateAllEdges=animateConnections;
     release(objects);scene.remove(objects);objects=new THREE.Group();scene.add(objects);labels.replaceChildren();paths=[];model=next;
     items=model.nodes.map(makeObject);const map=new Map(items.map(i=>[i.node.id,i]));
     for(const edge of model.edges){const from=map.get(edge.from),to=map.get(edge.to);if(!from||!to)continue;
@@ -97,7 +98,7 @@ export function createScene({canvas, labels, onActivate, onMode}) {
     move(center.clone().add(new THREE.Vector3(0,-1,0)),center.clone().add(new THREE.Vector3(distance*.52,distance*.7,distance*.93)));
   }
   function focus(id) {const item=items.find(x=>x.node.id===id);if(!item)return;const point=item.group.position.clone().add(new THREE.Vector3(0,1,0));move(point,point.clone().add(new THREE.Vector3(11,13,20)));select(id);}
-  function select(id) {selectedId=id;for(const item of items){const active=item.node.id===id;item.marker.visible=active;item.label.classList.toggle('selected',active);item.body.material.emissiveIntensity=active?.5:.16;}for(const p of paths){const active=[p.edge.from,p.edge.to].includes(id);p.line.material.opacity=active?.8:.23;p.line.material.color.setHex(active?0xe9c58c:0x6abfc5);p.pulse.visible=active;}dirty=true;labelsDirty=true;requestFrame();}
+  function select(id) {selectedId=id;for(const item of items){const active=item.node.id===id;item.marker.visible=active;item.label.classList.toggle('selected',active);item.body.material.emissiveIntensity=active?.5:.16;}for(const p of paths){const active=[p.edge.from,p.edge.to].includes(id);p.line.material.opacity=active?.8:.23;p.line.material.color.setHex(active?0xe9c58c:0x6abfc5);p.pulse.visible=animateAllEdges||active;}dirty=true;labelsDirty=true;requestFrame();}
   function projectLabels() {
     const w=canvas.clientWidth,h=canvas.clientHeight,placed=[];
     const ordered=[...items].sort((a,b)=>(b.node.id===selectedId)-(a.node.id===selectedId)||a.group.position.distanceTo(camera.position)-b.group.position.distanceTo(camera.position));
@@ -136,5 +137,5 @@ export function createScene({canvas, labels, onActivate, onMode}) {
   function lost(e){e.preventDefault();contextLost=true;cancelAnimationFrame(frame);frame=0;labels.replaceChildren();onMode(false);}
   canvas.addEventListener('webglcontextlost',lost);
   onMode(true);resize();requestFrame();
-  return {setModel,focus,select,reset:resetCamera,zoom(factor){const offset=camera.position.clone().sub(controls.target).multiplyScalar(factor);offset.clampLength(9,145);move(controls.target,controls.target.clone().add(offset));},setMotion(value,isReduced=false){paused=value;reduced=isReduced;controls.enableDamping=!paused&&!reduced;for(const p of paths)p.pulse.visible=[p.edge.from,p.edge.to].includes(selectedId);changed();},clear(){setModel({nodes:[],edges:[]});},dispose(){disposed=true;cancelAnimationFrame(frame);observer.disconnect();controls.dispose();document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('pointerdown',pointerDown);canvas.removeEventListener('pointerup',pointerUp);canvas.removeEventListener('keydown',keydown);canvas.removeEventListener('webglcontextlost',lost);release(scene);glowTexture.dispose();renderer.dispose();labels.replaceChildren();}};
+  return {setModel,focus,select,reset:resetCamera,zoom(factor){const offset=camera.position.clone().sub(controls.target).multiplyScalar(factor);offset.clampLength(9,145);move(controls.target,controls.target.clone().add(offset));},setMotion(value,isReduced=false){paused=value;reduced=isReduced;controls.enableDamping=!paused&&!reduced;for(const p of paths)p.pulse.visible=animateAllEdges||[p.edge.from,p.edge.to].includes(selectedId);changed();},clear(){setModel({nodes:[],edges:[]});},dispose(){disposed=true;cancelAnimationFrame(frame);observer.disconnect();controls.dispose();document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('pointerdown',pointerDown);canvas.removeEventListener('pointerup',pointerUp);canvas.removeEventListener('keydown',keydown);canvas.removeEventListener('webglcontextlost',lost);release(scene);glowTexture.dispose();renderer.dispose();labels.replaceChildren();}};
 }

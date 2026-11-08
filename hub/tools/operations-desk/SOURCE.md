@@ -14,6 +14,7 @@ Scene limits: 40 fleet destinations, 15 immediate folder entries per page,
 4 workflow definitions and 12 runs in the overview, or 6 jobs and 5 steps per
 job for a selected run. Retrieved workflow details remain available in the
 inspector and list. Camera movement renders at the display rate. When a selected node has visible
-connections, its dots animate at the display frame rate; otherwise the scene
-rests when idle. Hidden tabs do not render. Reduced motion and Pause motion stop
+connections, its dots animate at the display frame rate. Workflow views animate
+all documented membership links; the dots are decorative, not live execution
+status. Otherwise the scene rests when idle. Hidden tabs do not render. Reduced motion and Pause motion stop
 the dots and shorten camera transitions.
