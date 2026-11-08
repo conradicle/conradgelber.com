@@ -16,14 +16,16 @@
     "borderline:data": "node scripts/borderline/fetch-sources.mjs && node scripts/borderline/build-geo.mjs && node scripts/borderline/build-bank.mjs && node scripts/borderline/build-curated.mjs && node scripts/borderline/build-maps.mjs",
     "build:historybowl": "esbuild src/historybowl/main.js --bundle --minify --format=iife --target=es2019 --outfile=../historybowl/historybowl.js",
     "build:12axes": "esbuild src/12axes/main.js --bundle --minify --format=iife --target=es2019 --outfile=../12axes/12axes.js",
-    "12axes:data": "node scripts/12axes/import-source.mjs"
+    "12axes:data": "node scripts/12axes/import-source.mjs",
+    "build:desk": "esbuild src/operations-desk/scene.js --bundle --minify --format=esm --target=es2020 --outfile=../hub/tools/operations-desk/scene.js"
   },
   "dependencies": {
     "d3-geo": "3.1.1",
     "d3-selection": "3.0.0",
     "d3-zoom": "3.0.0",
     "topojson-client": "3.1.0",
-    "ts-fsrs": "5.4.2"
+    "ts-fsrs": "5.4.2",
+    "three": "0.187.0"
   },
   "devDependencies": {
     "@resvg/resvg-js": "2.6.2",

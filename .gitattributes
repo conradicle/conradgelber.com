@@ -2,3 +2,5 @@
 *.woff2 binary
 *.png binary
 *.ico binary
+# Generated bundle preserves upstream GLSL string whitespace.
+hub/tools/operations-desk/scene.js -whitespace

@@ -1,40 +1,291 @@
 import { toolStore } from '/hub/lib/store.js';
-const $ = s => document.querySelector(s), store=toolStore('operations-desk');
-const text=(tag,value,cls)=>{const e=document.createElement(tag);e.textContent=value??'';if(cls)e.className=cls;return e;};
-const button=(label,fn,cls)=>{const b=text('button',label,cls);b.type='button';b.onclick=fn;return b;};
-function link(label,url){const a=text('a',label);try{const u=new URL(url);if(u.protocol!=='https:'||u.hostname!=='github.com')throw Error();a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';}catch{return text('span',label);}return a;}
-let repos=[], pins=[], knowledge=null, selected=null, detail=null, view='fleet', nodes=[], edges=[], selectedNode=null, opened=new Map(), jobs=null, locked=false, paused=matchMedia('(prefers-reduced-motion: reduce)').matches, raf=0, frame=0, lastInput=Date.now(), pan={x:0,y:0},zoom=1,drag=null,hover=null;
-const canvas=$('#graph'),ctx=canvas.getContext('2d');
-if(matchMedia('(max-width: 650px)').matches) $('#library').open=false;
-const api=async (params={})=>{const res=await fetch('/hub/api/desk/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params),cache:'no-store'});if(res.status===401||res.redirected){location.replace('/login/');throw Error('Session expired');}const body=await res.json();if(!res.ok)throw Error(body.error||body.state||'Request failed');if(locked)throw Error('Locked');return body;};
-function clear(){repos=[];pins=[];knowledge=null;selected=null;detail=null;nodes=[];edges=[];opened.clear();jobs=null;for(const s of ['#project-list','#detail','#alternate','#results'])$(s).replaceChildren();$('#search').value='';if(ctx)ctx.clearRect(0,0,canvas.width,canvas.height);}
-async function lock(){if(locked)return;locked=true;clear();document.body.replaceChildren(text('p','Locking the desk…'));try{const res=await fetch('/logout',{method:'POST',redirect:'manual'});if(!res.ok&&res.type!=='opaqueredirect'&&res.status!==303)throw Error();location.replace('/login/');}catch{document.body.replaceChildren(text('p','Could not reach the server. Your session may still be active.'),button('Retry lock',()=>{locked=false;lock();}));}}
-$('#lock').onclick=lock;for(const ev of ['pointerdown','keydown','touchstart'])addEventListener(ev,()=>lastInput=Date.now(),{passive:true});setInterval(()=>{if(Date.now()-lastInput>900000)lock();},10000);addEventListener('pageshow',e=>{if(e.persisted){clear();location.reload();}});
-async function sync(force=false){$('#notice').textContent='Loading repository library…';$('#refresh').disabled=true;try{const [f,k,p]=await Promise.allSettled([api({action:'fleet',...(force?{refresh:'1'}:{})}),api({action:'knowledge',...(force?{refresh:'1'}:{})}),store.get('pins')]);if(locked)return;if(f.status==='fulfilled'){repos=f.value.repositories;$('#sync').textContent='Fleet fetched '+new Date(f.value.syncedAt).toLocaleString();$('#notice').textContent=(f.value.incomplete?'Repository list is limited to 2,000 results. ':'')+'Only repositories accessible to the configured credential appear.';}else{$('#notice').textContent='Fleet disconnected or unavailable. '+f.reason.message+(repos.length?' Showing the previous list in this tab.':'');}if(k.status==='fulfilled')knowledge=k.value;else $('#notice').textContent+=' Knowledge index unavailable.';if(p.status==='fulfilled'&&Array.isArray(p.value?.value))pins=p.value.value.filter(x=>typeof x==='string').slice(0,100);renderLibrary();buildGraph();}finally{if(!locked)$('#refresh').disabled=false;}}
-$('#refresh').onclick=()=>sync(true);
-async function pin(name){const next=!pins.includes(name);try{const saved=await store.update('pins',value=>{const set=new Set(Array.isArray(value)?value:[]);next?set.add(name):set.delete(name);return [...set].slice(0,100);},[]);if(locked)return;pins=saved.value;renderLibrary();buildGraph();}catch{$('#notice').textContent='Could not save repository selection. Try again.';}}
-function renderLibrary(){const out=$('#project-list');out.replaceChildren();const q=$('#search').value.trim().toLowerCase();for(const r of repos.filter(r=>(r.name+' '+(r.description||'')).toLowerCase().includes(q))){const row=text('div','','repo-row');const toggle=button(pins.includes(r.name)?'Unpin':'Pin',()=>pin(r.name),'pin');toggle.setAttribute('aria-label',(pins.includes(r.name)?'Unpin ':'Pin ')+r.name);row.append(button(r.name,()=>selectRepo(r.name),'repo-open'),toggle);out.append(row);}if(!repos.length)out.append(text('p','No repositories loaded.','muted'));else if(!out.children.length)out.append(text('p','No matching repositories.','muted'));}
-$('#search').oninput=()=>{renderLibrary();const q=$('#search').value.trim().toLowerCase(),out=$('#results');out.replaceChildren();if(!q||!knowledge)return;for(const p of [...knowledge.projects,...knowledge.documents].filter(p=>(p.title+' '+Object.values(p.sections).join(' ')).toLowerCase().includes(q)).slice(0,8))out.append(button('Knowledge: '+p.title,()=>{out.replaceChildren();showKnowledge(p);},'list-button'));};
-function showKnowledge(p){selectedNode='knowledge:'+p.path;const d=$('#detail');d.replaceChildren(text('p','KNOWLEDGE / DOCUMENTED','eyebrow'),text('h2',p.title),text('p',[p.status&&'Status: '+p.status,p.confidence&&'Confidence: '+p.confidence,p.date].filter(Boolean).join(' · '),'tag'),link('Open source ↗',knowledge.sourceRoot+p.path.split('/').map(encodeURIComponent).join('/')),text('p',p.path,'muted'));for(const [k,v] of Object.entries(p.sections))if(v)d.append(text('h3',k),text('pre',v));draw();}
-async function selectRepo(name,force=false){const previous=selected===name?detail:null;selected=name;detail=null;opened.clear();jobs=null;selectedNode='repo:'+name;$('#detail').replaceChildren(text('p','GITHUB / REPOSITORY','eyebrow'),text('h2',name),text('p','Loading repository details…','muted'));buildGraph();try{const d=await api({action:'detail',repo:name,...(force?{refresh:'1'}:{})});if(selected!==name)return;if(previous){for(const [key,value] of Object.entries(d.sections)){if(!value.available&&previous.sections[key]?.available)d.sections[key]={...previous.sections[key],stale:true,reason:value.reason};}}detail=d;showRepo();if(view==='structure')await openDirectory('');else buildGraph();}catch(e){if(selected===name){if(previous){detail=previous;showRepo();}$('#detail').append(text('p',(previous?'Refresh failed; showing stale details: ':'Details unavailable: ')+e.message,'muted'),button('Retry',()=>selectRepo(name,true)));}}}
-function sectionList(container,title,section,render,empty='None reported.') {container.append(text('h3',title));if(section?.stale)container.append(text('p','Refresh failed; showing previous results.','tag'));if(!section?.available){container.append(text('p',section?.reason||'Unavailable','muted'));return;}const values=Array.isArray(section.value)?section.value:[];if(!values.length){container.append(text('p',empty,'muted'));return;}for(const item of values.slice(0,15))container.append(render(item));}
-function showRepo(){if(!detail)return;const {repo,sections,fetchedAt}=detail,d=$('#detail');d.replaceChildren(text('p','GITHUB / REPOSITORY','eyebrow'),text('h2',repo.name),text('p',repo.description||'No description provided.','muted'),text('p',`${repo.visibility} · ${repo.archived?'archived':'not archived'} · ${repo.language||'language unknown'} · default branch ${repo.branch||'unknown'}`,'tag'),text('p','Last push: '+(repo.pushedAt?new Date(repo.pushedAt).toLocaleString():'unknown'),'muted'),link('Open repository ↗',repo.url),button('Refresh repository',()=>selectRepo(repo.name,true),'list-button'),text('p','Details fetched '+new Date(fetchedAt).toLocaleString(),'muted'));
-const langs=sections.languages;if(langs?.available&&Object.keys(langs.value||{}).length)d.append(text('h3','Languages · bytes'),text('p',Object.entries(langs.value).map(([k,v])=>`${k}: ${v}`).join(' · '),'muted'));
-const related=knowledge?.projects?.filter(p=>(p.repos||[]).some(r=>r.toLowerCase()===repo.name.toLowerCase()))||[];d.append(text('h3','Knowledge / explicit links'));if(!related.length)d.append(text('p','No explicit repository link found in indexed records.','muted'));related.forEach(p=>d.append(button(p.title,()=>showKnowledge(p),'list-button')));
-sectionList(d,'Recent commits · first 15',sections.commits,x=>button((x.commit?.message||'Commit').split('\n')[0]+' →',()=>showCommit(x.sha),'list-button'));
-sectionList(d,'Open pull requests · first 30',sections.pulls,x=>link('#'+x.number+' '+x.title+' ↗',`https://github.com/${repo.name}/pull/${x.number}`));sectionList(d,'Open issues · first 30',sections.issues,x=>link('#'+x.number+' '+x.title+' ↗',`https://github.com/${repo.name}/issues/${x.number}`));sectionList(d,'Open milestones · first 30',sections.milestones,x=>link(x.title+' ↗',`https://github.com/${repo.name}/milestone/${x.number}`));}
-async function openDirectory(path){if(!selected)return;const name=selected;try{const data=await api({action:'contents',repo:name,path});if(selected!==name)return;if(data.type==='directory'){opened.set(path,data);if(data.incomplete)$('#notice').textContent='Folder listing is limited to 1,000 entries.';buildGraph();renderView();}else if(data.type==='file'){selectedNode='path:'+path;const d=$('#detail');d.replaceChildren(text('p','GITHUB / FILE PREVIEW','eyebrow'),text('h2',path),link('Open file on GitHub ↗',data.url),button('Back to repository',showRepo,'list-button'),text('pre',data.content));draw();}else $('#detail').append(text('p',data.reason,'muted'));}catch(e){$('#detail').append(text('p','Could not load '+(path||'root')+': '+e.message,'muted'));}}
-async function showCommit(sha){const name=selected,d=$('#detail');d.replaceChildren(text('p','GITHUB / COMMIT','eyebrow'),text('h2',sha.slice(0,12)),link('Open commit ↗',`https://github.com/${name}/commit/${sha}`),text('p','Loading changed files…','muted'));try{const result=await api({action:'commit',repo:name,id:sha});if(selected!==name)return;d.lastChild.remove();for(const f of result.files)d.append(link(f.path+' · '+f.status+' ↗',`https://github.com/${name}/commit/${sha}`));if(result.incomplete)d.append(text('p','Changed-file list may be incomplete.','muted'));}catch(e){d.append(text('p','Changed files unavailable: '+e.message,'muted'));}}
-async function moreRuns(){if(!detail||!selected)return;const repo=selected, section=detail.sections.runs, list=section.value.workflow_runs||[], page=(section.loadedPage||1)+1;try{const result=await api({action:'runs',repo,id:String(page)});if(selected!==repo||!detail)return;const ids=new Set(list.map(x=>x.id));list.push(...result.runs.filter(x=>!ids.has(x.id)));section.value.workflow_runs=list;section.value.total_count=result.runs.length?result.total:list.length;section.loadedPage=page;buildGraph();}catch(e){$('#notice').textContent='Could not load more runs: '+e.message;}}
-async function selectRun(run){if(!selected)return;jobs=null;selectedNode='run:'+run.id;buildGraph();const d=$('#detail');d.replaceChildren(text('p','GITHUB ACTIONS / EXECUTION','eyebrow'),text('h2',run.name||'Workflow run'),text('p',`${run.status} · ${run.conclusion||'no conclusion yet'}`,'tag'),link('Open run ↗',`https://github.com/${selected}/actions/runs/${run.id}`),text('p','Loading jobs…','muted'));try{jobs=await api({action:'jobs',repo:selected,id:String(run.id)});d.lastChild.remove();if(!jobs.jobs.length)d.append(text('p','No jobs available.','muted'));for(const job of jobs.jobs){d.append(text('h3',job.name),text('p',`${job.status} · ${job.conclusion||'no conclusion yet'}`,'tag'));for(const step of job.steps)d.append(text('p',`${step.number}. ${step.name} — ${step.status}${step.conclusion?' / '+step.conclusion:''}`,'muted'));}if(jobs.incomplete)d.append(text('p','Showing first 100 jobs.','muted'));buildGraph();}catch(e){d.append(text('p','Jobs unavailable: '+e.message,'muted'));}}
-function setView(v){view=v;document.querySelectorAll('.view').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v==='structure'&&selected&&!opened.has(''))openDirectory('');buildGraph();renderView();}
-document.querySelectorAll('.view').forEach(b=>b.onclick=()=>setView(b.dataset.view));
-function renderView(){$('.graph-caption').textContent={fleet:'EXPLICIT KNOWLEDGE LINKS · SELECT A NODE',structure:'CONTAINMENT · FOLDERS AND FILES',workflow:'CONTAINMENT · DEFINITIONS / RUNS / JOBS / STEPS',knowledge:'SELECT A DOCUMENTED PROJECT'}[view];const labels={fleet:'Repository fleet',structure:'Repository structure',workflow:'Workflows & runs',knowledge:'Knowledge records'};$('#view-label').textContent=view.toUpperCase()+' / '+(selected||'OVERVIEW');$('#view-title').textContent=labels[view];const alt=$('#alternate');alt.hidden=false;alt.replaceChildren();if(view==='fleet'){alt.append(text('p','Pin repositories in the library. Only explicit knowledge links connect fleet nodes.','muted'));}else if(view==='structure'){if(!selected){alt.append(text('p','Select a repository to browse folders.','muted'));return;}alt.append(button('Root folder',()=>openDirectory(''),'list-button'));for(const [path,dir] of opened){alt.append(text('p',path||'/','eyebrow'));for(const entry of dir.entries.slice(0,100))alt.append(button((entry.type==='dir'?'▸ ':'· ')+entry.name,()=>openDirectory(entry.path),'list-button'));if(dir.entries.length>100)alt.append(text('p','Showing first 100 entries in the list.','muted'));}}else if(view==='workflow'){if(!detail){alt.append(text('p','Select a repository to inspect workflows.','muted'));return;}const ws=detail.sections.workflows,rs=detail.sections.runs;if(ws?.stale||rs?.stale)alt.append(text('p','Refresh failed; showing previous results.','tag'));alt.append(text('p','Definitions · first 30','eyebrow')); if(!ws?.available)alt.append(text('p',ws?.reason||'Unavailable','muted'));else if(!ws.value.workflows?.length)alt.append(text('p','No workflow definitions found.','muted'));else for(const w of ws.value.workflows)alt.append(link(w.name+' ↗',`https://github.com/${selected}/actions/workflows/${encodeURIComponent(w.path.split('/').pop())}`));alt.append(text('p','Individual runs','eyebrow')); if(!rs?.available)alt.append(text('p',rs?.reason||'Unavailable','muted'));else if(!rs.value.workflow_runs?.length)alt.append(text('p','No runs found.','muted'));else {for(const run of rs.value.workflow_runs)alt.append(button(`${run.name} · ${run.status}${run.conclusion?' / '+run.conclusion:''}`,()=>selectRun(run),'list-button'));if((rs.loadedPage||1)<20&&rs.value.workflow_runs.length<(rs.value.total_count||0))alt.append(button('Load more runs',moreRuns,'list-button'));}}else{if(!knowledge){alt.append(text('p','Knowledge index unavailable.','muted'));return;}alt.append(text('p','Knowledge fetched '+new Date(knowledge.syncedAt).toLocaleString(),'muted'));for(const p of knowledge.projects)alt.append(button(p.title,()=>showKnowledge(p),'list-button'));alt.append(text('p','KNOWLEDGE REPOSITORY ACTIVITY','eyebrow'));for(const a of knowledge.activity||[])alt.append(link(new Date(a.date).toLocaleDateString()+' · '+a.title+' ↗',a.url));}}
-function buildGraph(){const list=[], links=[];if(view==='fleet'){for(const r of repos.filter(r=>pins.includes(r.name)).slice(0,40))list.push({id:'repo:'+r.name,label:r.name,kind:'repo',activate:()=>selectRepo(r.name)});for(const p of knowledge?.projects||[]){const matched=(p.repos||[]).map(n=>repos.find(r=>r.name.toLowerCase()===n.toLowerCase())).filter(r=>r&&pins.includes(r.name));if(!matched.length)continue;list.push({id:'knowledge:'+p.path,label:p.title,kind:'record',activate:()=>showKnowledge(p)});matched.forEach(r=>links.push(['repo:'+r.name,'knowledge:'+p.path]));}}else if(view==='structure'&&selected){list.push({id:'repo:'+selected,label:selected,kind:'repo',activate:showRepo});for(const [parent,dir] of opened){for(const e of dir.entries.slice(0,30)){if(list.length>=80)break;list.push({id:'path:'+e.path,label:e.name,kind:e.type,activate:()=>openDirectory(e.path)});links.push([parent?'path:'+parent:'repo:'+selected,'path:'+e.path]);}}}else if(view==='workflow'&&detail){list.push({id:'repo:'+selected,label:selected,kind:'repo',activate:showRepo});const definitions=(detail.sections.workflows?.value?.workflows||[]).slice(0,20);for(const w of definitions){list.push({id:'workflow:'+w.id,label:w.name+' · definition',kind:'record',activate:()=>{}});links.push(['repo:'+selected,'workflow:'+w.id]);}for(const run of (detail.sections.runs?.value?.workflow_runs||[]).slice(0,25)){list.push({id:'run:'+run.id,label:(run.name||'run')+' · '+run.status,kind:run.status==='in_progress'?'running':'record',activate:()=>selectRun(run)});links.push([definitions.some(w=>w.id===run.workflow_id)?'workflow:'+run.workflow_id:'repo:'+selected,'run:'+run.id]);}if(jobs&&selectedNode?.startsWith('run:'))for(const j of jobs.jobs.slice(0,20)){list.push({id:'job:'+j.id,label:j.name+' · '+j.status,kind:j.status==='in_progress'?'running':'record',activate:()=>{}});links.push([selectedNode,'job:'+j.id]);for(const step of j.steps.slice(0,15)){if(list.length>=80)break;const stepId='step:'+j.id+':'+step.number;list.push({id:stepId,label:step.name+' · '+step.status,kind:step.status==='in_progress'?'running':'record',activate:()=>{}});links.push(['job:'+j.id,stepId]);}}}else if(view==='knowledge'){for(const p of (knowledge?.projects||[]).slice(0,50))list.push({id:'knowledge:'+p.path,label:p.title,kind:'record',activate:()=>showKnowledge(p)});}const prev=new Map(nodes.map(n=>[n.id,n]));nodes=list.map((n,i)=>{const a=2*Math.PI*i/Math.max(list.length,1)-Math.PI/2,old=prev.get(n.id);const tx=Math.cos(a)*.36,ty=Math.sin(a)*.36;return {...n,x:old?.x??(paused?tx:0),y:old?.y??(paused?ty:0),tx,ty};});edges=links;renderView();if(paused)settle();else draw();}
-function size(){if(!ctx)return;const r=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(1,r.width*ratio);canvas.height=Math.max(1,r.height*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);draw();}new ResizeObserver(size).observe(canvas);
-function pos(n,w,h){return{x:w/2+n.x*w*zoom+pan.x,y:h/2+n.y*h*zoom+pan.y};}
-function draw(){if(!ctx||document.hidden)return;const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);const map=new Map(nodes.map(n=>[n.id,pos(n,w,h)]));for(const [a,b] of edges){const p=map.get(a),q=map.get(b);if(!p||!q)continue;const lit=[a,b].includes(selectedNode)||[a,b].includes(hover);ctx.strokeStyle=lit?'rgba(126,221,210,.85)':'rgba(94,153,156,.24)';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.quadraticCurveTo((p.x+q.x)/2,(p.y+q.y)/2-30,q.x,q.y);ctx.stroke();if(lit){const t=(frame%240)/240;ctx.fillStyle='#eacb8f';ctx.beginPath();ctx.arc((1-t)**2*p.x+2*(1-t)*t*(p.x+q.x)/2+t*t*q.x,(1-t)**2*p.y+2*(1-t)*t*((p.y+q.y)/2-30)+t*t*q.y,2,0,7);ctx.fill();}}for(const n of nodes){const p=map.get(n.id),lit=n.id===selectedNode||n.id===hover;ctx.beginPath();ctx.arc(p.x,p.y,lit?8:n.kind==='repo'?6:4,0,7);ctx.fillStyle=n.kind==='running'?'#f0c682':lit?'#f1d397':n.kind==='repo'?'#75d3ca':'#78959c';ctx.fill();if(n.kind==='repo'||lit){ctx.font='11px system-ui';ctx.fillStyle='#d3e2e2';ctx.fillText(n.label.slice(0,32),p.x+10,p.y+4);}}}
-function tick(){if(paused||document.hidden){raf=0;return;}frame++;for(const n of nodes){n.x+=(n.tx-n.x)*.08;n.y+=(n.ty-n.y)*.08;}draw();raf=requestAnimationFrame(tick);}function settle(){for(const n of nodes){n.x=n.tx;n.y=n.ty;}draw();}
-$('#motion').onclick=()=>{paused=!paused;$('#motion').textContent=paused?'Resume motion':'Pause motion';if(paused)settle();else if(!raf)tick();};$('#motion').textContent=paused?'Resume motion':'Pause motion';document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastInput>900000){lock();return;}if(!document.hidden&&!paused&&!raf)tick();});
-function hit(e){const r=canvas.getBoundingClientRect();return nodes.find(n=>{const p=pos(n,r.width,r.height);return Math.hypot(e.clientX-r.left-p.x,e.clientY-r.top-p.y)<16;});}canvas.onpointerdown=e=>{drag={x:e.clientX,y:e.clientY,px:pan.x,py:pan.y,moved:false};canvas.setPointerCapture(e.pointerId);};canvas.onpointermove=e=>{if(drag){drag.moved ||= Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>4;pan={x:drag.px+e.clientX-drag.x,y:drag.py+e.clientY-drag.y};draw();}else{hover=hit(e)?.id||null;canvas.title=nodes.find(n=>n.id===hover)?.label||'';draw();}};canvas.onpointerup=e=>{if(drag&&!drag.moved)hit(e)?.activate();drag=null;};canvas.onwheel=e=>{e.preventDefault();zoom=Math.max(.5,Math.min(2,zoom*(e.deltaY>0?.9:1.1)));draw();};$('#reset').onclick=()=>{pan={x:0,y:0};zoom=1;draw();};
-if(!ctx)$('#notice').textContent='Graph unavailable; use the repository library and lists.';sync();if(!paused)tick();else setTimeout(settle,0);
+import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './model.js';
+const $ = s => document.querySelector(s), store = toolStore('operations-desk');
+const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+const state = {repos: [], fleetStatus: 'loading', pins: [], pinnedOnly: false, knowledge: null, selected: null, detail: null, view: 'fleet', folder: '', directory: null, offset: 0, run: null, jobs: null, selectedId: null};
+let graphicsAvailable = null, inspectorEpoch = 0;
+let scene = null, locked = false, paused = motionPreference.matches, epoch = 0, fileEpoch = 0, lastInput = Date.now(), pending = new Set(), directories = new Map(), loadingFolder = false, folderError = '', renderedModel = {nodes: [], edges: []};
+const text = (tag, value, cls) => { const e = document.createElement(tag); e.textContent = value ?? ''; if (cls) e.className = cls; return e; };
+const button = (label, fn, cls = 'list-button') => { const b = text('button', label, cls); b.type = 'button'; b.addEventListener('click', fn); return b; };
+function link(label, url) { const a = text('a', label); try { const u = new URL(url); if (u.protocol !== 'https:' || u.hostname !== 'github.com') throw Error(); a.href = u.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; } catch { return text('span', label); } return a; }
+function notice(message, error = false) { if (locked) return; $('#notice').textContent = message; $('#notice').classList.toggle('error', error); }
+function clearPrivate() {
+  for (const controller of pending) controller.abort(); pending.clear(); epoch++; fileEpoch++;
+  Object.assign(state, {repos: [], pins: [], knowledge: null, selected: null, detail: null, directory: null, run: null, jobs: null, selectedId: null});
+  directories.clear(); renderedModel = {nodes: [], edges: []}; scene?.dispose(); scene = null;
+  for (const id of ['#project-list', '#detail', '#alternate', '#results', '#scene-labels', '#breadcrumbs']) $(id)?.replaceChildren();
+  if ($('#search')) $('#search').value = '';
+}
+function lockScreen(message) { document.body.className = 'lock-screen'; document.body.replaceChildren(text('p', message)); }
+async function lock() {
+  if (locked) return; locked = true; clearPrivate(); lockScreen('Locking your workspace…');
+  try { const res = await fetch('/logout', {method: 'POST', redirect: 'manual'}); if (!res.ok && res.type !== 'opaqueredirect' && res.status !== 303) throw Error(); location.replace('/login/'); }
+  catch { lockScreen('The server could not confirm the lock. Reconnect and retry to end this session.'); document.body.append(button('Retry lock', () => { locked = false; lock(); })); }
+}
+async function api(params = {}) {
+  const controller = new AbortController(); pending.add(controller);
+  try {
+    const res = await fetch('/hub/api/desk/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(params), cache: 'no-store', signal: controller.signal});
+    if (res.status === 401 || res.redirected) { locked = true; clearPrivate(); lockScreen('Your session has ended. Returning to sign-in…'); location.replace('/login/'); throw Error('Session expired'); }
+    const body = await res.json(); if (!res.ok) throw Error(body.error || body.state || 'Request unavailable'); if (locked) throw Error('Locked'); return body;
+  } finally { pending.delete(controller); }
+}
+$('#lock').addEventListener('click', lock);
+for (const event of ['pointerdown', 'keydown', 'touchstart', 'wheel']) addEventListener(event, () => lastInput = Date.now(), {passive: true});
+setInterval(() => { if (Date.now() - lastInput > 900000) lock(); }, 10000);
+addEventListener('pageshow', e => { if (e.persisted) { clearPrivate(); location.reload(); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastInput > 900000) lock(); });
+if (matchMedia('(max-width: 600px)').matches) $('#library').open = false;
+
+async function sync(force = false) {
+  notice('Refreshing your repository library and project context…'); $('#refresh').disabled = true;
+  const extra = force ? {refresh: '1'} : {};
+  try {
+    const [fleet, knowledge, pins] = await Promise.allSettled([api({action: 'fleet', ...extra}), api({action: 'knowledge', ...extra}), store.get('pins')]);
+    if (locked) return;
+    const warnings = [];
+    if (fleet.status === 'fulfilled') { state.fleetStatus = 'connected'; state.repos = fleet.value.repositories; $('#sync').textContent = 'Fetched ' + new Date(fleet.value.syncedAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); if (fleet.value.incomplete) warnings.push('Repository discovery is limited to 2,000 results.'); }
+    else { state.fleetStatus = 'error'; warnings.push('Repository connection unavailable. ' + fleet.reason.message + (state.repos.length ? ' Previous results remain visible.' : ' Use Refresh to retry.')); }
+    if (knowledge.status === 'fulfilled') state.knowledge = knowledge.value; else warnings.push('Knowledge refresh is unavailable.' + (state.knowledge ? ' Showing earlier knowledge records.' : ' Repository browsing still works.'));
+    if (pins.status === 'fulfilled' && Array.isArray(pins.value?.value)) state.pins = pins.value.value.filter(n => typeof n === 'string').slice(0,100);
+    else if (pins.status === 'rejected') warnings.push('Pinned selection could not be loaded.');
+    $('#repo-count').textContent = state.repos.length; $('#library-count').textContent = state.repos.length; $('#knowledge-count').textContent = state.knowledge?.projects.length ?? '—';
+    notice(warnings.length ? warnings.join(' ') : 'Workspace connected. Select a destination to explore its source.', !!warnings.length);
+    renderLibrary(); render(true);
+  } finally { if (!locked) $('#refresh').disabled = false; }
+}
+$('#refresh').addEventListener('click', () => sync(true));
+async function pin(name) {
+  const shouldPin = !state.pins.includes(name);
+  try { const saved = await store.update('pins', value => { const pins = new Set(Array.isArray(value) ? value : []); shouldPin ? pins.add(name) : pins.delete(name); return [...pins].slice(0, 100); }, []); if (locked) return; state.pins = saved.value; renderLibrary(); if (state.view === 'fleet') render(false); }
+  catch { notice('Your pinned selection could not be saved. Try again.', true); }
+}
+function setFilter(pinned) { state.pinnedOnly = pinned; renderLibrary(); if (state.view === 'fleet') render(true); }
+$('#filter-all').onclick = () => setFilter(false); $('#filter-pins').onclick = () => setFilter(true);
+function renderLibrary() {
+  const out = $('#project-list'), query = $('#search').value.trim().toLowerCase(), focusKey = out.contains(document.activeElement) ? document.activeElement.dataset.focus : null; out.replaceChildren();
+  $('#pin-count').textContent = state.pins.length;
+  for (const [id, active] of [['#filter-all', !state.pinnedOnly], ['#filter-pins', state.pinnedOnly]]) { $(id).classList.toggle('active', active); $(id).setAttribute('aria-pressed', String(active)); }
+  const repos = state.repos.filter(r => (!state.pinnedOnly || state.pins.includes(r.name)) && (r.name + ' ' + (r.description || '')).toLowerCase().includes(query));
+  for (const repo of repos) {
+    const row = text('div', '', 'repo-row'), open = button(repo.name.split('/')[1], () => selectRepo(repo.name), 'repo-open' + (state.selected === repo.name ? ' selected' : ''));
+    open.dataset.focus = 'open:' + repo.name; open.setAttribute('aria-label', 'Open repository ' + repo.name); open.append(text('small', (repo.language || 'Repository') + ' · ' + repo.visibility));
+    const pinned = state.pins.includes(repo.name), toggle = button(pinned ? '★' : '☆', () => pin(repo.name), 'pin'); toggle.dataset.focus = 'pin:' + repo.name; toggle.setAttribute('aria-label', (pinned ? 'Unpin ' : 'Pin ') + repo.name); toggle.setAttribute('aria-pressed', String(pinned)); row.append(open, toggle); out.append(row);
+  }
+  if (!repos.length) out.append(text('p', state.pinnedOnly ? 'No pinned repositories match. Choose All repos to find one.' : query ? 'No repositories match this search.' : 'No repositories loaded. Try Refresh.', 'muted'));
+  if (focusKey) ([...out.querySelectorAll('button')].find(b => b.dataset.focus === focusKey) || $('#filter-pins')).focus({preventScroll:true});
+}
+$('#search').addEventListener('input', () => {
+  renderLibrary(); const query = $('#search').value.trim().toLowerCase(), results = $('#results'); results.replaceChildren();
+  if (!query) return;
+  for (const record of [...(state.knowledge?.projects || []), ...(state.knowledge?.documents || [])].filter(p => (p.title + ' ' + Object.values(p.sections).join(' ')).toLowerCase().includes(query)).slice(0, 6)) results.append(button('Knowledge · ' + record.title, () => { setView('knowledge'); showKnowledge(record); scene?.focus('knowledge:' + record.path); }));
+});
+function inspectorIntro(label, title) { inspectorEpoch++; const d = $('#detail'), restoreFocus = d.contains(document.activeElement); d.replaceChildren(text('p', label, 'eyebrow'), text('h2', title)); d.scrollTop = 0; if(restoreFocus){d.querySelector('h2').tabIndex=-1;d.querySelector('h2').focus({preventScroll:true});} return d; }
+function focusStage() { $('#view-title').focus({preventScroll:true}); }
+function revealInspector() { const heading=$('#detail h2'); if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});} if(matchMedia('(max-width:850px)').matches) $('.inspector').scrollIntoView({behavior:motionPreference.matches?'instant':'smooth',block:'start'}); }
+function actions(...entries) { const row = text('div', '', 'action-row'); for (const [label, fn, primary] of entries) row.append(button(label, fn, primary ? 'primary' : '')); return row; }
+async function selectRepo(name, targetView = state.view === 'workflow' ? 'workflow' : 'structure', force = false) {
+  if (locked) return; const current = ++epoch; fileEpoch++; const oldDetail = state.selected === name ? state.detail : null;
+  Object.assign(state, {selected: name, detail: null, folder: '', directory: null, offset: 0, run: null, jobs: null, selectedId: 'repo:' + name, view: targetView}); directories.clear(); loadingFolder = true; folderError = '';
+  const d = inspectorIntro('GITHUB / REPOSITORY', name.split('/')[1]), inspectorTicket = inspectorEpoch; d.append(text('p', 'Loading source information…', 'muted'));
+  renderLibrary(); render(true); focusStage(); if(matchMedia('(max-width:600px)').matches) $('.stage').scrollIntoView({behavior:motionPreference.matches?'instant':'smooth',block:'start'});
+  const loadContents = openDirectory('', current);
+  try {
+    const detail = await api({action: 'detail', repo: name, ...(force ? {refresh: '1'} : {})}); if (locked || current !== epoch) return;
+    if (oldDetail) for (const [key, value] of Object.entries(detail.sections)) if (!value.available && oldDetail.sections[key]?.available) detail.sections[key] = {...oldDetail.sections[key], stale: true};
+    state.detail = detail; if (inspectorTicket === inspectorEpoch) showRepo(); render(false);
+  } catch (error) { if (!locked && current === epoch) { state.detail = oldDetail; if (oldDetail) showRepo(); $('#detail').append(text('p', 'Repository details unavailable: ' + error.message, 'muted'), button('Retry repository', () => selectRepo(name, targetView, true))); } }
+  await loadContents;
+}
+function section(container, title, data, fn, empty = 'None reported.') {
+  container.append(text('h3', title)); if (!data?.available) { container.append(text('p', data?.reason || 'Unavailable', 'muted')); return; }
+  if (data.stale) container.append(text('p', 'Showing older results after a failed refresh.', 'tag'));
+  const values = Array.isArray(data.value) ? data.value : []; if (!values.length) container.append(text('p', empty, 'muted'));
+  values.slice(0, title.includes('first 15') ? 15 : 30).forEach(x => container.append(fn(x)));
+}
+function showRepo() {
+  if (locked || !state.selected) return;
+  const repo = state.detail?.repo || state.repos.find(r => r.name === state.selected); if (!repo) return;
+  const d = inspectorIntro('GITHUB / REPOSITORY', repo.name.split('/')[1]);
+  d.append(text('p', repo.description || 'No description provided.', 'muted'), text('p', `${repo.visibility} · ${repo.language || 'Language unknown'} · ${repo.archived ? 'Archived' : 'Not archived'}`, 'tag'));
+  d.append(actions(['Explore files', () => setView('structure'), true], ['Workflow runs', () => setView('workflow')], [state.pins.includes(repo.name) ? 'Unpin repo' : 'Pin repo', async () => { await pin(repo.name); if (!locked) showRepo(); }]));
+  d.append(link('Open repository on GitHub ↗', repo.url), text('p', 'Default branch: ' + (repo.branch || 'Unknown') + ' · Last push: ' + (repo.pushedAt ? new Date(repo.pushedAt).toLocaleDateString() : 'Unknown'), 'muted'));
+  if (!state.detail) return;
+  d.append(text('p', 'Details fetched ' + new Date(state.detail.fetchedAt).toLocaleString(), 'muted'));
+  const sections = state.detail.sections;
+  if (sections.languages?.available) { d.append(text('h3', 'Languages / source bytes')); d.append(text('p', Object.entries(sections.languages.value).map(([language, bytes]) => language + ' ' + Number(bytes).toLocaleString()).join(' · ') || 'Not reported.', 'muted')); }
+  d.append(text('h3', 'Knowledge / explicit repository links'));
+  const related = state.knowledge?.projects.filter(p => (p.repos || []).some(r => r.toLowerCase() === repo.name.toLowerCase())) || [];
+  if (!related.length) d.append(text('p', 'No explicit link in the indexed records.', 'muted'));
+  for (const p of related) d.append(button(p.title, () => { setView('knowledge'); showKnowledge(p); }));
+  section(d, 'Recent commits / first 15', sections.commits, commit => button((commit.commit?.message || 'Commit').split('\n')[0] + ' →', () => showCommit(commit)));
+  section(d, 'Open pull requests / first 30', sections.pulls, pr => link('#' + pr.number + ' ' + pr.title + ' ↗', `https://github.com/${repo.name}/pull/${pr.number}`));
+  section(d, 'Open issues / first 30', sections.issues, issue => link('#' + issue.number + ' ' + issue.title + ' ↗', `https://github.com/${repo.name}/issues/${issue.number}`));
+  section(d, 'Milestones / first 30', sections.milestones, milestone => link(milestone.title + ' ↗', `https://github.com/${repo.name}/milestone/${milestone.number}`));
+}
+async function openDirectory(path, expectedEpoch = epoch) {
+  if (!state.selected || locked) return; const name = state.selected; const requestId = ++fileEpoch;
+  loadingFolder = true; folderError = ''; render(false);
+  try {
+    const data = directories.get(path) || await api({action: 'contents', repo: name, path}); if (locked || state.selected !== name || expectedEpoch !== epoch || requestId !== fileEpoch) return;
+    if (data.type !== 'directory') throw Error('This item is not a folder.');
+    directories.set(path, data); state.folder = path; state.directory = data; state.offset = 0; state.selectedId = path ? 'path:' + path : 'repo:' + name;
+    if (data.incomplete) notice('GitHub limits this folder to 1,000 entries. The list and scene show a page at a time.');
+    loadingFolder = false; render(true); focusStage();
+  } catch (error) { if (!locked && expectedEpoch === epoch && requestId === fileEpoch) { loadingFolder = false; folderError = error.message; render(false); } }
+}
+async function previewFile(path) {
+  if (!state.selected || locked) return; const name = state.selected, current = epoch, requestId = ++fileEpoch;
+  state.selectedId = 'path:' + path; scene?.select(state.selectedId); scene?.focus(state.selectedId);
+  const d = inspectorIntro('GITHUB / FILE PREVIEW', path.split('/').pop()), inspectorTicket = inspectorEpoch; d.append(text('p', path, 'file-summary'), text('p', 'Loading read-only preview…', 'muted'));
+  try {
+    const data = await api({action: 'contents', repo: name, path}); if (locked || current !== epoch || requestId !== fileEpoch || inspectorTicket !== inspectorEpoch) return;
+    d.replaceChildren(text('p', 'GITHUB / FILE PREVIEW', 'eyebrow'), text('h2', path.split('/').pop()), text('p', path, 'file-summary'));
+    d.append(actions(['← Back to repository', showRepo], ['Containing folder', () => { setView('structure'); openDirectory(parentPath(path)); }]));
+    if (data.type === 'file') d.append(link('Open file on GitHub ↗', data.url), text('pre', data.content));
+    else d.append(text('p', data.reason || 'Preview unavailable for this item.', 'muted'));
+    revealInspector();
+  } catch (error) { if (!locked && current === epoch && requestId === fileEpoch) d.append(text('p', 'File unavailable: ' + error.message, 'muted'), button('Retry preview', () => previewFile(path))); }
+}
+function showKnowledge(record) {
+  if (locked || !state.knowledge) return;
+  state.selectedId = 'knowledge:' + record.path; scene?.select(state.selectedId);
+  const d = inspectorIntro('KNOWLEDGE / DOCUMENTED CLAIM', record.title);
+  d.append(text('p', [record.status && 'Recorded status: ' + record.status, record.confidence && 'Confidence: ' + record.confidence, record.date].filter(Boolean).join(' · ') || 'Status not documented.', 'tag'), text('p', 'These are knowledge-base statements, not measured repository progress.', 'muted'), link('Open original record ↗', state.knowledge.sourceRoot + record.path.split('/').map(encodeURIComponent).join('/')));
+  for (const [title, value] of Object.entries(record.sections || {})) if (value) d.append(text('h3', title), text('pre', value));
+  revealInspector();
+}
+async function showCommit(commit) {
+  const name = state.selected, current = epoch, d = inspectorIntro('GITHUB / COMMIT', (commit.commit?.message || 'Commit').split('\n')[0]), inspectorTicket = inspectorEpoch;
+  d.append(link('Open commit ↗', `https://github.com/${name}/commit/${commit.sha}`), button('← Back to repository', showRepo), text('p', 'Loading changed files…', 'muted'));
+  try { const result = await api({action: 'commit', repo: name, id: commit.sha}); if (locked || current !== epoch || inspectorTicket !== inspectorEpoch || !d.isConnected) return; d.lastChild.remove(); result.files.forEach(file => d.append(link(file.path + ' · ' + file.status, `https://github.com/${name}/commit/${commit.sha}`))); if (result.incomplete) d.append(text('p', 'The changed-file list may be incomplete.', 'tag')); }
+  catch (error) { if (!locked && current === epoch) d.append(text('p', 'Changed files unavailable: ' + error.message, 'muted')); }
+}
+async function selectRun(run) {
+  if (!state.selected || locked) return; const name = state.selected, current = epoch, requestId = ++fileEpoch;
+  state.run = run; state.jobs = null; state.selectedId = 'run:' + run.id; render(false);
+  const d = inspectorIntro('GITHUB ACTIONS / RETRIEVED EXECUTION', run.name || 'Workflow run'), inspectorTicket = inspectorEpoch;
+  d.append(text('p', (run.conclusion || run.status) + ' · run #' + (run.run_number || run.id), 'tag'), link('Open run on GitHub ↗', `https://github.com/${name}/actions/runs/${run.id}`), button('← All workflow runs', () => { state.run = null; state.jobs = null; render(true); showRepo(); }), text('p', 'Loading jobs and steps…', 'muted'));
+  try {
+    const data = await api({action: 'jobs', repo: name, id: String(run.id)}); if (locked || current !== epoch || requestId !== fileEpoch || inspectorTicket !== inspectorEpoch) return;
+    state.jobs = data; d.lastChild.remove(); d.append(text('p', 'Retrieved status; refresh the repository for newer runs. The scene shows up to 6 jobs and 5 steps each. The full retrieved list is below.', 'muted'));
+    if (!data.jobs.length) d.append(text('p', 'No jobs available for this run.', 'muted'));
+    for (const job of data.jobs) { d.append(text('h3', job.name), text('p', job.conclusion || job.status, 'tag')); for (const step of job.steps) d.append(text('p', `${step.number}. ${step.name} · ${step.conclusion || step.status}`, 'step-row')); }
+    if (data.incomplete) d.append(text('p', 'Showing the first 100 jobs.', 'tag')); render(true); revealInspector();
+  } catch (error) { if (!locked && current === epoch && requestId === fileEpoch) d.append(text('p', 'Jobs unavailable: ' + error.message, 'muted'), button('Retry jobs', () => selectRun(run))); }
+}
+async function moreRuns() {
+  if (!state.detail?.sections.runs?.available || locked) return;
+  const name = state.selected, current = epoch, section = state.detail.sections.runs, page = (section.loadedPage || 1) + 1;
+  try { const result = await api({action: 'runs', repo: name, id: String(page)}); if (locked || current !== epoch) return; const ids = new Set(section.value.workflow_runs.map(r => r.id)); section.value.workflow_runs.push(...result.runs.filter(r => !ids.has(r.id))); section.value.total_count = result.runs.length ? result.total : section.value.workflow_runs.length; section.loadedPage = page; render(false); }
+  catch (error) { notice('More runs could not be loaded. ' + error.message, true); }
+}
+function setView(view) {
+  if (locked) return; state.view = view; state.run = null; state.jobs = null;
+  render(true);
+  if (view === 'structure' && state.selected && !state.directory) openDirectory('');
+}
+for (const control of document.querySelectorAll('[data-view]')) control.onclick = () => setView(control.dataset.view);
+function back() {
+  if (state.view === 'structure' && state.folder) { openDirectory(parentPath(state.folder)); return; }
+  if (state.view === 'workflow' && state.run) { state.run = null; state.jobs = null; showRepo(); render(true); return; }
+  setView('fleet'); if (state.selected) showRepo();
+}
+$('#back').onclick = back; $('#reset').onclick = () => scene?.reset(); $('#zoom-in').onclick = () => scene?.zoom(.8); $('#zoom-out').onclick = () => scene?.zoom(1.25);
+function toggleOutline(open = $('#outline').hidden) { $('#outline').hidden = !open; $('#toggle-outline').setAttribute('aria-expanded', String(open)); }
+$('#toggle-outline').onclick = () => toggleOutline();
+function activate(node) {
+  if (locked) return;
+  state.selectedId = node.id; scene?.select(node.id);
+  if (node.action === 'repo') selectRepo(node.value);
+  if (node.action === 'folder') openDirectory(node.value);
+  if (node.action === 'file') previewFile(node.value);
+  if (node.action === 'knowledge') { const record = [...(state.knowledge?.projects || []), ...(state.knowledge?.documents || [])].find(r => r.path === node.value); if (record) { showKnowledge(record); scene?.focus(node.id); } }
+  if (node.action === 'run') selectRun(node.value);
+  if (node.action === 'definition') { const d = inspectorIntro('GITHUB ACTIONS / DEFINITION', node.value.name); d.append(text('p', 'A workflow definition is configuration, not an execution.', 'muted'), link('Open workflow definition ↗', `https://github.com/${state.selected}/blob/${encodeURIComponent(state.detail.repo.branch)}/${node.value.path}`)); scene?.focus(node.id); }
+  if (node.action === 'job' || node.action === 'step') { const d = inspectorIntro('GITHUB ACTIONS / RETRIEVED ' + node.action.toUpperCase(), node.value.name); d.append(text('p', node.value.conclusion || node.value.status, 'tag'), button('← Back to selected run', () => selectRun(state.run))); scene?.focus(node.id); }
+}
+function renderBreadcrumbs() {
+  const out = $('#breadcrumbs'); out.replaceChildren(button('Fleet', () => setView('fleet'), ''));
+  const crumb = (label, fn, current = false) => { out.append(text('span', '/')); const b = button(label, fn, ''); if (current) b.setAttribute('aria-current', 'location'); out.append(b); };
+  if (state.view === 'knowledge') { crumb('Knowledge', () => setView('knowledge'), true); return; }
+  if (!state.selected || state.view === 'fleet') return;
+  crumb(state.selected.split('/')[1], () => { setView('structure'); openDirectory(''); }, state.view === 'structure' && !state.folder);
+  if (state.view === 'structure') for (const path of ancestors(state.folder).slice(1)) crumb(path.split('/').pop(), () => openDirectory(path), path === state.folder);
+  if (state.view === 'workflow') crumb(state.run ? 'Run #' + (state.run.run_number || state.run.id) : 'Workflow runs', () => { state.run = null; state.jobs = null; render(true); }, true);
+}
+function showMessage(title, message, action) {
+  const out = $('#scene-message'); out.hidden = !title; out.replaceChildren(); if (!title) return;
+  out.append(text('span', '◈'), text('h3', title), text('p', message)); if (action) out.append(button(action[0], action[1], ''));
+}
+function renderOutline() {
+  const out = $('#alternate'); out.replaceChildren(); const pagination = $('#pagination'); pagination.replaceChildren(); pagination.hidden = true;
+  $('#outline-title').textContent = {fleet: 'Repository destinations', structure: 'Current folder', workflow: 'Workflow runs & definitions', knowledge: 'Knowledge records'}[state.view];
+  $('#outline-count').textContent = renderedModel.nodes.length + ' visible destinations';
+  if (state.view === 'structure' && state.directory) {
+    const entries = visibleEntries(state.directory.entries, state.offset);
+    for (const entry of entries) out.append(button((entry.type === 'dir' ? '▸ ' : '◇ ') + entry.name, () => entry.type === 'dir' ? openDirectory(entry.path) : previewFile(entry.path)));
+    if (!entries.length) out.append(text('p', 'This folder has no visible entries.', 'muted'));
+    if (state.directory.entries.length > PAGE_SIZE) { pagination.hidden = false; const previous = button('← Previous', () => { state.offset = Math.max(0, state.offset - PAGE_SIZE); render(true); }, ''), next = button('Next →', () => { state.offset += PAGE_SIZE; render(true); }, ''); previous.disabled = state.offset === 0; next.disabled = state.offset + PAGE_SIZE >= state.directory.entries.length; pagination.append(previous, text('span', `${state.offset + 1}–${Math.min(state.offset + PAGE_SIZE, state.directory.entries.length)} of ${state.directory.entries.length}`), next); }
+  } else if (state.view === 'workflow' && state.detail) {
+    if (state.run && state.jobs) for (const node of renderedModel.nodes) out.append(button(node.label + ' · ' + node.subtitle, () => activate(node)));
+    else {
+      const {workflows, runs} = state.detail.sections;
+      if (!workflows?.available) out.append(text('p', 'Workflow definitions: ' + (workflows?.reason || 'Unavailable'), 'muted'));
+      for (const w of workflows?.value?.workflows || []) out.append(button('Definition · ' + w.name, () => activate({id: 'workflow:' + w.id, action: 'definition', value: w})));
+      if (!runs?.available) out.append(text('p', 'Runs: ' + (runs?.reason || 'Unavailable'), 'muted'));
+      for (const run of runs?.value?.workflow_runs || []) out.append(button((run.name || 'Run') + ' · ' + (run.conclusion || run.status), () => selectRun(run)));
+      if (runs?.available && (runs.loadedPage || 1) < 20 && runs.value.workflow_runs.length < (runs.value.total_count || 0)) out.append(button('Load more runs', moreRuns));
+    }
+  } else for (const node of renderedModel.nodes) out.append(button(node.label + ' · ' + node.subtitle, () => activate(node)));
+  if (state.view === 'knowledge' && state.knowledge) {
+    out.append(text('h3', 'Knowledge repository activity'));
+    for (const item of state.knowledge.activity || []) { const a = link(item.title + ' ↗', item.url); a.className = 'list-button wide'; out.append(a); }
+  }
+}
+function render(reset = false) {
+  if (locked) return;
+  for (const b of document.querySelectorAll('[data-view]')) { const active = b.dataset.view === state.view; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)); }
+  $('#view-label').textContent = state.view.toUpperCase() + ' / ' + (state.selected && state.view !== 'fleet' && state.view !== 'knowledge' ? state.selected.split('/')[1] : 'OVERVIEW');
+  $('#view-title').textContent = {fleet: 'Repository fleet', structure: state.folder ? state.folder.split('/').pop() : 'Repository structure', workflow: state.run ? 'Inside the run' : 'Workflows & runs', knowledge: 'Knowledge constellation'}[state.view];
+  $('#scene-caption').textContent = {fleet: 'Repository destinations. No implied dependencies.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership, not execution dependencies. Open Explorer list for all retrieved runs.', knowledge: 'Documented records. Connections are explicit references; claims are not measured progress.'}[state.view];
+  renderedModel = makeModel(state); scene?.setModel(renderedModel, {selected: state.selectedId, reset});
+  renderBreadcrumbs(); renderOutline();
+  if (!state.repos.length && state.view !== 'knowledge' && state.fleetStatus === 'connected') showMessage('No repositories available.', 'The configured connection returned no accessible repositories. Check its repository selection or refresh.', ['Refresh connection', () => sync(true)]);
+  else if (!state.repos.length && state.view !== 'knowledge') showMessage('Your fleet is not connected', 'Use Refresh to retry the repository connection.', ['Refresh connection', () => sync(true)]);
+  else if (state.view === 'fleet' && !renderedModel.nodes.length) showMessage('Keep your work within reach.', 'Choose All repos, then use the star beside a repository to pin it.', ['Show all repositories', () => setFilter(false)]);
+  else if (['structure', 'workflow'].includes(state.view) && !state.selected) showMessage('Choose a repository first.', 'Open the library and select a destination to start exploring.', ['Open repository library', () => { $('#library').open = true; $('#search').focus(); }]);
+  else if (state.view === 'structure' && loadingFolder) showMessage('Opening folder…', 'Retrieving its immediate contents.');
+  else if (state.view === 'structure' && folderError) showMessage('This folder could not be opened.', folderError, ['Retry folder', () => openDirectory(state.folder)]);
+  else if (state.view === 'structure' && !state.directory?.entries.length) showMessage('This folder is empty.', 'Use the breadcrumbs or Back to return to its parent.');
+  else if (state.view === 'workflow' && !state.detail) showMessage('Loading workflow information…', 'Retrieving definitions and actual executions.');
+  else if (state.view === 'workflow' && !renderedModel.nodes.length) showMessage('No workflows to display.', 'This repository has no available workflow definitions or runs. Check the explorer list for permission details.');
+  else if (state.view === 'knowledge' && !state.knowledge) showMessage('Knowledge is unavailable.', 'Repository browsing still works. Refresh to retry the knowledge index.');
+  else if (state.view === 'knowledge' && !renderedModel.nodes.length) showMessage('No indexed project records.', 'The configured knowledge source has no allowed records to show.');
+  else if (graphicsAvailable === false) showMessage('Explore with the list.', '3D graphics are unavailable. Every destination is accessible in the explorer list below.');
+  else showMessage('', '');
+}
+function updateMotion() { const reduced = motionPreference.matches; $('#motion').textContent = reduced ? 'Reduced motion' : paused ? 'Resume motion' : 'Pause motion'; $('#motion').disabled = reduced; $('#motion').setAttribute('aria-pressed', String(paused || reduced)); scene?.setMotion(paused || reduced, reduced); }
+$('#motion').onclick = () => { paused = !paused; updateMotion(); };
+motionPreference.addEventListener('change', e => { paused = e.matches; updateMotion(); });
+function graphicsMode(available) {
+  if (locked) return;
+  graphicsAvailable = available;
+  for(const id of ['#zoom-in','#zoom-out','#reset']) $(id).disabled = !available;
+  document.body.classList.toggle('fallback', !available); $('#render-mode').textContent = available ? '3D / WEBGL' : 'EXPLORER / LIST';
+  if (!available) { toggleOutline(true); render(false); $('#scene-help').textContent = '3D graphics unavailable. Use the explorer list and breadcrumbs.'; }
+  else $('#scene-help').textContent = matchMedia('(max-width: 600px)').matches ? 'One finger orbits · Pinch zooms · Two fingers pan' : 'Drag to orbit · Scroll to zoom · Right-drag to pan';
+}
+async function initScene() {
+  try { const {createScene} = await import('./scene.js?v=3'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) scene.setModel(renderedModel, {selected: state.selectedId, reset: true}); }
+  catch { graphicsMode(false); }
+}
+updateMotion(); initScene(); sync();
+
+function sizeLibrary() {
+  const list = $('#project-list');
+  if (matchMedia('(min-width: 851px)').matches && $('#library').open) list.style.maxHeight = Math.max(110, $('.rail').getBoundingClientRect().bottom - list.getBoundingClientRect().top - 90) + 'px';
+  else list.style.removeProperty('max-height');
+}
+new ResizeObserver(sizeLibrary).observe($('.rail'));
+$('#library').addEventListener('toggle', sizeLibrary);
