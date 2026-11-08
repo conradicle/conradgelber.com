@@ -3,7 +3,7 @@ import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './m
 const $ = s => document.querySelector(s), store = toolStore('operations-desk');
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const state = {repos: [], fleetStatus: 'loading', pins: [], pinnedOnly: false, knowledge: null, selected: null, detail: null, view: 'fleet', folder: '', directory: null, offset: 0, run: null, jobs: null, selectedId: null};
-let graphicsAvailable = null, inspectorEpoch = 0;
+let graphicsAvailable = null, inspectorEpoch = 0, initialFavoritesApplied = false, filterChosen = false;
 let scene = null, locked = false, paused = motionPreference.matches, epoch = 0, fileEpoch = 0, lastInput = Date.now(), pending = new Set(), directories = new Map(), loadingFolder = false, folderError = '', renderedModel = {nodes: [], edges: []}, renderedSignature = null;
 const text = (tag, value, cls) => { const e = document.createElement(tag); e.textContent = value ?? ''; if (cls) e.className = cls; return e; };
 const button = (label, fn, cls = 'list-button') => { const b = text('button', label, cls); b.type = 'button'; b.addEventListener('click', fn); return b; };
@@ -48,7 +48,8 @@ async function sync(force = false) {
     else { state.fleetStatus = 'error'; warnings.push('Repository connection unavailable. ' + fleet.reason.message + (state.repos.length ? ' Previous results remain visible.' : ' Use Refresh to retry.')); }
     if (knowledge.status === 'fulfilled') state.knowledge = knowledge.value; else warnings.push('Knowledge refresh is unavailable.' + (state.knowledge ? ' Showing earlier knowledge records.' : ' Repository browsing still works.'));
     if (pins.status === 'fulfilled' && Array.isArray(pins.value?.value)) state.pins = pins.value.value.filter(n => typeof n === 'string').slice(0,100);
-    else if (pins.status === 'rejected') warnings.push('Pinned selection could not be loaded.');
+    else if (pins.status === 'rejected') warnings.push('Favorites could not be loaded.');
+    if (pins.status === 'fulfilled' && !initialFavoritesApplied) { if (!filterChosen) state.pinnedOnly = state.pins.length > 0; initialFavoritesApplied = true; }
     $('#repo-count').textContent = state.repos.length; $('#library-count').textContent = state.repos.length; $('#knowledge-count').textContent = state.knowledge?.projects.length ?? '—';
     notice(warnings.length ? warnings.join(' ') : 'Workspace connected. Select a destination to explore its source.', !!warnings.length);
     renderLibrary(); render(true);
@@ -58,10 +59,11 @@ $('#refresh').addEventListener('click', () => sync(true));
 async function pin(name) {
   const shouldPin = !state.pins.includes(name);
   try { const saved = await store.update('pins', value => { const pins = new Set(Array.isArray(value) ? value : []); shouldPin ? pins.add(name) : pins.delete(name); return [...pins].slice(0, 100); }, []); if (locked) return; state.pins = saved.value; renderLibrary(); if (state.view === 'fleet') render(false); }
-  catch { notice('Your pinned selection could not be saved. Try again.', true); }
+  catch { notice('Your favorites could not be saved. Try again.', true); }
 }
-function setFilter(pinned) { state.pinnedOnly = pinned; renderLibrary(); if (state.view === 'fleet') render(true); }
+function setFilter(pinned) { filterChosen = true; state.pinnedOnly = pinned; renderLibrary(); if (state.view === 'fleet') render(true); }
 $('#filter-all').onclick = () => setFilter(false); $('#filter-pins').onclick = () => setFilter(true);
+$('#manage-favorites').onclick = () => { $('#library').open = true; setFilter(false); $('#search').focus(); if (matchMedia('(max-width: 600px)').matches) $('#library').scrollIntoView({behavior: motionPreference.matches ? 'instant' : 'smooth', block: 'start'}); };
 function renderLibrary() {
   const out = $('#project-list'), query = $('#search').value.trim().toLowerCase(), focusKey = out.contains(document.activeElement) ? document.activeElement.dataset.focus : null; out.replaceChildren();
   $('#pin-count').textContent = state.pins.length;
@@ -70,9 +72,9 @@ function renderLibrary() {
   for (const repo of repos) {
     const row = text('div', '', 'repo-row'), open = button(repo.name.split('/')[1], () => selectRepo(repo.name), 'repo-open' + (state.selected === repo.name ? ' selected' : ''));
     open.dataset.focus = 'open:' + repo.name; open.setAttribute('aria-label', 'Open repository ' + repo.name); open.append(text('small', (repo.language || 'Repository') + ' · ' + repo.visibility));
-    const pinned = state.pins.includes(repo.name), toggle = button(pinned ? '★' : '☆', () => pin(repo.name), 'pin'); toggle.dataset.focus = 'pin:' + repo.name; toggle.setAttribute('aria-label', (pinned ? 'Unpin ' : 'Pin ') + repo.name); toggle.setAttribute('aria-pressed', String(pinned)); row.append(open, toggle); out.append(row);
+    const pinned = state.pins.includes(repo.name), toggle = button(pinned ? '★' : '☆', () => pin(repo.name), 'pin'); toggle.dataset.focus = 'pin:' + repo.name; toggle.setAttribute('aria-label', (pinned ? 'Remove from favorites: ' : 'Add to favorites: ') + repo.name); toggle.setAttribute('aria-pressed', String(pinned)); row.append(open, toggle); out.append(row);
   }
-  if (!repos.length) out.append(text('p', state.pinnedOnly ? 'No pinned repositories match. Choose All repos to find one.' : query ? 'No repositories match this search.' : 'No repositories loaded. Try Refresh.', 'muted'));
+  if (!repos.length) out.append(text('p', state.pinnedOnly ? 'No favorites match. Choose All repos and star a repository to add it.' : query ? 'No repositories match this search.' : 'No repositories loaded. Try Refresh.', 'muted'));
   if (focusKey) ([...out.querySelectorAll('button')].find(b => b.dataset.focus === focusKey) || $('#filter-pins')).focus({preventScroll:true});
 }
 $('#search').addEventListener('input', () => {
@@ -108,7 +110,7 @@ function showRepo() {
   const repo = state.detail?.repo || state.repos.find(r => r.name === state.selected); if (!repo) return;
   const d = inspectorIntro('GITHUB / REPOSITORY', repo.name.split('/')[1]);
   d.append(text('p', repo.description || 'No description provided.', 'muted'), text('p', `${repo.visibility} · ${repo.language || 'Language unknown'} · ${repo.archived ? 'Archived' : 'Not archived'}`, 'tag'));
-  d.append(actions(['Explore files', () => setView('structure'), true], ['Workflow runs', () => setView('workflow')], [state.pins.includes(repo.name) ? 'Unpin repo' : 'Pin repo', async () => { await pin(repo.name); if (!locked) showRepo(); }]));
+  d.append(actions(['Explore files', () => setView('structure'), true], ['Workflow runs', () => setView('workflow')], [state.pins.includes(repo.name) ? 'Remove from favorites' : 'Add to favorites', async () => { await pin(repo.name); if (!locked) showRepo(); }]));
   d.append(link('Open repository on GitHub ↗', repo.url), text('p', 'Default branch: ' + (repo.branch || 'Unknown') + ' · Last push: ' + (repo.pushedAt ? new Date(repo.pushedAt).toLocaleDateString() : 'Unknown'), 'muted'));
   if (!state.detail) return;
   d.append(text('p', 'Details fetched ' + new Date(state.detail.fetchedAt).toLocaleString(), 'muted'));
@@ -247,9 +249,10 @@ function render(reset = false) {
   if (locked) return;
   for (const b of document.querySelectorAll('[data-view]')) { const active = b.dataset.view === state.view; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)); }
   $('#scene-wrap').dataset.view = state.view;
+  $('#manage-favorites').hidden = state.view !== 'fleet';
   $('#view-label').textContent = state.view.toUpperCase() + ' / ' + (state.selected && state.view !== 'fleet' && state.view !== 'knowledge' ? state.selected.split('/')[1] : 'OVERVIEW');
   $('#view-title').textContent = {fleet: 'Repository fleet', structure: state.folder ? state.folder.split('/').pop() : 'Repository structure', workflow: state.run ? 'Inside the run' : 'Workflows & runs', knowledge: 'Knowledge constellation'}[state.view];
-  $('#scene-caption').textContent = {fleet: 'Repository destinations. No implied dependencies.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership. Moving dots are decorative, not live execution. Open Explorer list for all retrieved runs.', knowledge: 'Documented records. Connections are explicit references; claims are not measured progress.'}[state.view];
+  $('#scene-caption').textContent = {fleet: state.pinnedOnly ? 'Favorites only. Use Manage favorites to add more.' : 'All repositories. Star the ones you want in Favorites.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership. Moving dots are decorative, not live execution. Open Explorer list for all retrieved runs.', knowledge: 'Documented records. Connections are explicit references; claims are not measured progress.'}[state.view];
   renderedModel = makeModel(state);
   const signature = state.view + ':' + JSON.stringify(renderedModel);
   if (scene && signature !== renderedSignature) { scene.setModel(renderedModel, {selected: state.selectedId, reset, animateConnections: state.view === 'workflow'}); renderedSignature = signature; }
@@ -257,7 +260,7 @@ function render(reset = false) {
   renderBreadcrumbs(); renderOutline();
   if (!state.repos.length && state.view !== 'knowledge' && state.fleetStatus === 'connected') showMessage('No repositories available.', 'The configured connection returned no accessible repositories. Check its repository selection or refresh.', ['Refresh connection', () => sync(true)]);
   else if (!state.repos.length && state.view !== 'knowledge') showMessage('Your fleet is not connected', 'Use Refresh to retry the repository connection.', ['Refresh connection', () => sync(true)]);
-  else if (state.view === 'fleet' && !renderedModel.nodes.length) showMessage('Keep your work within reach.', 'Choose All repos, then use the star beside a repository to pin it.', ['Show all repositories', () => setFilter(false)]);
+  else if (state.view === 'fleet' && !renderedModel.nodes.length) showMessage('Choose your favorites.', 'Select All repos, then use the star beside each repository to add it.', ['Show all repositories', () => setFilter(false)]);
   else if (['structure', 'workflow'].includes(state.view) && !state.selected) showMessage('Choose a repository first.', 'Open the library and select a destination to start exploring.', ['Open repository library', () => { $('#library').open = true; $('#search').focus(); }]);
   else if (state.view === 'structure' && loadingFolder) showMessage('Opening folder…', 'Retrieving its immediate contents.');
   else if (state.view === 'structure' && folderError) showMessage('This folder could not be opened.', folderError, ['Retry folder', () => openDirectory(state.folder)]);
