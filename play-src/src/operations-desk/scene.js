@@ -16,7 +16,7 @@ export function createScene({canvas, labels, onActivate, onMode}) {
   camera.position.set(30, 32, 42);
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true; controls.dampingFactor = .085;
-  controls.minDistance = 9; controls.maxDistance = 110;
+  controls.minDistance = 9; controls.maxDistance = 145;
   controls.maxPolarAngle = Math.PI * .47;
   controls.minPolarAngle = .12;
   controls.rotateSpeed = .6; controls.zoomSpeed = .75;
@@ -93,7 +93,7 @@ export function createScene({canvas, labels, onActivate, onMode}) {
     const bounds=new THREE.Box3();for(const item of items)bounds.expandByPoint(item.group.position);
     if(bounds.isEmpty()){move(new THREE.Vector3(),new THREE.Vector3(28,30,38));return;}
     const center=bounds.getCenter(new THREE.Vector3()),size=bounds.getSize(new THREE.Vector3());
-    const extent=Math.max(size.x,size.z,15), distance=THREE.MathUtils.clamp((extent*.94+16)*Math.max(1,1.3/camera.aspect),26,85);
+    const extent=Math.max(size.x,size.z,15), distance=THREE.MathUtils.clamp((extent*.94+16)*Math.max(1,1.3/camera.aspect),26,110);
     move(center.clone().add(new THREE.Vector3(0,-1,0)),center.clone().add(new THREE.Vector3(distance*.52,distance*.7,distance*.93)));
   }
   function focus(id) {const item=items.find(x=>x.node.id===id);if(!item)return;const point=item.group.position.clone().add(new THREE.Vector3(0,1,0));move(point,point.clone().add(new THREE.Vector3(11,13,20)));select(id);}
@@ -129,12 +129,12 @@ export function createScene({canvas, labels, onActivate, onMode}) {
   function pointerDown(e){pointerStart={x:e.clientX,y:e.clientY};}
   function pointerUp(e){if(!pointerStart||Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>5)return;pointerStart=null;const r=canvas.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);const hit=raycaster.intersectObjects(items.map(x=>x.body))[0];if(hit)onActivate(hit.object.userData.node);}
   canvas.addEventListener('pointerdown',pointerDown);canvas.addEventListener('pointerup',pointerUp);
-  function keydown(e){if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','Home'].includes(e.key))return;e.preventDefault();if(e.key==='Home'){resetCamera();return;}const offset=camera.position.clone().sub(controls.target),spherical=new THREE.Spherical().setFromVector3(offset);if(e.key==='ArrowLeft')spherical.theta-=.12;if(e.key==='ArrowRight')spherical.theta+=.12;if(e.key==='ArrowUp')spherical.phi=Math.max(.12,spherical.phi-.1);if(e.key==='ArrowDown')spherical.phi=Math.min(Math.PI*.47,spherical.phi+.1);if(e.key==='+')spherical.radius=Math.max(9,spherical.radius*.9);if(e.key==='-')spherical.radius=Math.min(110,spherical.radius*1.1);camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(spherical));controls.update();changed();}
+  function keydown(e){if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','Home'].includes(e.key))return;e.preventDefault();if(e.key==='Home'){resetCamera();return;}const offset=camera.position.clone().sub(controls.target),spherical=new THREE.Spherical().setFromVector3(offset);if(e.key==='ArrowLeft')spherical.theta-=.12;if(e.key==='ArrowRight')spherical.theta+=.12;if(e.key==='ArrowUp')spherical.phi=Math.max(.12,spherical.phi-.1);if(e.key==='ArrowDown')spherical.phi=Math.min(Math.PI*.47,spherical.phi+.1);if(e.key==='+')spherical.radius=Math.max(9,spherical.radius*.9);if(e.key==='-')spherical.radius=Math.min(145,spherical.radius*1.1);camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(spherical));controls.update();changed();}
   canvas.addEventListener('keydown',keydown);
   function visibility(){if(document.hidden){cancelAnimationFrame(frame);frame=0;}else{changed();}}
   document.addEventListener('visibilitychange',visibility);
   function lost(e){e.preventDefault();contextLost=true;cancelAnimationFrame(frame);frame=0;labels.replaceChildren();onMode(false);}
   canvas.addEventListener('webglcontextlost',lost);
   onMode(true);resize();requestFrame();
-  return {setModel,focus,select,reset:resetCamera,zoom(factor){const offset=camera.position.clone().sub(controls.target).multiplyScalar(factor);offset.clampLength(9,110);move(controls.target,controls.target.clone().add(offset));},setMotion(value,isReduced=false){paused=value;reduced=isReduced;controls.enableDamping=!paused&&!reduced;for(const p of paths)p.pulse.visible=[p.edge.from,p.edge.to].includes(selectedId);changed();},clear(){setModel({nodes:[],edges:[]});},dispose(){disposed=true;cancelAnimationFrame(frame);observer.disconnect();controls.dispose();document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('pointerdown',pointerDown);canvas.removeEventListener('pointerup',pointerUp);canvas.removeEventListener('keydown',keydown);canvas.removeEventListener('webglcontextlost',lost);release(scene);glowTexture.dispose();renderer.dispose();labels.replaceChildren();}};
+  return {setModel,focus,select,reset:resetCamera,zoom(factor){const offset=camera.position.clone().sub(controls.target).multiplyScalar(factor);offset.clampLength(9,145);move(controls.target,controls.target.clone().add(offset));},setMotion(value,isReduced=false){paused=value;reduced=isReduced;controls.enableDamping=!paused&&!reduced;for(const p of paths)p.pulse.visible=[p.edge.from,p.edge.to].includes(selectedId);changed();},clear(){setModel({nodes:[],edges:[]});},dispose(){disposed=true;cancelAnimationFrame(frame);observer.disconnect();controls.dispose();document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('pointerdown',pointerDown);canvas.removeEventListener('pointerup',pointerUp);canvas.removeEventListener('keydown',keydown);canvas.removeEventListener('webglcontextlost',lost);release(scene);glowTexture.dispose();renderer.dispose();labels.replaceChildren();}};
 }

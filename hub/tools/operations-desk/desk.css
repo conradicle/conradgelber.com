@@ -56,3 +56,11 @@ button,.workspace,.search-field,.dimension-tag,.status-pill,#detail pre{border-r
 :root:not([data-theme=dark]) #scene-message h3{color:#dbe7ee}
 @media(max-width:600px){.brand{gap:6px}.brand-name{font-size:1.1rem}.brand-current{font-size:10px}h1{font-size:2rem}}
 @media(max-width:420px){.intro{align-items:flex-start;gap:8px}.intro>div:first-child{min-width:0}.readouts{flex-shrink:0;max-width:68px}.readouts>div{min-width:0}.readouts span{overflow-wrap:anywhere}.head-actions #motion{max-width:54px}footer{letter-spacing:.06em}}
+
+/* In fleet view the repository library and inspector carry the details; keep
+   names in the scene compact so the destinations have space to breathe. */
+#scene-wrap[data-view="fleet"] .scene-label{padding:5px 8px;min-height:32px;max-width:150px;background:#0c1929d9;box-shadow:none;border-top-width:1px}
+#scene-wrap[data-view="fleet"] .scene-label small{display:none}
+#scene-wrap[data-view="fleet"] .scene-label>span{max-width:132px}
+#scene-wrap[data-view="fleet"] .scene-label:hover,#scene-wrap[data-view="fleet"] .scene-label:focus-visible{background:#173044;border-color:#9de8df}
+@media(max-width:600px){#scene-wrap[data-view="fleet"] .scene-label{min-height:44px;max-width:120px}#scene-wrap[data-view="fleet"] .scene-label>span{max-width:104px}}

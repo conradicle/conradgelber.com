@@ -10,8 +10,8 @@ export function ancestors(path) {
 export function visibleEntries(entries, offset = 0) {
   return [...entries].sort((a, b) => (a.type === 'dir' ? 0 : 1) - (b.type === 'dir' ? 0 : 1) || a.name.localeCompare(b.name)).slice(offset, offset + PAGE_SIZE);
 }
-const grid = (i, count, spacing = 7) => {
-  const cols = Math.min(4, Math.ceil(Math.sqrt(count)));
+const grid = (i, count, spacing = 7, maxColumns = 4) => {
+  const cols = Math.min(maxColumns, Math.ceil(Math.sqrt(count)));
   return [(i % cols - (cols - 1) / 2) * spacing, (i % 3) * .85, (Math.floor(i / cols) - (Math.ceil(count / cols) - 1) / 2) * spacing];
 };
 export function makeModel(state) {
@@ -20,7 +20,7 @@ export function makeModel(state) {
   const add = (node, parent) => { nodes.push(node); if (parent) edges.push({from: parent, to: node.id}); };
   if (view === 'fleet') {
     const fleet = repos.filter(r => !state.pinnedOnly || state.pins.includes(r.name));
-    fleet.slice(0, 40).forEach((r, i) => add({id: 'repo:' + r.name, label: r.name.split('/')[1], subtitle: r.language || r.visibility, kind: 'repo', position: grid(i, Math.min(fleet.length, 40), 9), action: 'repo', value: r.name}));
+    fleet.slice(0, 40).forEach((r, i) => add({id: 'repo:' + r.name, label: r.name.split('/')[1], subtitle: r.language || r.visibility, kind: 'repo', position: grid(i, Math.min(fleet.length, 40), 13, 7), action: 'repo', value: r.name}));
   } else if (view === 'structure' && selected) {
     const chain = ancestors(folder);
     chain.forEach((path, i) => add({id: path ? 'path:' + path : 'repo:' + selected, label: path ? path.split('/').pop() : selected.split('/')[1], subtitle: i === chain.length - 1 ? 'Current folder' : 'Parent', kind: path ? 'dir' : 'repo', position: [0, 5 + (chain.length - 1 - i) * 2.5, -9 - (chain.length - 1 - i) * 7], action: 'folder', value: path}, i ? (chain[i - 1] ? 'path:' + chain[i - 1] : 'repo:' + selected) : null));

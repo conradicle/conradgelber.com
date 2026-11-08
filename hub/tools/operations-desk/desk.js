@@ -1,5 +1,5 @@
 import { toolStore } from '/hub/lib/store.js';
-import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './model.js';
+import { makeModel, visibleEntries, ancestors, parentPath, PAGE_SIZE } from './model.js?v=2';
 const $ = s => document.querySelector(s), store = toolStore('operations-desk');
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const state = {repos: [], fleetStatus: 'loading', pins: [], pinnedOnly: false, knowledge: null, selected: null, detail: null, view: 'fleet', folder: '', directory: null, offset: 0, run: null, jobs: null, selectedId: null};
@@ -246,6 +246,7 @@ function renderOutline() {
 function render(reset = false) {
   if (locked) return;
   for (const b of document.querySelectorAll('[data-view]')) { const active = b.dataset.view === state.view; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)); }
+  $('#scene-wrap').dataset.view = state.view;
   $('#view-label').textContent = state.view.toUpperCase() + ' / ' + (state.selected && state.view !== 'fleet' && state.view !== 'knowledge' ? state.selected.split('/')[1] : 'OVERVIEW');
   $('#view-title').textContent = {fleet: 'Repository fleet', structure: state.folder ? state.folder.split('/').pop() : 'Repository structure', workflow: state.run ? 'Inside the run' : 'Workflows & runs', knowledge: 'Knowledge constellation'}[state.view];
   $('#scene-caption').textContent = {fleet: 'Repository destinations. No implied dependencies.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership, not execution dependencies. Open Explorer list for all retrieved runs.', knowledge: 'Documented records. Connections are explicit references; claims are not measured progress.'}[state.view];
@@ -280,7 +281,7 @@ function graphicsMode(available) {
   else $('#scene-help').textContent = matchMedia('(max-width: 600px)').matches ? 'One finger orbits · Pinch zooms · Two fingers pan' : 'Drag to orbit · Scroll to zoom · Right-drag to pan';
 }
 async function initScene() {
-  try { const {createScene} = await import('./scene.js?v=6'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true}); renderedSignature = JSON.stringify(renderedModel); } }
+  try { const {createScene} = await import('./scene.js?v=7'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true}); renderedSignature = JSON.stringify(renderedModel); } }
   catch { graphicsMode(false); }
 }
 updateMotion(); initScene(); sync();
