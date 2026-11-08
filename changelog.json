@@ -1,5 +1,30 @@
 [
   {
+    "version": "1.18.20",
+    "date": "2026-11-08",
+    "title": "Natural jellyfish detail",
+    "bullets": [
+      "Individual tentacles now have subtler, independent follow-through, with soft ribbon-like oral arms."
+    ]
+  },
+  {
+    "version": "1.18.19",
+    "date": "2026-11-08",
+    "title": "Calmer jellyfish tentacles",
+    "bullets": [
+      "Tentacles now trail more gracefully through turns, with steadier attachments and smoother oral arms."
+    ]
+  },
+  {
+    "version": "1.18.18",
+    "date": "2026-11-08",
+    "title": "A more living digital ocean",
+    "bullets": [
+      "Jellyfish bells reshape through each swimming stroke, with flowing oral arms and tentacles that trail through turns.",
+      "Independent swimming paths and quieter mobile rendering keep the background calm."
+    ]
+  },
+  {
     "version": "1.18.17",
     "date": "2026-11-08",
     "title": "A digital ocean",

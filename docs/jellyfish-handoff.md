@@ -1,5 +1,9 @@
 # Jellyfish and site theme handoff
 
+For the subsequent anatomical rebuild and its validation, see
+[`jellyfish-rebuild.md`](jellyfish-rebuild.md). The checkpoint description below
+is retained as the record of the implementation before that rebuild.
+
 This checkpoint preserves the current implementation for further review. It is a static, framework-free website served from the repository root. The animation is an original procedural WebGL effect; it does not use Three.js, external assets, a physics engine, or a video. The latest creative request was to improve swimming and remove content-dimming halos. The user has not yet given feedback on that latest iteration, so treat its visual quality as an open question rather than a finished design.
 
 ## Where to start
