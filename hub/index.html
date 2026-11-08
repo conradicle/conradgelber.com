@@ -14,8 +14,8 @@
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
 <script src="/js/theme-preference.js?v=1"></script>
 <link rel="stylesheet" href="/style.css?v=16">
-<link rel="stylesheet" href="/hub/hub.css?v=2">
-<script type="module" src="/hub/hub.js?v=1"></script>
+<link rel="stylesheet" href="/hub/hub.css?v=3">
+<script type="module" src="/hub/hub.js?v=2"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -28,7 +28,9 @@
 
   <main id="main">
     <section class="hub-section">
-      <h1 class="page-title">Tools</h1>
+      <h1 class="page-title">Your workspace</h1>
+      <div id="featured-tool" class="featured-slot" hidden></div>
+      <h2 class="tools-heading" id="tools-heading" hidden>More tools</h2>
       <ul class="tiles" id="tiles"></ul>
       <p class="hub-note" id="tiles-error" hidden>Could not load the tool list. Reload to try again.</p>
     </section>

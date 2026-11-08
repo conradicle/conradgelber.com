@@ -77,3 +77,18 @@
 
 /* Keep controls and tool cards legible in the site’s dark appearance. */
 :root[data-theme="dark"] .tile,:root[data-theme="dark"] .hub-input,:root[data-theme="dark"] .hub-frame{background:#17263b}
+
+/* Give the desk a clear entry point while retaining the shared Hub palette. */
+.featured-slot{margin:1.2rem 0 2.5rem}
+.featured-desk{position:relative;isolation:isolate;display:flex;align-items:center;min-height:235px;overflow:hidden;padding:2rem 2.2rem;background:#13233c;color:#f0f4f7;border:1px solid #263d59;border-top:3px solid #5cc4b5;border-radius:2px}
+.featured-desk:hover{color:#fff;border-top-color:#a0e2d7}
+.featured-desk:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.featured-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;max-width:25rem}
+.featured-eyebrow{font-size:.66rem;letter-spacing:.15em;font-weight:500;color:#8fd6ca}
+.featured-name{font:600 clamp(1.8rem,4vw,2.5rem)/1.12 Spectral,Georgia,serif;letter-spacing:-.02em;margin-top:.65rem}
+.featured-description{font-size:.96rem;line-height:1.55;color:#bdcbd8;margin-top:.6rem;max-width:29ch}
+.featured-action{margin-top:1.25rem;font-size:.9rem;color:#9cddd2;font-weight:500}
+.featured-desk:hover .featured-action{color:#fff}
+.featured-art{position:absolute;right:-1%;top:0;width:57%;height:100%;object-fit:contain;opacity:.85;pointer-events:none}
+.tools-heading{font:600 1.35rem/1.3 Spectral,Georgia,serif;margin:0 0 1rem;padding-bottom:.7rem;border-bottom:1px solid var(--rule)}
+@media(max-width:600px){.featured-slot{margin:.9rem 0 2rem}.featured-desk{min-height:218px;padding:1.4rem}.featured-art{width:65%;right:-18%;opacity:.45}.featured-content{max-width:75%}.featured-description{font-size:.9rem}}

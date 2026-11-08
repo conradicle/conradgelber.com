@@ -1,5 +1,4 @@
-// Draws one tile per entry in /hub/tools.json. Adding a tool never touches
-// this file; see ADDING_TOOLS.md.
+// Render the Operations Desk as the featured tool and other registry entries below.
 
 const list = document.getElementById("tiles");
 
@@ -33,7 +32,39 @@ try {
   const res = await fetch("/hub/tools.json", { cache: "no-store" });
   if (res.status === 401 || res.redirected) location.href = "/login/";
   const { tools } = await res.json();
-  list.append(...tools.map(tile));
+  const featured = tools.find(tool => tool.id === "operations-desk");
+  const others = tools.filter(tool => tool.id !== "operations-desk");
+  if (featured) {
+    const slot = document.getElementById("featured-tool");
+    const link = document.createElement("a");
+    link.className = "featured-desk";
+    link.href = featured.route;
+    const content = document.createElement("span");
+    content.className = "featured-content";
+    const eyebrow = document.createElement("span");
+    eyebrow.className = "featured-eyebrow";
+    eyebrow.textContent = "PROJECTS & KNOWLEDGE";
+    const name = document.createElement("span");
+    name.className = "featured-name";
+    name.textContent = featured.name;
+    const description = document.createElement("span");
+    description.className = "featured-description";
+    description.textContent = "Explore your repositories, workflows, and connected knowledge in one place.";
+    const action = document.createElement("span");
+    action.className = "featured-action";
+    action.textContent = "Open desk →";
+    const artwork = document.createElement("img");
+    artwork.className = "featured-art";
+    artwork.src = "/hub/tools/operations-desk/feature.svg";
+    artwork.alt = "";
+    artwork.setAttribute("aria-hidden", "true");
+    content.append(eyebrow, name, description, action);
+    link.append(content, artwork);
+    slot.append(link);
+    slot.hidden = false;
+  }
+  document.getElementById("tools-heading").hidden = !featured || !others.length;
+  list.append(...(featured ? others : tools).map(tile));
 } catch {
   document.getElementById("tiles-error").hidden = false;
 }
