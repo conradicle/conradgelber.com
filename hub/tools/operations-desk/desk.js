@@ -4,7 +4,7 @@ const $ = s => document.querySelector(s), store = toolStore('operations-desk');
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const state = {repos: [], fleetStatus: 'loading', pins: [], pinnedOnly: false, knowledge: null, selected: null, detail: null, view: 'fleet', folder: '', directory: null, offset: 0, run: null, jobs: null, selectedId: null};
 let graphicsAvailable = null, inspectorEpoch = 0;
-let scene = null, locked = false, paused = motionPreference.matches, epoch = 0, fileEpoch = 0, lastInput = Date.now(), pending = new Set(), directories = new Map(), loadingFolder = false, folderError = '', renderedModel = {nodes: [], edges: []};
+let scene = null, locked = false, paused = motionPreference.matches, epoch = 0, fileEpoch = 0, lastInput = Date.now(), pending = new Set(), directories = new Map(), loadingFolder = false, folderError = '', renderedModel = {nodes: [], edges: []}, renderedSignature = null;
 const text = (tag, value, cls) => { const e = document.createElement(tag); e.textContent = value ?? ''; if (cls) e.className = cls; return e; };
 const button = (label, fn, cls = 'list-button') => { const b = text('button', label, cls); b.type = 'button'; b.addEventListener('click', fn); return b; };
 function link(label, url) { const a = text('a', label); try { const u = new URL(url); if (u.protocol !== 'https:' || u.hostname !== 'github.com') throw Error(); a.href = u.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; } catch { return text('span', label); } return a; }
@@ -12,7 +12,7 @@ function notice(message, error = false) { if (locked) return; $('#notice').textC
 function clearPrivate() {
   for (const controller of pending) controller.abort(); pending.clear(); epoch++; fileEpoch++;
   Object.assign(state, {repos: [], pins: [], knowledge: null, selected: null, detail: null, directory: null, run: null, jobs: null, selectedId: null});
-  directories.clear(); renderedModel = {nodes: [], edges: []}; scene?.dispose(); scene = null;
+  directories.clear(); renderedModel = {nodes: [], edges: []}; renderedSignature = null; scene?.dispose(); scene = null;
   for (const id of ['#project-list', '#detail', '#alternate', '#results', '#scene-labels', '#breadcrumbs']) $(id)?.replaceChildren();
   if ($('#search')) $('#search').value = '';
 }
@@ -249,7 +249,10 @@ function render(reset = false) {
   $('#view-label').textContent = state.view.toUpperCase() + ' / ' + (state.selected && state.view !== 'fleet' && state.view !== 'knowledge' ? state.selected.split('/')[1] : 'OVERVIEW');
   $('#view-title').textContent = {fleet: 'Repository fleet', structure: state.folder ? state.folder.split('/').pop() : 'Repository structure', workflow: state.run ? 'Inside the run' : 'Workflows & runs', knowledge: 'Knowledge constellation'}[state.view];
   $('#scene-caption').textContent = {fleet: 'Repository destinations. No implied dependencies.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership, not execution dependencies. Open Explorer list for all retrieved runs.', knowledge: 'Documented records. Connections are explicit references; claims are not measured progress.'}[state.view];
-  renderedModel = makeModel(state); scene?.setModel(renderedModel, {selected: state.selectedId, reset});
+  renderedModel = makeModel(state);
+  const signature = JSON.stringify(renderedModel);
+  if (scene && signature !== renderedSignature) { scene.setModel(renderedModel, {selected: state.selectedId, reset}); renderedSignature = signature; }
+  else if (scene) { scene.select(state.selectedId); if (reset) scene.reset(); }
   renderBreadcrumbs(); renderOutline();
   if (!state.repos.length && state.view !== 'knowledge' && state.fleetStatus === 'connected') showMessage('No repositories available.', 'The configured connection returned no accessible repositories. Check its repository selection or refresh.', ['Refresh connection', () => sync(true)]);
   else if (!state.repos.length && state.view !== 'knowledge') showMessage('Your fleet is not connected', 'Use Refresh to retry the repository connection.', ['Refresh connection', () => sync(true)]);
@@ -277,7 +280,7 @@ function graphicsMode(available) {
   else $('#scene-help').textContent = matchMedia('(max-width: 600px)').matches ? 'One finger orbits · Pinch zooms · Two fingers pan' : 'Drag to orbit · Scroll to zoom · Right-drag to pan';
 }
 async function initScene() {
-  try { const {createScene} = await import('./scene.js?v=3'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) scene.setModel(renderedModel, {selected: state.selectedId, reset: true}); }
+  try { const {createScene} = await import('./scene.js?v=4'); if (locked) return; scene = createScene({canvas: $('#graph'), labels: $('#scene-labels'), onActivate: activate, onMode: graphicsMode}); updateMotion(); if (scene) { scene.setModel(renderedModel, {selected: state.selectedId, reset: true}); renderedSignature = JSON.stringify(renderedModel); } }
   catch { graphicsMode(false); }
 }
 updateMotion(); initScene(); sync();
