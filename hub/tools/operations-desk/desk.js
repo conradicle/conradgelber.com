@@ -51,7 +51,7 @@ async function sync(force = false) {
     else if (pins.status === 'rejected') warnings.push('Favorites could not be loaded.');
     if (pins.status === 'fulfilled' && !initialFavoritesApplied) { if (!filterChosen) state.pinnedOnly = state.pins.length > 0; initialFavoritesApplied = true; }
     $('#repo-count').textContent = state.repos.length; $('#library-count').textContent = state.repos.length; $('#knowledge-count').textContent = state.knowledge?.projects.length ?? '—';
-    notice(warnings.length ? warnings.join(' ') : 'Workspace connected. Select a destination to explore its source.', !!warnings.length);
+    notice(warnings.join(' '), !!warnings.length);
     renderLibrary(); render(true);
   } finally { if (!locked) $('#refresh').disabled = false; }
 }
@@ -252,7 +252,6 @@ function render(reset = false) {
   $('#scene-wrap').dataset.view = state.view;
   $('#manage-favorites').hidden = state.view !== 'fleet';
   $('#knowledge-labels').hidden = state.view !== 'knowledge';
-  $('#view-label').textContent = state.view.toUpperCase() + ' / ' + (state.selected && state.view !== 'fleet' && state.view !== 'knowledge' ? state.selected.split('/')[1] : 'OVERVIEW');
   $('#view-title').textContent = {fleet: 'Repository fleet', structure: state.folder ? state.folder.split('/').pop() : 'Repository structure', workflow: state.run ? 'Inside the run' : 'Workflows & runs', knowledge: 'Knowledge constellation'}[state.view];
   $('#scene-caption').textContent = {fleet: state.pinnedOnly ? 'Favorites only. Use Manage favorites to add more.' : 'All repositories. Star the ones you want in Favorites.', structure: 'Lines show folder containment. Open a folder to move deeper; preview a file in the inspector.', workflow: 'Lines show membership. Moving dots are decorative, not live execution. Open Explorer list for all retrieved runs.', knowledge: 'Select a bright point or use Explorer list. Lines are explicit references; background particles are decorative.'}[state.view];
   renderedModel = makeModel(state);

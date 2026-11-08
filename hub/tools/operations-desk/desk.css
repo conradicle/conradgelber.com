@@ -76,3 +76,6 @@ button,.workspace,.search-field,.dimension-tag,.status-pill,#detail pre{border-r
 #scene-wrap[data-view="knowledge"] .scene-label.selected,#scene-wrap[data-view="knowledge"].show-knowledge-labels .scene-label{visibility:visible;pointer-events:auto}
 #scene-wrap[data-view="knowledge"] .scene-label{border-color:#5d77b3;background:#0c162ae8;box-shadow:0 0 15px #479cf444}
 @media(max-width:600px){.knowledge-stat{padding:8px 9px;display:block}.knowledge-stat strong,.knowledge-stat span{display:block}.knowledge-stat span{font-size:8px;margin-top:3px}}
+
+#notice:empty{display:none}
+main{padding-bottom:24px}

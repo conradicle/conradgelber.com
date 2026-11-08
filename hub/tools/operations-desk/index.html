@@ -8,18 +8,18 @@
 <meta name="theme-color" content="#13233C">
 <script src="theme.js?v=1"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="desk.css?v=7">
-<script type="module" src="desk.js?v=10"></script>
+<link rel="stylesheet" href="desk.css?v=8">
+<script type="module" src="desk.js?v=11"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to workspace</a>
 <header class="mast">
-  <a href="/hub/" class="brand"><span class="brand-name">Hub</span><span class="brand-divider" aria-hidden="true">/</span><span class="brand-current">Operations desk</span></a>
+  <a href="/hub/" class="brand"><span class="brand-name">Hub</span></a>
   <div class="head-actions"><span class="connection" id="sync">Connecting to GitHub…</span><button id="refresh">↻ <span>Refresh</span></button><button id="motion" aria-pressed="false">Pause motion</button><button id="lock" class="lock">Lock desk</button></div>
 </header>
 <main id="main">
   <section class="intro" aria-label="Workspace overview">
-    <div><p class="eyebrow">HUB <span>/</span> TOOLS</p><h1>Operations desk</h1></div>
+    <div><h1>Operations desk</h1></div>
     <div class="readouts"><div><strong id="repo-count">—</strong><span>REPOSITORIES</span></div><div><strong id="knowledge-count">—</strong><span>PROJECT RECORDS</span></div><div class="read-only"><span class="status-mark" aria-hidden="true">◇</span><span>READ ONLY<br>PRIVATE WORKSPACE</span></div></div>
   </section>
   <div id="notice" role="status" aria-live="polite">Loading your workspace…</div>
@@ -27,10 +27,10 @@
     <aside class="rail">
       <p class="eyebrow rail-label">EXPLORER</p>
       <nav class="views" aria-label="Desk views">
-        <button class="view active" data-view="fleet" aria-pressed="true"><span class="nav-icon" aria-hidden="true">◎</span><span>Fleet<small>All your repositories</small></span><span class="nav-number">01</span></button>
-        <button class="view" data-view="structure" aria-pressed="false"><span class="nav-icon" aria-hidden="true">⌘</span><span>Structure<small>Folders & files</small></span><span class="nav-number">02</span></button>
-        <button class="view" data-view="workflow" aria-pressed="false"><span class="nav-icon" aria-hidden="true">⑂</span><span>Workflow<small>Runs, jobs & steps</small></span><span class="nav-number">03</span></button>
-        <button class="view" data-view="knowledge" aria-pressed="false"><span class="nav-icon" aria-hidden="true">✧</span><span>Knowledge<small>Documented project context</small></span><span class="nav-number">04</span></button>
+        <button class="view active" data-view="fleet" aria-pressed="true"><span class="nav-icon" aria-hidden="true">◎</span><span>Fleet<small>All your repositories</small></span></button>
+        <button class="view" data-view="structure" aria-pressed="false"><span class="nav-icon" aria-hidden="true">⌘</span><span>Structure<small>Folders & files</small></span></button>
+        <button class="view" data-view="workflow" aria-pressed="false"><span class="nav-icon" aria-hidden="true">⑂</span><span>Workflow<small>Runs, jobs & steps</small></span></button>
+        <button class="view" data-view="knowledge" aria-pressed="false"><span class="nav-icon" aria-hidden="true">✧</span><span>Knowledge<small>Documented project context</small></span></button>
       </nav>
       <details id="library" open>
         <summary>REPOSITORY LIBRARY <span id="library-count">0</span></summary>
@@ -43,24 +43,21 @@
       <p class="rail-note"><span aria-hidden="true">✦</span> Star repositories to show them in Favorites. Choose All repos to add more.</p>
     </aside>
     <section class="stage" aria-label="Interactive explorer">
-      <div class="stage-top"><div><p class="eyebrow" id="view-label">FLEET / OVERVIEW</p><h2 id="view-title" tabindex="-1">Repository fleet</h2></div><div class="stage-actions"><button id="knowledge-labels" type="button" aria-pressed="false" hidden>Show labels</button><button id="manage-favorites" type="button">Manage favorites</button><span class="dimension-tag" id="render-mode">INITIALIZING</span></div></div>
+      <div class="stage-top"><div><h2 id="view-title" tabindex="-1">Repository fleet</h2></div><div class="stage-actions"><button id="knowledge-labels" type="button" aria-pressed="false" hidden>Show labels</button><button id="manage-favorites" type="button">Manage favorites</button><span class="dimension-tag" id="render-mode">INITIALIZING</span></div></div>
       <nav id="breadcrumbs" aria-label="Explorer breadcrumbs"></nav>
       <div id="knowledge-summary" class="knowledge-summary" aria-label="Knowledge overview" hidden></div>
       <div class="scene-wrap" id="scene-wrap">
         <canvas id="graph" tabindex="0" aria-label="3D explorer. Arrow keys orbit, plus and minus zoom, Home resets. Use the explorer list for all destinations." aria-describedby="scene-help"></canvas>
         <div id="scene-labels" aria-label="Visible 3D destinations"></div>
-        <div class="stage-coordinate" aria-hidden="true">PERSPECTIVE / LOCAL SPACE<br><span>RELATIONSHIPS FROM SOURCE</span></div>
         <div id="scene-message"><span aria-hidden="true">◈</span><h3>Preparing your workspace</h3><p>Connecting to your repositories.</p></div>
         <div class="scene-tools" aria-label="Camera controls"><button id="back" aria-label="Go back in explorer">← Back</button><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button><button id="reset">↺ Reset camera</button></div>
-        <div class="scene-scale" aria-hidden="true"><span>DEPTH / PERSPECTIVE</span><i></i></div>
       </div>
       <div class="stage-foot"><p id="scene-help">Drag to orbit · Scroll to zoom · Right-drag to pan</p><button id="toggle-outline" aria-expanded="false" aria-controls="outline">☷ Explorer list</button></div>
       <div id="outline" hidden><div class="outline-heading"><h3 id="outline-title">Destinations</h3><span id="outline-count"></span></div><div id="alternate"></div></div>
       <div id="pagination" class="pagination" hidden></div>
       <p class="scene-caption" id="scene-caption">Repository destinations. Connections appear only where documented.</p>
     </section>
-    <aside class="inspector"><div class="inspector-top"><span>INSPECTOR</span><span aria-hidden="true">↗</span></div><div id="detail" aria-live="polite"><p class="eyebrow">READY WHEN YOU ARE</p><h2>Choose a destination.</h2><p class="muted">Select a repository in the scene or library to explore its folders, files, and workflows.</p><div class="inspector-guide"><p><b>01</b> Find a repository</p><p><b>02</b> Open a folder</p><p><b>03</b> Inspect the source</p></div></div></aside>
+    <aside class="inspector"><div class="inspector-top"><span>INSPECTOR</span><span aria-hidden="true">↗</span></div><div id="detail" aria-live="polite"><h2>Choose a destination.</h2><p class="muted">Select a repository to explore its files and workflows.</p></div></aside>
   </section>
-  <footer><span>CONRAD GELBER <i>/</i> HUB</span><span>GITHUB FACTS · DOCUMENTED KNOWLEDGE</span></footer>
 </main>
 </body></html>
