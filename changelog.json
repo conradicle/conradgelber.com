@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.18.21",
+    "date": "2026-11-08",
+    "title": "Visual polish",
+    "bullets": [
+      "Improved visual clarity."
+    ]
+  },
+  {
     "version": "1.18.20",
     "date": "2026-11-08",
     "title": "Natural jellyfish detail",

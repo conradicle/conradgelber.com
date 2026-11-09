@@ -136,7 +136,13 @@ import { JellyfishSchool, STRANDS } from './jellyfish-model.js?v=3';
   }
   function resize() {
     if(!alive) return;
-    const rect=canvas.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,small?1.35:1.6)*quality;
+    const rect=canvas.getBoundingClientRect();
+    let dpr=Math.min((devicePixelRatio||1)*(desk&&!small?1.75:1),desk&&!small?3:small?1.35:1.6)*quality;
+    // Bound the supersampled desk surface to the GPU's viewport and 8 megapixels.
+    if(desk&&!small){
+      const limits=gl.getParameter(gl.MAX_VIEWPORT_DIMS), max=gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);
+      dpr=Math.min(dpr,limits[0]/Math.max(1,rect.width),limits[1]/Math.max(1,rect.height),max/Math.max(1,rect.width),max/Math.max(1,rect.height),Math.sqrt(8000000/Math.max(1,rect.width*rect.height)));
+    }
     canvas.width=Math.max(1,Math.round(rect.width*dpr)); canvas.height=Math.max(1,Math.round(rect.height*dpr));
     gl.viewport(0,0,canvas.width,canvas.height); gl.uniform1f(locations.uDpr,dpr); gl.uniform1f(locations.uHeight,canvas.height);
     school.resize(Math.max(.1,rect.width/Math.max(1,rect.height))); gl.uniform1f(locations.uAspect,school.aspect);
@@ -149,7 +155,7 @@ import { JellyfishSchool, STRANDS } from './jellyfish-model.js?v=3';
     gl.bindBuffer(gl.ARRAY_BUFFER,positionBuffer); gl.bufferSubData(gl.ARRAY_BUFFER,0,positions); gl.drawArrays(gl.POINTS,0,count);
     canvas.classList.add('is-live');
     if(mirrorContext && mirror.clientWidth && mirror.clientHeight) {
-      const w=mirror.clientWidth,h=mirror.clientHeight,dpr=Math.min(devicePixelRatio||1,1.5)*quality;
+      const w=mirror.clientWidth,h=mirror.clientHeight,dpr=(desk&&!small?Math.min((devicePixelRatio||1)*1.75,3):Math.min(devicePixelRatio||1,1.5))*quality;
       if(mirror.width!==Math.round(w*dpr)||mirror.height!==Math.round(h*dpr)){mirror.width=Math.round(w*dpr);mirror.height=Math.round(h*dpr);}
       const crop=Math.min(canvas.width,canvas.height*w/h);
       mirrorContext.clearRect(0,0,mirror.width,mirror.height);
