@@ -98,3 +98,24 @@ test('a long free swim stays finite and near the stage', () => {
     }
   }
 });
+
+
+test('startle and recovery keep every link bounded', () => {
+  for (const seed of [5, 21, 42]) {
+    const m = new LabJellyfish({ seed });
+    run(m, 6);
+    m.startle();
+    for (let frame = 0; frame < 90 * 6; frame++) {
+      if (frame === 45) m.startle();
+      m.step(1 / 90);
+      for (const c of m.chains) {
+        const rest = c.length * m.scale * c.reach / (NODES - 1);
+        for (let k = 1; k < NODES; k++) {
+          const i = k * 3;
+          const length = Math.hypot(c.points[i] - c.points[i - 3], c.points[i + 1] - c.points[i - 2], c.points[i + 2] - c.points[i - 1]);
+          assert.ok(length <= rest * 1.001, `seed ${seed}, frame ${frame}, link ${k}`);
+        }
+      }
+    }
+  }
+});

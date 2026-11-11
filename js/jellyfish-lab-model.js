@@ -238,7 +238,7 @@ export class LabJellyfish {
     this.thrust = 0.062 * force * size;
 
     // A push at a rim point turns the bell about the axis r x axis = cos(a) z - sin(a) x.
-    const o = this.omega, torque = 1.9;
+    const o = this.omega, torque = 1.3;
     for (let axis = 0; axis < 3; axis++) o[axis] += (b[axis] * tx + b[6 + axis] * tz) * torque * dt;
     const spin = Math.exp(-dt * 1.5);
     o[0] *= spin; o[1] *= spin; o[2] *= spin;
@@ -351,6 +351,22 @@ export class LabJellyfish {
       if (rho >= radius) continue;
       const ox = rho > 1e-6 ? qx / rho : ca, oz = rho > 1e-6 ? qz / rho : sa, out = (radius - rho) * s;
       for (let axis = 0; axis < 3; axis++) { const move = (b[axis] * ox + b[6 + axis] * oz) * out; p[i + axis] += move; prev[i + axis] += move * 0.7; }
+    }
+    // Retraction and collision corrections can outrun the iterative solver. Limit
+    // only excess length, carrying Verlet history along so the correction does
+    // not create an artificial kick. Shorter links remain free to bend.
+    for (let k = 1; k < NODES; k++) {
+      const i = k * 3, a = i - 3;
+      const x = p[i] - p[a], y = p[i + 1] - p[a + 1], z = p[i + 2] - p[a + 2];
+      const length = Math.hypot(x, y, z);
+      if (length > rest) {
+        const fix = (length - rest) / length;
+        for (let axis = 0; axis < 3; axis++) {
+          const correction = (axis === 0 ? x : axis === 1 ? y : z) * fix;
+          p[i + axis] -= correction;
+          prev[i + axis] -= correction;
+        }
+      }
     }
   }
 

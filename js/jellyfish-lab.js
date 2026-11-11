@@ -1,6 +1,6 @@
 /* Jellyfish lab: one animal from the experimental swimming model, drawn as
    translucent tissue in WebGL2 and, on top, as a grid of ASCII characters. */
-import { LabJellyfish, FINE, ORAL } from './jellyfish-lab-model.js?v=1';
+import { LabJellyfish, FINE, ORAL } from './jellyfish-lab-model.js?v=2';
 
 const canvas = document.querySelector('#lab-canvas');
 if (canvas) start(canvas);
@@ -334,11 +334,11 @@ function start(canvas) {
         // ASCII: density follows brightness; threads and outlines take a stroke along their direction.
         ch = RAMP[int(min(11.0, floor(level * 12.0)))];
         bright = (0.34 + 0.66 * level) * step(0.045, level);
-        float thread = step(0.62, edge.z) * step(0.10, edge.w) * step(level, 0.78);
+        float thread = step(0.78, edge.z) * step(0.16, edge.w) * step(level, 0.78);
         if (thread > 0.5) {
           float bin = floor(mod(edge.x * 3.14159265 + 0.3926991, 3.14159265) / 0.7853982);
           ch = bin < 0.5 ? 45.0 : bin < 1.5 ? 47.0 : bin < 2.5 ? 124.0 : 92.0;
-          bright = max(bright, 0.50 + 0.3 * edge.w);
+          bright = max(bright, 0.38 + 0.25 * edge.w);
         }
       }
       ch = clamp(ch - 32.0, 0.0, 94.0);
@@ -348,7 +348,7 @@ function start(canvas) {
       vec3 tint = mix(vec3(0.78, 0.92, 1.0), cell.rgb / max(peak, 1e-3), 0.7);
       vec3 glyph = ink * tint * bright;
 
-      vec3 light = texture(uScene, vUv).rgb * mix(1.0, 0.26, ascii) + texture(uBloom, vUv).rgb * uBloomGain * mix(1.0, 0.8, ascii);
+      vec3 light = texture(uScene, vUv).rgb * mix(1.0, 0.42, ascii) + texture(uBloom, vUv).rgb * uBloomGain * mix(1.0, 0.8, ascii);
       vec3 col = water + (1.0 - exp(-light * 1.55)) + glyph * ascii;
       col += (hash(gl_FragCoord.xy) - 0.5) / 255.0;
       o = vec4(col, 1.0);
@@ -770,7 +770,7 @@ function start(canvas) {
     if ('ResizeObserver' in window) new ResizeObserver(resize).observe(canvas); else listen(window, 'resize', resize);
     refresh();
     // The text on the bell is this simulation's own source.
-    fetch('/js/jellyfish-lab-model.js?v=1').then(r => (r.ok ? r.text() : '')).then(text => {
+    fetch('/js/jellyfish-lab-model.js?v=2').then(r => (r.ok ? r.text() : '')).then(text => {
       if (text && state.alive) { sourceText = text; res.text = textTexture(); }
     }).catch(() => { /* the short built-in excerpt stays */ });
   } catch (_) { fail(); }
