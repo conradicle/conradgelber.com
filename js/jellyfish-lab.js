@@ -37,7 +37,7 @@ function start(canvas) {
   for (let k = 0; k < 540; k++) school.step(1 / 90);
 
   const state = {
-    playing: !reduced.matches, surface: 'ascii', ascii: 1, asciiTarget: 1, code: 0, bloom: 1, bloomTarget: 1,
+    playing: !reduced.matches, surface: 'tissue', ascii: 0, asciiTarget: 0, code: 0, bloom: 1, bloomTarget: 1,
     zoom: 1.3, zoomTarget: 1.3, focus: [animal.pos[0], animal.pos[1]],
     pointer: [0, 0], pointerPx: [-9999, -9999], hover: 0, lastMove: -1e9,
     pulse: -100, dpr: 1, width: 1, height: 1, last: 0, raf: 0, alive: false,
@@ -315,9 +315,9 @@ function start(canvas) {
       float shaft = exp(-pow((vUv.x - 0.56 + (1.0 - vUv.y) * 0.10) * 2.3, 2.0));
       water += vec3(0.020, 0.045, 0.060) * pow(vUv.y, 2.6) * shaft;
 
-      // The pointer is a lens onto the other rendering: tissue under ASCII, ASCII over tissue.
+      // The pointer gently clears the character overlay to reveal the tissue.
       float lens = uLens * smoothstep(uLensRadius, uLensRadius * 0.55, distance(gl_FragCoord.xy, uPointerPx));
-      float ascii = mix(uAscii, 1.0 - uAscii, lens);
+      float ascii = uAscii * (1.0 - 0.65 * lens);
 
       vec2 top = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
       ivec2 id = ivec2(floor(top / uCell));
@@ -348,8 +348,8 @@ function start(canvas) {
       vec3 tint = mix(vec3(0.78, 0.92, 1.0), cell.rgb / max(peak, 1e-3), 0.7);
       vec3 glyph = ink * tint * bright;
 
-      vec3 light = texture(uScene, vUv).rgb * mix(1.0, 0.42, ascii) + texture(uBloom, vUv).rgb * uBloomGain * mix(1.0, 0.8, ascii);
-      vec3 col = water + (1.0 - exp(-light * 1.55)) + glyph * ascii;
+      vec3 light = texture(uScene, vUv).rgb + texture(uBloom, vUv).rgb * uBloomGain;
+      vec3 col = water + (1.0 - exp(-light * 1.55)) + glyph * ascii * 0.28 * step(0.55, hash(vec2(id)));
       col += (hash(gl_FragCoord.xy) - 0.5) / 255.0;
       o = vec4(col, 1.0);
     }`;
