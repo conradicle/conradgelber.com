@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.19.3",
+    "date": "2026-11-10",
+    "title": "Homepage spacing",
+    "bullets": [
+      "Tightened the space between the homepage navigation and introduction."
+    ]
+  },
+  {
     "version": "1.19.2",
     "date": "2026-11-10",
     "title": "Jellyfish polish",

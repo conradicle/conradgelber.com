@@ -16,3 +16,7 @@
 @media(prefers-reduced-motion:reduce){.jellyfish,.desk-jellyfish{animation:none}}
 
 .desk-jellyfish[data-paused=true]{animation-play-state:paused}
+
+/* Keep the homepage introduction close to the navigation. */
+.hero{min-height:0;padding-bottom:1rem}
+.hero + .wrap #main > .intro{padding-top:2rem}
