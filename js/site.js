@@ -194,7 +194,7 @@
      no JS the footer link simply reads "Changelog". Phone widths keep that too,
      so the footer doesn't wrap differently there. */
 
-  var LAST_UPDATED = "2026-11-08T17:04:00-05:00";
+  var LAST_UPDATED = "2026-11-10T20:08:00-05:00";
   var FRESHNESS_WIDTH = "(min-width: 641px)";
 
   function plural(count, unit) {

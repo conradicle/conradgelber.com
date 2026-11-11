@@ -1,0 +1,3 @@
+.jellyfish,.desk-jellyfish{mix-blend-mode:screen;pointer-events:none}
+.jellyfish.is-live{opacity:.55}
+.desk-jellyfish.is-live{opacity:.35}

@@ -2,11 +2,13 @@
    translucent tissue in WebGL2 and, on top, as a grid of ASCII characters. */
 import { LabJellyfish, FINE, ORAL } from './jellyfish-lab-model.js?v=2';
 
-const canvas = document.querySelector('#lab-canvas');
+const canvas = document.querySelector('#lab-canvas, #jellyfish[data-renderer="tissue"]');
 if (canvas) start(canvas);
 
 function start(canvas) {
   const stage = canvas.parentElement;
+  const ambient = canvas.id !== 'lab-canvas';
+  let visible = true;
   const fallback = document.querySelector('#lab-fallback');
   const stats = document.querySelector('#lab-stats');
   const buttons = {
@@ -677,7 +679,7 @@ function start(canvas) {
   function resize() {
     if (!state.alive) return;
     const rect = canvas.getBoundingClientRect();
-    state.dpr = Math.min(devicePixelRatio || 1, 2);
+    state.dpr = Math.min(devicePixelRatio || 1, ambient ? 1 : 2);
     const w = Math.max(2, Math.round(rect.width * state.dpr)), h = Math.max(2, Math.round(rect.height * state.dpr));
     state.width = rect.width; state.height = rect.height;
     if (canvas.width !== w || canvas.height !== h || !res.scene) { canvas.width = w; canvas.height = h; makeTargets(); }
@@ -712,12 +714,12 @@ function start(canvas) {
       if (stats) stats.textContent = `${(state.cpu / 45).toFixed(1)} ms of script per frame, ${Math.round(45 / state.interval)} frames per second`;
       state.cpu = state.interval = state.frames = 0;
     }
-    state.raf = requestAnimationFrame(frame);
+    if (!ambient || state.playing) state.raf = requestAnimationFrame(frame);
   }
 
   function refresh() {
     cancelAnimationFrame(state.raf); state.raf = 0;
-    if (!state.alive || document.hidden) return;
+    if (!state.alive || document.hidden || !visible || (ambient && document.documentElement.dataset.theme === 'light')) return;
     state.last = performance.now(); state.raf = requestAnimationFrame(frame);
   }
 
@@ -739,9 +741,11 @@ function start(canvas) {
   function press(button, on) { button.setAttribute('aria-pressed', String(on)); }
 
   const events = new AbortController(), listen = (t, name, fn) => t && t.addEventListener(name, fn, { signal: events.signal });
-  listen(stage, 'pointermove', locate);
-  listen(stage, 'pointerdown', startle);
-  listen(stage, 'pointerleave', () => { state.lastMove = -1e9; });
+  if (!ambient) {
+    listen(stage, 'pointermove', locate);
+    listen(stage, 'pointerdown', startle);
+    listen(stage, 'pointerleave', () => { state.lastMove = -1e9; });
+  }
   listen(buttons.motion, 'click', () => { state.playing = !state.playing; press(buttons.motion, state.playing); });
   function surface(name) {
     state.surface = name; state.asciiTarget = name === 'tissue' ? 0 : 1;
@@ -768,9 +772,19 @@ function start(canvas) {
     if (buttons.motion) press(buttons.motion, state.playing);
     surface(state.surface);
     if ('ResizeObserver' in window) new ResizeObserver(resize).observe(canvas); else listen(window, 'resize', resize);
+    if (ambient) {
+      if ('IntersectionObserver' in window) new IntersectionObserver(entries => { visible = entries[0].isIntersecting; refresh(); }).observe(canvas);
+      new MutationObserver(refresh).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      const motionButton = document.querySelector('#motion');
+      if (motionButton) {
+        const syncMotion = () => { state.playing = motionButton.getAttribute('aria-pressed') !== 'true'; refresh(); };
+        new MutationObserver(syncMotion).observe(motionButton, { attributes: true, attributeFilter: ['aria-pressed'] });
+        syncMotion();
+      } else listen(reduced, 'change', e => { state.playing = !e.matches; refresh(); });
+    }
     refresh();
     // The text on the bell is this simulation's own source.
-    fetch('/js/jellyfish-lab-model.js?v=2').then(r => (r.ok ? r.text() : '')).then(text => {
+    if (!ambient) fetch('/js/jellyfish-lab-model.js?v=2').then(r => (r.ok ? r.text() : '')).then(text => {
       if (text && state.alive) { sourceText = text; res.text = textTexture(); }
     }).catch(() => { /* the short built-in excerpt stays */ });
   } catch (_) { fail(); }

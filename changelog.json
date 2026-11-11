@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.19.0",
+    "date": "2026-11-10",
+    "title": "A new jellyfish",
+    "bullets": [
+      "A translucent jellyfish now swims on the homepage.",
+      "Explore the interactive jellyfish lab."
+    ]
+  },
+  {
     "version": "1.18.21",
     "date": "2026-11-08",
     "title": "Visual polish",
