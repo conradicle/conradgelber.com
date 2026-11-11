@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jellyfish lab &middot; Conrad Gelber</title>
+<meta name="description" content="A prototype renderer for the jellyfish on conradgelber.com: one animal, drawn as translucent tissue.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://conradgelber.com/jellyfish-lab/">
+<meta name="theme-color" content="#05090D">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css?v=16">
+<link rel="stylesheet" href="/jellyfish-lab/lab.css?v=1">
+<script src="/js/site.js?v=2"></script>
+</head>
+<body class="lab">
+<a class="skip" href="#main">Skip to main content</a>
+<main id="main" class="lab-stage">
+  <canvas class="lab-canvas" id="lab-canvas" role="img"
+    aria-label="A single translucent jellyfish swimming through dark water, trailing fine tentacles and four frilled oral arms."></canvas>
+
+  <header class="lab-head">
+    <p class="site-name"><a href="/">Conrad Gelber</a></p>
+    <h1 class="lab-title">Jellyfish lab</h1>
+    <p class="lab-note">A prototype renderer on the existing swimming model.
+      Click or tap the water to startle the animal. Move the pointer over the
+      bell to read what it is made of.</p>
+  </header>
+
+  <p class="lab-fallback" id="lab-fallback" hidden>This prototype needs WebGL2,
+    which this browser or device does not offer. The
+    <a href="/">front page</a> has the current jellyfish.</p>
+
+  <div class="lab-controls" role="group" aria-label="Lab controls">
+    <button type="button" id="lab-motion" aria-pressed="true">Motion</button>
+    <button type="button" id="lab-code" aria-pressed="false">Code</button>
+    <button type="button" id="lab-glow" aria-pressed="true">Glow</button>
+    <button type="button" id="lab-closer">Closer</button>
+    <button type="button" id="lab-farther">Farther</button>
+    <p class="lab-stats" id="lab-stats"></p>
+  </div>
+</main>
+<div class="wrap">
+  <footer>
+    <div class="contact">
+      <span><a href="mailto:conrad@conradgelber.com">conrad@conradgelber.com</a></span>
+      <span><a href="https://www.linkedin.com/in/conradgelber">LinkedIn</a></span>
+      <span><a href="https://github.com/conradicle">GitHub</a></span>
+      <span><a href="/accessibility/">Accessibility</a></span>
+      <span><a href="/changelog/">Changelog</a></span>
+    </div>
+    <p class="colophon">Miami Beach, Florida. Views here are my own
+      and not those of any organization named on this page.</p>
+  </footer>
+</div>
+<script type="module" src="/js/jellyfish-lab.js?v=1"></script>
+</body>
+</html>

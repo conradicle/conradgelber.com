@@ -17,7 +17,8 @@
           { "not": { "href_matches": "/poker{/*}?" } },
           { "not": { "href_matches": "/historybowl{/*}?" } },
           { "not": { "href_matches": "/12axes{/*}?" } },
-          { "not": { "href_matches": "/aspen{/*}?" } }
+          { "not": { "href_matches": "/aspen{/*}?" } },
+          { "not": { "href_matches": "/jellyfish-lab{/*}?" } }
         ]
       },
       "eagerness": "moderate"
