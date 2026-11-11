@@ -2,8 +2,7 @@
    translucent tissue in WebGL2 and, on top, as a grid of ASCII characters. */
 import { LabJellyfish, FINE, ORAL } from './jellyfish-lab-model.js?v=2';
 
-const canvas = document.querySelector('#lab-canvas, #jellyfish[data-renderer="tissue"]');
-if (canvas) start(canvas);
+document.querySelectorAll('#lab-canvas, canvas[data-renderer="tissue"]').forEach(start);
 
 function start(canvas) {
   const stage = canvas.parentElement;
@@ -33,7 +32,7 @@ function start(canvas) {
 
   // Every visit gets its own animal; ?seed=7 pins one for comparison.
   const wanted = Number(new URLSearchParams(location.search).get('seed'));
-  const school = new LabJellyfish({ seed: wanted > 0 ? wanted : (Date.now() & 0xffffff) + 1, aspect: 1.6 });
+  const school = new LabJellyfish({ seed: wanted > 0 ? wanted : Math.floor(Math.random() * 0xffffff) + 1, aspect: 1.6 });
   const animal = school;
   // Let the tentacles settle out of their straight reset pose before the first frame.
   for (let k = 0; k < 540; k++) school.step(1 / 90);
@@ -777,7 +776,7 @@ function start(canvas) {
       new MutationObserver(refresh).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
       const motionButton = document.querySelector('#motion');
       if (motionButton) {
-        const syncMotion = () => { state.playing = motionButton.getAttribute('aria-pressed') !== 'true'; refresh(); };
+        const syncMotion = () => { state.playing = motionButton.getAttribute('aria-pressed') !== 'true'; canvas.dataset.paused = String(!state.playing); refresh(); };
         new MutationObserver(syncMotion).observe(motionButton, { attributes: true, attributeFilter: ['aria-pressed'] });
         syncMotion();
       } else listen(reduced, 'change', e => { state.playing = !e.matches; refresh(); });

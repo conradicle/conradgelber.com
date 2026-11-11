@@ -1,3 +1,18 @@
-.jellyfish,.desk-jellyfish{mix-blend-mode:screen;pointer-events:none}
-.jellyfish.is-live{opacity:.55}
-.desk-jellyfish.is-live{opacity:.35}
+/* Separate pools blend the animals into their surroundings without blocking links. */
+.jellyfish,.desk-jellyfish{mix-blend-mode:screen;pointer-events:none;mask-image:radial-gradient(ellipse, #000 35%, transparent 75%)}
+:root:not([data-theme=light]) .hero{background:radial-gradient(ellipse at 52% 25%,rgba(21,39,53,.22),transparent 65%),linear-gradient(to bottom,#0a1721 0%,var(--paper) 100%)}
+.jellyfish{inset:auto;width:clamp(170px,19vw,290px);height:clamp(280px,32vw,460px);animation:jelly-drift 22s ease-in-out infinite alternate}
+.jellyfish.is-live{opacity:.65}
+.jellyfish-1{left:3%;top:3%;animation-delay:-5s}
+.jellyfish-2{left:auto;right:3%;top:35%;animation-delay:-14s;animation-duration:28s}
+.jellyfish-3{left:5%;top:90%;animation-delay:-19s;animation-duration:25s}
+.desk-jellyfish{inset:auto;top:-38px;width:clamp(160px,19%,260px);height:230px;animation:jelly-drift 20s ease-in-out infinite alternate}
+.desk-jellyfish.is-live{opacity:.48}
+.desk-jellyfish-1{left:12%;animation-delay:-4s}
+.desk-jellyfish-2{left:42%;animation-delay:-12s;animation-duration:25s}
+.desk-jellyfish-3{left:70%;animation-delay:-19s;animation-duration:22s}
+@keyframes jelly-drift{from{transform:translateY(-22px)}to{transform:translateY(35px)}}
+@media(max-width:800px){.jellyfish{width:150px;height:250px}.jellyfish-1{left:-35px}.jellyfish-2{right:-35px}.jellyfish-3{left:-30px;top:110%}.jellyfish.is-live{opacity:.38}.desk-jellyfish{width:150px;height:200px;top:-28px}.desk-jellyfish-1{left:5%}.desk-jellyfish-2{left:36%}.desk-jellyfish-3{left:68%}}
+@media(prefers-reduced-motion:reduce){.jellyfish,.desk-jellyfish{animation:none}}
+
+.desk-jellyfish[data-paused=true]{animation-play-state:paused}

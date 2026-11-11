@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.19.1",
+    "date": "2026-11-10",
+    "title": "Jellyfish in motion",
+    "bullets": [
+      "A school of jellyfish now swims around the homepage with a softer background transition."
+    ]
+  },
+  {
     "version": "1.19.0",
     "date": "2026-11-10",
     "title": "A new jellyfish",
