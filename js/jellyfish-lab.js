@@ -304,7 +304,7 @@ function start(canvas) {
     in vec2 vUv;
     uniform sampler2D uScene, uBloom, uCells, uEdges, uAtlas, uText;
     uniform vec2 uRes, uCell, uGrid, uPointerPx;
-    uniform float uBloomGain, uAscii, uCode, uLens, uLensRadius, uTextLength, uLod;
+    uniform float uBloomGain, uAscii, uCode, uLens, uLensRadius, uTextLength, uLod, uAmbient;
     out vec4 o;
     // Dark to bright.
     const float RAMP[12] = float[12](32.0, 46.0, 44.0, 58.0, 59.0, 45.0, 61.0, 43.0, 42.0, 35.0, 37.0, 64.0);
@@ -350,8 +350,8 @@ function start(canvas) {
       vec3 glyph = ink * tint * bright;
 
       vec3 light = texture(uScene, vUv).rgb + texture(uBloom, vUv).rgb * uBloomGain;
-      vec3 col = water + (1.0 - exp(-light * 1.55)) + glyph * ascii * 0.28 * step(0.55, hash(vec2(id)));
-      col += (hash(gl_FragCoord.xy) - 0.5) / 255.0;
+      vec3 col = water * (1.0 - uAmbient) + (1.0 - exp(-light * 1.55)) + glyph * ascii * 0.28 * step(0.55, hash(vec2(id)));
+      col += (hash(gl_FragCoord.xy) - 0.5) / 255.0 * (1.0 - uAmbient);
       o = vec4(col, 1.0);
     }`;
 
@@ -610,7 +610,7 @@ function start(canvas) {
     let p = res.snowProgram; gl.useProgram(p.program); camera(p);
     gl.uniform1f(p.u('uPx'), px); gl.uniform1f(p.u('uDpr'), state.dpr);
     gl.bindVertexArray(res.snow.vao); gl.bindBuffer(gl.ARRAY_BUFFER, res.snow.buffer); gl.bufferSubData(gl.ARRAY_BUFFER, 0, snowData);
-    gl.drawArrays(gl.POINTS, 0, SNOW);
+    if (!ambient) gl.drawArrays(gl.POINTS, 0, SNOW);
 
     p = res.bellProgram; gl.useProgram(p.program); camera(p);
     gl.uniform1f(p.u('uPhase'), animal.phase - Math.floor(animal.phase) + 1); gl.uniform1f(p.u('uAmp'), animal.amp);
@@ -659,7 +659,8 @@ function start(canvas) {
     p = res.finalProgram; gl.useProgram(p.program);
     gl.bindTexture(gl.TEXTURE_2D, res.scene.tex); gl.uniform1i(p.u('uScene'), 0);
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, res.bloom[0].tex); gl.uniform1i(p.u('uBloom'), 1); gl.activeTexture(gl.TEXTURE0);
-    gl.uniform1f(p.u('uBloomGain'), 0.42 * state.bloom);
+    gl.uniform1f(p.u('uBloomGain'), (ambient ? 0.14 : 0.42) * state.bloom);
+    gl.uniform1f(p.u('uAmbient'), ambient ? 1 : 0);
     gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, res.cells.tex); gl.uniform1i(p.u('uCells'), 2);
     gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, res.cells.edges); gl.uniform1i(p.u('uEdges'), 3);
     gl.activeTexture(gl.TEXTURE4); gl.bindTexture(gl.TEXTURE_2D, res.atlas); gl.uniform1i(p.u('uAtlas'), 4);
