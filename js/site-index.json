@@ -119,6 +119,11 @@
     },
     {
       "group": "Built",
+      "title": "Archimedes",
+      "url": "https://archimedeslab.dev"
+    },
+    {
+      "group": "Built",
       "title": "Aspen mountain explorer",
       "url": "/aspen/"
     },

@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.19.5",
+    "date": "2026-11-11",
+    "title": "Archimedes research project",
+    "bullets": [
+      "Featured Archimedes on Things I've built, with its development status and website link."
+    ]
+  },
+  {
     "version": "1.19.4",
     "date": "2026-11-10",
     "title": "Homepage visual polish",
