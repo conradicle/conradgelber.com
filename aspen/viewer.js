@@ -51,6 +51,9 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
 
   let viewer, handler, frame, pendingMove, tileset;
   let dead = false;
+  let ready = false;
+  let startupFailure;
+  const removers = [];
   const listeners = [];
   const runController = new AbortController();
   const cleanup = () => {
@@ -59,43 +62,15 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
     runController.abort();
     cancelAnimationFrame(frame);
     cancelAnimationFrame(pendingMove);
+    for (const remove of removers) remove();
     for (const [el, type, fn] of listeners) el.removeEventListener(type, fn);
     if (handler && !handler.isDestroyed()) handler.destroy();
     if (viewer && !viewer.isDestroyed()) viewer.destroy();
     if (tileset && !tileset.isDestroyed()) tileset.destroy();
   };
   try {
-  let fallback = false, terrain, imagery;
-  try {
-    tileset = await C.createGooglePhotorealistic3DTileset(
-      {onlyUsingWithGoogleGeocoder: true},
-      {maximumScreenSpaceError: phone ? 16 : 6, cacheBytes: (phone ? 160 : 512) * 1024 * 1024,
-        maximumCacheOverflowBytes: 32 * 1024 * 1024, enableCollision: true},
-    );
-  } catch (error) {
-    console.warn('Aspen photorealistic imagery unavailable:', error);
-    if (error?.statusCode !== 429 && error?.response?.status !== 429) {
-      throw new Error('Mountain imagery could not start. Check your connection and try again.');
-    }
-    fallback = true;
-    try {
-      [terrain, imagery] = await Promise.all([
-        C.ArcGISTiledElevationTerrainProvider.fromUrl('https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer'),
-        C.ArcGisMapServerImageryProvider.fromUrl('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'),
-      ]);
-    } catch (fallbackError) {
-      console.error('Aspen alternate terrain unavailable:', fallbackError);
-      const limited = new Error('The mountain imagery service is temporarily unavailable. Please try again later.');
-      limited.code = 'RATE_LIMITED';
-      throw limited;
-    }
-  }
-  const groundType = fallback ? C.ClassificationType.TERRAIN : C.ClassificationType.CESIUM_3D_TILE;
-  const labelHeight = fallback ? C.HeightReference.CLAMP_TO_TERRAIN : C.HeightReference.CLAMP_TO_3D_TILE;
-  onSource(fallback ? 'esri' : 'google');
   viewer = new C.Viewer(container, {
-    globe: fallback ? undefined : false, baseLayer: fallback ? new C.ImageryLayer(imagery) : false,
-    terrainProvider: terrain, geocoder: false, animation: false, timeline: false,
+    baseLayer: false, geocoder: false, animation: false, timeline: false,
     baseLayerPicker: false, sceneModePicker: false, navigationHelpButton: false,
     homeButton: false, fullscreenButton: false, selectionIndicator: false, infoBox: false,
     requestRenderMode: true, maximumRenderTimeChange: Infinity,
@@ -103,6 +78,64 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
     // phones keep the lighter settings so they stay smooth.
     msaaSamples: phone ? 1 : 4, useBrowserRecommendedResolution: phone,
   });
+  // Constructing the viewer initializes Cesium's WebGL limits. The Google
+  // tileset's environment map manager reads those limits during construction.
+  // Keep a globe available for fallback, but hidden for Google 3D Tiles.
+  viewer.scene.globe.show = false;
+  const fatal = error => {
+    if (dead) return;
+    startupFailure = error;
+    cleanup();
+    // During startup, reject the existing attempt before retry can start another.
+    if (ready) onFatal(error);
+  };
+  const checkStartup = () => { if (dead) throw startupFailure; };
+  const contextLost = e => {
+    e.preventDefault();
+    fatal(new Error('The 3D graphics context was lost. Close other graphics-heavy tabs and try again.'));
+  };
+  viewer.canvas.addEventListener('webglcontextlost', contextLost);
+  listeners.push([viewer.canvas, 'webglcontextlost', contextLost]);
+  removers.push(viewer.scene.renderError.addEventListener((scene, error) => {
+    console.error('Aspen rendering failed:', error);
+    queueMicrotask(() => fatal(new Error('The 3D view stopped rendering. Please try again.', {cause: error})));
+  }));
+  viewer.resize();
+  viewer.render();
+  let fallback = false;
+  try {
+    tileset = await C.createGooglePhotorealistic3DTileset(
+      {onlyUsingWithGoogleGeocoder: true},
+      {maximumScreenSpaceError: phone ? 16 : 6, cacheBytes: (phone ? 160 : 512) * 1024 * 1024,
+        maximumCacheOverflowBytes: 32 * 1024 * 1024, enableCollision: true},
+    );
+    if (dead && tileset && !tileset.isDestroyed()) tileset.destroy();
+    checkStartup();
+  } catch (error) {
+    checkStartup();
+    // Quota, authentication, network and imagery initialization failures can
+    // all leave Google unavailable. Preserve the original diagnostic.
+    console.warn('Aspen photorealistic imagery unavailable:', error);
+    fallback = true;
+    try {
+      const [terrain, imagery] = await Promise.all([
+        C.ArcGISTiledElevationTerrainProvider.fromUrl('https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer'),
+        C.ArcGisMapServerImageryProvider.fromUrl('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'),
+      ]);
+      checkStartup();
+      viewer.terrainProvider = terrain;
+      viewer.imageryLayers.addImageryProvider(imagery);
+      viewer.scene.globe.show = true;
+    } catch (fallbackError) {
+      checkStartup();
+      console.error('Aspen alternate terrain unavailable:', fallbackError);
+      throw new Error('Mountain imagery and alternate terrain could not start. Check your connection and try again.',
+        {cause: new AggregateError([error, fallbackError], 'Both terrain sources failed')});
+    }
+  }
+  const groundType = fallback ? C.ClassificationType.TERRAIN : C.ClassificationType.CESIUM_3D_TILE;
+  const labelHeight = fallback ? C.HeightReference.CLAMP_TO_TERRAIN : C.HeightReference.CLAMP_TO_3D_TILE;
+  onSource(fallback ? 'esri' : 'google');
   viewer.resolutionScale = phone ? 1 : Math.min(1, 2 / (window.devicePixelRatio || 1));
   viewer.targetFrameRate = phone ? 30 : 60;
   viewer.scene.screenSpaceCameraController.minimumZoomDistance = 150;
@@ -296,11 +329,6 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
     [window, 'pointercancel', () => { holding = false; }],
     [canvas, 'wheel', interact],
     [canvas, 'pointerleave', () => { if (mode === 'valley' && hovered) { hovered = null; paint(); onHover(null); } }],
-    [canvas, 'webglcontextlost', e => {
-      e.preventDefault();
-      cleanup();
-      onFatal(new Error('The 3D graphics context was lost. Close other graphics-heavy tabs and try again.'));
-    }],
   );
   for (const [el, type, fn] of listeners) el.addEventListener(type, fn, {passive: type !== 'webglcontextlost'});
 
@@ -361,18 +389,10 @@ export async function createScene(container, mountains, {onHover, onEnter, onRun
     onStatus('Some terrain could not load. Check your connection.');
   });
   }
-  viewer.scene.renderError.addEventListener((scene, error) => {
-    if (dead) return;
-    console.error('Aspen rendering failed:', error);
-    queueMicrotask(() => {
-      if (dead) return;
-      cleanup();
-      onFatal(new Error('The 3D view stopped rendering. Please try again.'));
-    });
-  });
   paint();
   frame = requestAnimationFrame(loop);
 
+  ready = true;
   return {
     hover(id) {
       if (mode !== 'valley' || id === hovered) return;

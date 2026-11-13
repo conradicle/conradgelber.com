@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.19.6",
+    "date": "2026-11-12",
+    "title": "Aspen 3D startup",
+    "bullets": [
+      "Fixed the mountain explorer’s initial 3D load.",
+      "Alternate terrain now handles more imagery outages and failed loads can be retried."
+    ]
+  },
+  {
     "version": "1.19.5",
     "date": "2026-11-11",
     "title": "Archimedes research project",

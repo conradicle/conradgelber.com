@@ -9,7 +9,6 @@ let active = null;
 let entries = [];
 let restoringFocus = false;
 let selectionVersion = 0;
-let retryAfter = 0;
 
 // Readout under the landing view.
 function preview(m) {
@@ -34,10 +33,9 @@ function fail(error) {
 function start() {
   if (scene) return Promise.resolve(scene);
   if (starting) return starting;
-  if (Date.now() < retryAfter) return Promise.reject(new Error('The mountain imagery service is temporarily limiting requests. Please try again later.'));
   $('error').hidden = true;
   status('Loading the Roaring Fork Valley…');
-  starting = import('./viewer.js?v=9')
+  starting = import('./viewer.js?v=10')
     .then(({createScene}) => createScene('cesium', mountains, {
       onHover: preview,
       onEnter: m => openMountain(m),
@@ -49,11 +47,6 @@ function start() {
     .then(s => { scene = s; return s; })
     .catch(e => {
       starting = null;
-      if (e.code === 'RATE_LIMITED') {
-        retryAfter = Date.now() + 60_000;
-        $('retry').disabled = true;
-        setTimeout(() => { $('retry').disabled = false; }, 60_000);
-      }
       fail(e);
       throw e;
     });
