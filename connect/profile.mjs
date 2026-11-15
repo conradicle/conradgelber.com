@@ -18,8 +18,8 @@ export default {
   sharing: {
     title: "Connect with Conrad Gelber",
     description: "Good to meet you. Find Conrad Gelber on Instagram, LinkedIn, and Substack, or explore his personal website.",
-    image: "/img/og-image-2026.jpg",
-    imageAlt: "Conrad Gelber in a navy suit and burgundy tie, with his name and Miami-Dade Commission Watch set beside the photo",
+    image: "/img/og-image-dark.jpg",
+    imageAlt: "Conrad Gelber in a navy suit and burgundy tie, in a round portrait beside his name and Miami-Dade Commission Watch on a dark background with jellyfish",
     imageWidth: 1200,
     imageHeight: 627,
   },

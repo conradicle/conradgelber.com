@@ -800,7 +800,7 @@ is hard to clear afterwards. The inspector both shows you what LinkedIn sees
 and forces a fresh scrape. You want: title "Conrad Gelber", the description,
 and the 1200x627 preview image. Only then add the Featured card.
 
-The preview image is `img/og-image-2026.jpg`, named in the `og:image` tag
+The preview image is `img/og-image-dark.jpg`, named in the `og:image` tag
 in `index.html`. Like every file in `img/`, it is cached for a year, and
 LinkedIn and other sites cache previews by URL, so a new preview image always
 gets a new filename (and the `og:image`, `og:image:alt`, `twitter:image` and

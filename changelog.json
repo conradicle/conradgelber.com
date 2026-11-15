@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.19.7",
+    "date": "2026-11-15",
+    "title": "New share preview",
+    "bullets": [
+      "Links to the site now show a dark preview card that matches the new look."
+    ]
+  },
+  {
     "version": "1.19.6",
     "date": "2026-11-12",
     "title": "Aspen 3D startup",

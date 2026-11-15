@@ -24,7 +24,7 @@ test("HTML works without runtime scripts and includes server-readable sharing me
   const html = renderConnect(profile);
   assert.doesNotMatch(html, /<script/);
   assert.match(html, /rel="canonical" href="https:\/\/conradgelber.com\/connect\/"/);
-  assert.match(html, /property="og:image" content="https:\/\/conradgelber.com\/img\/og-image-2026.jpg"/);
+  assert.match(html, /property="og:image" content="https:\/\/conradgelber.com\/img\/og-image-dark.jpg"/);
   for (const url of Object.values(profile.social)) assert.ok(html.includes(`href="${webUrl(url)}"`));
   assert.match(html, /<main id="main"/);
 });
