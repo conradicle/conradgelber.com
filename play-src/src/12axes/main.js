@@ -152,8 +152,10 @@ function renderQuestion() {
   $('q-mode').textContent = `${MODES[session.mode].label} test`;
   $('q-progress').style.width = `${(100 * session.at) / n}%`;
   $('statement').textContent = q.text;
-  const prev = session.answers[session.at];
-  for (const b of $('answers').children) b.setAttribute('aria-pressed', String(Number(b.dataset.answer) === prev));
+  $('question-info').setAttribute('aria-expanded', 'false');
+  $('question-context').hidden = true;
+  $('question-context').textContent = axesText[q.axis].about;
+  updateAnswerSelection();
   $('back').disabled = session.at === 0;
   $('statement').focus({ preventScroll: true });
   announce(`Question ${session.at + 1} of ${n}`);
@@ -162,6 +164,19 @@ function renderQuestion() {
 function answer(i) {
   if (!session) return;
   session.answers[session.at] = i;
+  persist();
+  updateAnswerSelection();
+}
+
+function updateAnswerSelection() {
+  const selected = session.answers[session.at];
+  for (const b of $('answers').children) b.setAttribute('aria-pressed', String(Number(b.dataset.answer) === selected));
+  $('next').disabled = !Number.isInteger(selected);
+  $('next').textContent = session.at === session.ids.length - 1 ? 'See results (E)' : 'Next (E)';
+}
+
+function next() {
+  if (!session || !Number.isInteger(session.answers[session.at])) return;
   session.at++;
   if (session.at >= session.ids.length) return finish();
   persist();
@@ -476,6 +491,12 @@ function init() {
   $('resume').addEventListener('click', resume);
   $('last').addEventListener('click', () => go('r=' + store.load().last.code));
   $('back').addEventListener('click', back);
+  $('next').addEventListener('click', next);
+  $('question-info').addEventListener('click', () => {
+    const open = $('question-context').hidden;
+    $('question-context').hidden = !open;
+    $('question-info').setAttribute('aria-expanded', String(open));
+  });
   $('quit').addEventListener('click', () => { persist(); session = null; refreshStart(); show('screen-start'); });
   $('again').addEventListener('click', () => go(''));
   $('take-own').addEventListener('click', () => go(''));
@@ -493,9 +514,11 @@ function init() {
     });
   }
   document.addEventListener('keydown', (e) => {
-    if (!visible('screen-quiz') || e.altKey || e.ctrlKey || e.metaKey) return;
-    if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+    if (!visible('screen-quiz') || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) || e.target.isContentEditable) return;
     if (e.key >= '1' && e.key <= '5') { e.preventDefault(); answer(Number(e.key) - 1); }
+    else if (e.key.toLowerCase() === 'q') { e.preventDefault(); back(); }
+    else if (e.key.toLowerCase() === 'e') { e.preventDefault(); next(); }
   });
   window.addEventListener('popstate', route);
   refreshStart();

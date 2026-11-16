@@ -35,6 +35,8 @@
   margin:.3rem 0 1.4rem;
 }
 .ax-statement:focus{outline:none}
+.ax-info{max-width:var(--measure);margin:0 0 1.2rem}
+.ax-context{margin:.7rem 0 0;padding:.8rem 1rem;border-left:3px solid var(--rule);font-size:.93rem;color:var(--ink-soft)}
 .ax-answers{display:grid;gap:.55rem;max-width:30rem}
 .ax-answer{
   display:flex;

@@ -18,8 +18,8 @@
 <link rel="stylesheet" href="/style.css?v=16">
 <script src="/js/site.js?v=2" data-app></script>
 <link rel="stylesheet" href="/play/play.css?v=4">
-<link rel="stylesheet" href="/12axes/12axes.css?v=2">
-<script src="/12axes/12axes.js?v=4" defer></script>
+<link rel="stylesheet" href="/12axes/12axes.css?v=3">
+<script src="/12axes/12axes.js?v=5" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -70,12 +70,17 @@
       <div class="ax-progress" aria-hidden="true"><div class="ax-progress-fill" id="q-progress"></div></div>
       <p class="ax-prompt">How much do you agree?</p>
       <h1 class="ax-statement" id="statement" tabindex="-1"></h1>
+      <div class="ax-info">
+        <button type="button" class="btn btn-quiet" id="question-info" aria-expanded="false" aria-controls="question-context">Info: question context</button>
+        <p class="ax-context" id="question-context" hidden></p>
+      </div>
       <div class="ax-answers" id="answers" role="group" aria-label="Your answer"></div>
       <div class="ax-quiz-actions">
-        <button type="button" class="btn btn-quiet" id="back">Back</button>
+        <button type="button" class="btn btn-quiet" id="back" aria-keyshortcuts="Q">Back (Q)</button>
+        <button type="button" class="btn" id="next" aria-keyshortcuts="E" disabled>Next (E)</button>
         <button type="button" class="btn btn-quiet" id="quit">Save and leave</button>
       </div>
-      <p class="hint ax-keys">Keyboard: press 1 to 5 to answer.</p>
+      <p class="hint ax-keys">Select an answer, then choose Next. Keyboard: 1 to 5 to select, Q for back, E for next.</p>
     </section>
 
     <section class="screen" id="screen-result" hidden aria-labelledby="result-title">

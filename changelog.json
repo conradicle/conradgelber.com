@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.19.8",
+    "date": "2026-11-16",
+    "title": "12 Axes question help and navigation",
+    "bullets": [
+      "Added a question info button with context for each topic.",
+      "Select an answer before continuing with Next, and use Q and E to move back and forward."
+    ]
+  },
+  {
     "version": "1.19.7",
     "date": "2026-11-15",
     "title": "New share preview",
