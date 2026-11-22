@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.19.9",
+    "date": "2026-11-21",
+    "title": "Pause the jellyfish",
+    "bullets": [
+      "The front page has a Pause animation button that stops the jellyfish, and the site remembers the choice."
+    ]
+  },
+  {
     "version": "1.19.8",
     "date": "2026-11-16",
     "title": "12 Axes question help and navigation",

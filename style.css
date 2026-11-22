@@ -109,6 +109,30 @@ h1{
 .stamp a{border-bottom-color:var(--ink-soft)}
 h1 a{border-bottom:none;padding-bottom:0}
 
+/* Front page "Pause animation" toggle at the end of the stamp (js/motion-toggle.js).
+   The box fills while the jellyfish are paused. */
+.motion-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  min-height:24px;
+  margin-left:auto;
+  padding:0;
+  font:inherit;
+  color:inherit;
+  background:none;
+  border:0;
+  cursor:pointer;
+  /* The hero turns pointer events off for everything but its links. */
+  pointer-events:auto;
+}
+.motion-toggle[hidden]{display:none}
+.motion-toggle::before{content:"";width:.7em;height:.7em;border:1.5px solid currentColor;border-radius:2px}
+.motion-toggle[aria-pressed="true"]::before{background:currentColor}
+.motion-toggle:hover{color:var(--accent)}
+.motion-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+@media (max-width:640px){.motion-toggle{margin-left:0}}
+
 /* Section pages: the name, sized down, on the same 2px rule as the stamp */
 .mast-sub{
   padding:clamp(1.6rem,5vw,2.6rem) 0 .7rem;

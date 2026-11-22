@@ -15,7 +15,7 @@
 @media(max-width:800px){.jellyfish{width:150px;height:250px}.jellyfish-1{left:-35px}.jellyfish-2{right:-35px}.jellyfish-3{left:-30px;top:110%}.jellyfish.is-live{opacity:.38}.desk-jellyfish{width:150px;height:200px;top:-28px}.desk-jellyfish-1{left:5%}.desk-jellyfish-2{left:36%}.desk-jellyfish-3{left:68%}}
 @media(prefers-reduced-motion:reduce){.jellyfish,.desk-jellyfish{animation:none}}
 
-.desk-jellyfish[data-paused=true]{animation-play-state:paused}
+.jellyfish[data-paused=true],.desk-jellyfish[data-paused=true]{animation-play-state:paused}
 
 /* Keep the homepage introduction close to the navigation. */
 .hero{isolation:auto;min-height:0;padding-bottom:1rem}
