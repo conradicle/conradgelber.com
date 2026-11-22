@@ -77,7 +77,8 @@ ${sharingImage ? `<meta name="twitter:image" content="${escape(sharingImage)}">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/fonts/spectral-latin-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/ibm-plex-sans-latin-400-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/style.css?v=16">
+<link rel="stylesheet" href="/theme.css?v=1">
+<link rel="stylesheet" href="/style.css?v=18">
 <link rel="stylesheet" href="/connect/connect.css?v=2">
 </head>
 <body class="connect-page">
